@@ -7,15 +7,37 @@ namespace HospodaUBobra
 {
     public partial class Form1 : Form
     {
-        string st = "st69607";
-        string heslo = "Yeet1*";
+        string st = "";
+        string heslo = "";
         string connectionString;
 
-        public Form1()
+        public enum UserRole
+        {
+            Admin,
+            User,
+            Anonymous
+        }
+
+        private UserRole currentRole;
+
+        private Dictionary<UserRole, List<string>> roleTables;
+
+        public Form1(UserRole role)
         {
             InitializeComponent();
             comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
             connectionString = $"User Id={st};Password={heslo};Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
+
+            currentRole = role;
+            roleTables = new Dictionary<UserRole, List<string>>
+            {
+                { UserRole.Admin, null },
+                { UserRole.User, new List<string> { "PIVA", "PIVOVARY", "KRAJE" } },
+                { UserRole.Anonymous, new List<string> { "OKRESY" } }
+            };
+
+            roleLabel.Text = role.ToString();
+
             PopulateTableList();
         }
 
@@ -33,9 +55,16 @@ namespace HospodaUBobra
                     {
                         using (OracleDataReader reader = cmd.ExecuteReader())
                         {
+                            comboBoxTables.Items.Clear();
+
                             while (reader.Read())
                             {
-                                comboBoxTables.Items.Add(reader.GetString(0));
+                                string tableName = reader.GetString(0);
+
+                                if (CanAccessTable(tableName))
+                                {
+                                    comboBoxTables.Items.Add(tableName);
+                                }
                             }
                         }
                     }
@@ -53,6 +82,21 @@ namespace HospodaUBobra
                 Log("General error: " + ex.Message);
                 MessageBox.Show("General error: " + ex.Message);
             }
+        }
+
+        private bool CanAccessTable(string tableName)
+        {
+            if (currentRole == UserRole.Admin)
+            {
+                return true;
+            }
+
+            if (roleTables.ContainsKey(currentRole) && roleTables[currentRole] != null)
+            {
+                return roleTables[currentRole].Contains(tableName);
+            }
+
+            return false;
         }
 
         private void comboBoxTables_SelectedIndexChanged(object sender, EventArgs e)
@@ -100,6 +144,13 @@ namespace HospodaUBobra
         private void Log(string message)
         {
             MessageBox.Show(DateTime.Now + ": " + message);
+        }
+
+        private void btnPrihlasit_Click(object sender, EventArgs e)
+        {
+            LoginForm loginForm = new LoginForm();
+            loginForm.ShowDialog();
+            this.Hide();
         }
     }
 }
