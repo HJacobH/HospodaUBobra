@@ -1,43 +1,33 @@
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
-using System;
-using System.Windows.Forms;
 
 namespace HospodaUBobra
 {
     public partial class Form1 : Form
     {
-        string st = "";
-        string heslo = "";
+        string st = "st69639";
+        string heslo = "Server2022";
         string connectionString;
 
-        public enum UserRole
-        {
-            Admin,
-            User,
-            Anonymous
-        }
-
-        private UserRole currentRole;
-
+        private UserRole currentRole = UserRole.Anonymous; 
+        private string currentUsername;
         private Dictionary<UserRole, List<string>> roleTables;
 
-        public Form1(UserRole role)
+        public Form1()
         {
             InitializeComponent();
-            comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
             connectionString = $"User Id={st};Password={heslo};Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
 
-            currentRole = role;
             roleTables = new Dictionary<UserRole, List<string>>
             {
                 { UserRole.Admin, null },
                 { UserRole.User, new List<string> { "PIVA", "PIVOVARY", "KRAJE" } },
                 { UserRole.Anonymous, new List<string> { "OKRESY" } }
             };
+            comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
+            currentUserLabel.Text = "Current user: Anonymous";
 
-            roleLabel.Text = role.ToString();
-
+            ApplyRolePermissions();
             PopulateTableList();
         }
 
@@ -146,11 +136,48 @@ namespace HospodaUBobra
             MessageBox.Show(DateTime.Now + ": " + message);
         }
 
+        private void ApplyRolePermissions()
+        {
+            roleLabel.Text = currentRole.ToString();
+            currentUserLabel.Text = $"Current user: {currentUsername}";
+
+            switch (currentRole)
+            {
+                case UserRole.Admin:
+                    break;
+                case UserRole.User:
+                    break;
+                case UserRole.Anonymous:
+                    break;
+            }
+
+            PopulateTableList();
+        }
+
         private void btnPrihlasit_Click(object sender, EventArgs e)
         {
             LoginForm loginForm = new LoginForm();
-            loginForm.ShowDialog();
-            this.Hide();
+
+            if (loginForm.ShowDialog() == DialogResult.OK)
+            {
+                this.currentRole = loginForm.LoggedInUserRole; 
+                this.currentUsername = loginForm.currentUsername;
+                MessageBox.Show($"Login successful! Role: {currentRole}");
+                ApplyRolePermissions();
+            }
+            else
+            {
+                MessageBox.Show("Login cancelled or failed.");
+            }
+        }
+
+        private void btnRegister_Click(object sender, EventArgs e)
+        {
+            RegisterForm registerForm = new RegisterForm();
+            if (registerForm.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show("Registration completed! You can now log in with your new credentials.");
+            }
         }
     }
 }

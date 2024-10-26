@@ -16,23 +16,26 @@ namespace HospodaUBobra
     {
         string connectionString = $"User Id=st69639;Password=Server2022;Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
 
+        public UserRole LoggedInUserRole { get; private set; } = UserRole.Anonymous;
+        public string currentUsername { get; private set; } = "Anonymous";
+
         public LoginForm()
         {
             InitializeComponent();
-            btnLogin.Click += new EventHandler(btnLogin_Click);
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
+            UserRole userRole = UserRole.Anonymous;
 
-            if (ValidateLogin(username, password, out Form1.UserRole userRole))
+            if (ValidateLogin(username, password, out userRole))
             {
-                MessageBox.Show("Login successful!");
-                Form1 mainForm = new Form1(userRole);
-                mainForm.Show();
-                this.Hide(); 
+                LoggedInUserRole = userRole;  // Set the user role
+                currentUsername = username;
+                this.DialogResult = DialogResult.OK;  // Signal that login succeeded
+                this.Close(); // Close LoginForm
             }
             else
             {
@@ -40,10 +43,9 @@ namespace HospodaUBobra
             }
         }
 
-
-        private bool ValidateLogin(string username, string password, out Form1.UserRole role)
+        private bool ValidateLogin(string username, string password, out UserRole role)
         {
-            role = Form1.UserRole.Anonymous; 
+            role = UserRole.Anonymous;
 
             try
             {
@@ -51,44 +53,28 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = "SELECT role FROM Users WHERE username = :username AND password = :password";
-
+                    string query = "SELECT password, salt, role FROM Users WHERE username = :username";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
-                        string trimmedUsername = username.Trim();
-                        string trimmedPassword = password.Trim();
-
-                        cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = trimmedUsername;
-                        cmd.Parameters.Add(new OracleParameter("password", OracleDbType.Varchar2)).Value = trimmedPassword;
+                        cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
 
                         using (OracleDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
-                            { 
-                                string userRole = reader.GetString(0);
-
-                                switch (userRole.ToLower())
-                                {
-                                    case "admin":
-                                        role = Form1.UserRole.Admin;
-                                        break;
-                                    case "user":
-                                        role = Form1.UserRole.User;
-                                        break;
-                                    case "anonymous":
-                                        role = Form1.UserRole.Anonymous;
-                                        break;
-                                    default:
-                                        MessageBox.Show($"Unknown role found: {userRole}");
-                                        return false; 
-                                }
-
-                                return true; 
-                            }
-                            else
                             {
-                                MessageBox.Show("No matching credentials found in the database.");
+                                string storedHashedPassword = reader.GetString(0);
+                                string salt = reader.GetString(1);
+                                string userRole = reader.GetString(2);
+
+                                // Hash the input password with the stored salt
+                                string hashedInputPassword = PasswordHelper.HashPassword(password, salt);
+
+                                if (hashedInputPassword == storedHashedPassword)
+                                {
+                                    role = Enum.Parse<UserRole>(userRole, true);
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -105,9 +91,10 @@ namespace HospodaUBobra
                 MessageBox.Show("General error: " + ex.Message);
             }
 
-            MessageBox.Show("Login failed. Returning false.");
-            return false; 
+            MessageBox.Show("Invalid credentials. Login failed.");
+            return false;
         }
+
 
     }
 }

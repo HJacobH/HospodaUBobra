@@ -35,23 +35,27 @@
             // 
             // txtUsername
             // 
-            txtUsername.Location = new Point(12, 12);
+            txtUsername.Location = new Point(10, 9);
+            txtUsername.Margin = new Padding(3, 2, 3, 2);
             txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(125, 27);
+            txtUsername.Size = new Size(110, 23);
             txtUsername.TabIndex = 0;
             // 
             // txtPassword
             // 
-            txtPassword.Location = new Point(12, 45);
+            txtPassword.Location = new Point(10, 34);
+            txtPassword.Margin = new Padding(3, 2, 3, 2);
             txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(125, 27);
+            txtPassword.PasswordChar = '*';
+            txtPassword.Size = new Size(110, 23);
             txtPassword.TabIndex = 1;
             // 
             // btnLogin
             // 
-            btnLogin.Location = new Point(29, 118);
+            btnLogin.Location = new Point(25, 88);
+            btnLogin.Margin = new Padding(3, 2, 3, 2);
             btnLogin.Name = "btnLogin";
-            btnLogin.Size = new Size(94, 29);
+            btnLogin.Size = new Size(82, 22);
             btnLogin.TabIndex = 2;
             btnLogin.Text = "Login";
             btnLogin.UseVisualStyleBackColor = true;
@@ -59,12 +63,13 @@
             // 
             // LoginForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(148, 159);
+            ClientSize = new Size(130, 119);
             Controls.Add(btnLogin);
             Controls.Add(txtPassword);
             Controls.Add(txtUsername);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "LoginForm";
             Text = "LoginForm";
             ResumeLayout(false);
