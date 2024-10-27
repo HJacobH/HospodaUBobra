@@ -82,47 +82,85 @@ namespace HospodaUBobra
             }
         }
 
-
         private bool RegisterUser(string username, string password, string role)
         {
             string salt = PasswordHelper.GenerateSalt();
             string hashedPassword = PasswordHelper.HashPassword(password, salt);
 
-            try
+            using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                using (OracleConnection conn = new OracleConnection(connectionString))
+                conn.Open();
+                OracleTransaction transaction = conn.BeginTransaction();
+
+                try
                 {
-                    conn.Open();
-
-                    string query = "INSERT INTO Users (username, password, salt, role) VALUES (:username, :password, :salt, :role)";
-
-                    int rowsAffected = 0;
-
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    string checkQuery = "SELECT COUNT(*) FROM Users WHERE username = :username";
+                    using (OracleCommand checkCmd = new OracleCommand(checkQuery, conn))
                     {
+                        checkCmd.Transaction = transaction;
+                        checkCmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
+                        int userCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                        if (userCount > 0)
+                        {
+                            MessageBox.Show("Username already exists. Please choose a different username.");
+                            transaction.Rollback();
+                            return false;
+                        }
+                    }
+
+                    string insertQuery = "INSERT INTO Users (username, password, salt, role) VALUES (:username, :password, :salt, :role)";
+                    using (OracleCommand cmd = new OracleCommand(insertQuery, conn))
+                    {
+                        cmd.Transaction = transaction;
                         cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
                         cmd.Parameters.Add(new OracleParameter("password", OracleDbType.Varchar2)).Value = hashedPassword;
                         cmd.Parameters.Add(new OracleParameter("salt", OracleDbType.Varchar2)).Value = salt;
                         cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
 
                         cmd.ExecuteNonQuery();
-                        rowsAffected = cmd.ExecuteNonQuery();
                     }
 
-                    conn.Close();
-                    MessageBox.Show("Registration successful!");
-                    return rowsAffected > 0;
+                    transaction.Commit();
+
+                    LogUserAction("REGISTER", "User registered successfully.", username, role);
+
+                    return true;
+                }
+                catch (OracleException ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show("Oracle error: " + ex.Message);
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show("General error: " + ex.Message);
+                    return false;
                 }
             }
-            catch (OracleException ex)
+        }
+
+
+
+        private void LogUserAction(string actionType, string actionDesc, string userId, string role)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                MessageBox.Show("Oracle error: " + ex.Message);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("General error: " + ex.Message);
-                return false;    
+                conn.Open();
+                string query = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, :actionDate, :userId, :role)";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
+                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
+                    cmd.Parameters.Add(new OracleParameter("actionDate", OracleDbType.Date)).Value = DateTime.Now;
+                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Varchar2)).Value = userId; // assuming userId corresponds to username
+                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
+
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 

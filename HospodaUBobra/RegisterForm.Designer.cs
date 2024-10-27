@@ -39,11 +39,11 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(69, 9);
+            label1.Location = new Point(58, 9);
             label1.Name = "label1";
-            label1.Size = new Size(61, 15);
+            label1.Size = new Size(84, 15);
             label1.TabIndex = 0;
-            label1.Text = "Registrace";
+            label1.Text = "REGISTRATION";
             // 
             // label2
             // 
@@ -80,9 +80,9 @@
             // 
             // btnRegister
             // 
-            btnRegister.Location = new Point(55, 118);
+            btnRegister.Location = new Point(46, 105);
             btnRegister.Name = "btnRegister";
-            btnRegister.Size = new Size(75, 23);
+            btnRegister.Size = new Size(114, 36);
             btnRegister.TabIndex = 5;
             btnRegister.Text = "Register";
             btnRegister.UseVisualStyleBackColor = true;
@@ -92,7 +92,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(212, 168);
+            ClientSize = new Size(212, 148);
             Controls.Add(btnRegister);
             Controls.Add(txtPassword);
             Controls.Add(txtUsername);

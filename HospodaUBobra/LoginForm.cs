@@ -32,13 +32,15 @@ namespace HospodaUBobra
 
             if (ValidateLogin(username, password, out userRole))
             {
-                LoggedInUserRole = userRole;  // Set the user role
+                LoggedInUserRole = userRole;
                 currentUsername = username;
-                this.DialogResult = DialogResult.OK;  // Signal that login succeeded
-                this.Close(); // Close LoginForm
+                LogUserAction("LOGIN", "User logged in successfully.", username, userRole.ToString());
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
             else
             {
+                LogUserAction("LOGIN_FAILED", "Failed login attempt.", username, userRole.ToString());
                 MessageBox.Show("Invalid credentials. Please try again.");
             }
         }
@@ -67,7 +69,6 @@ namespace HospodaUBobra
                                 string salt = reader.GetString(1);
                                 string userRole = reader.GetString(2);
 
-                                // Hash the input password with the stored salt
                                 string hashedInputPassword = PasswordHelper.HashPassword(password, salt);
 
                                 if (hashedInputPassword == storedHashedPassword)
@@ -95,6 +96,27 @@ namespace HospodaUBobra
             return false;
         }
 
+        private void LogUserAction(string actionType, string actionDesc, string username, string role)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+
+                string insertLogQuery = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, :actionDate, :userId, :role)";
+                using (OracleCommand cmd = new OracleCommand(insertLogQuery, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
+                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
+                    cmd.Parameters.Add(new OracleParameter("actionDate", OracleDbType.Date)).Value = DateTime.Now;
+                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Varchar2)).Value = username;
+                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                conn.Close();
+            }
+        }
 
     }
 }

@@ -49,14 +49,14 @@
             // comboBoxTables
             // 
             comboBoxTables.FormattingEnabled = true;
-            comboBoxTables.Location = new Point(835, 43);
+            comboBoxTables.Location = new Point(835, 175);
             comboBoxTables.Name = "comboBoxTables";
             comboBoxTables.Size = new Size(121, 23);
             comboBoxTables.TabIndex = 1;
             // 
             // btnPrihlasit
             // 
-            btnPrihlasit.Location = new Point(881, 107);
+            btnPrihlasit.Location = new Point(881, 416);
             btnPrihlasit.Margin = new Padding(3, 2, 3, 2);
             btnPrihlasit.Name = "btnPrihlasit";
             btnPrihlasit.Size = new Size(75, 23);
@@ -75,7 +75,7 @@
             // 
             // btnRegister
             // 
-            btnRegister.Location = new Point(881, 79);
+            btnRegister.Location = new Point(881, 388);
             btnRegister.Name = "btnRegister";
             btnRegister.Size = new Size(75, 23);
             btnRegister.TabIndex = 4;
