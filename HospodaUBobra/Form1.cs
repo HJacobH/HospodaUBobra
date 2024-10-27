@@ -9,7 +9,7 @@ namespace HospodaUBobra
         string heslo = "Server2022";
         string connectionString;
 
-        private UserRole currentRole = UserRole.Anonymous; 
+        private UserRole currentRole = UserRole.Anonymous;
         private string currentUsername;
         private Dictionary<UserRole, List<string>> roleTables;
 
@@ -17,6 +17,8 @@ namespace HospodaUBobra
         {
             InitializeComponent();
             connectionString = $"User Id={st};Password={heslo};Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
+
+            SetButtonVisibility();
 
             roleTables = new Dictionary<UserRole, List<string>>
             {
@@ -29,6 +31,15 @@ namespace HospodaUBobra
 
             ApplyRolePermissions();
             PopulateTableList();
+        }
+
+        private void SetButtonVisibility()
+        {
+            if (currentRole != UserRole.Admin)
+            {
+                btnAddPiwo.Visible = false;
+                btnShowKlientObj.Visible = false;
+            }
         }
 
         private void PopulateTableList()
@@ -144,6 +155,8 @@ namespace HospodaUBobra
             switch (currentRole)
             {
                 case UserRole.Admin:
+                    btnAddPiwo.Visible = true;
+                    btnShowKlientObj.Visible = true;
                     break;
                 case UserRole.User:
                     break;
@@ -160,7 +173,7 @@ namespace HospodaUBobra
 
             if (loginForm.ShowDialog() == DialogResult.OK)
             {
-                this.currentRole = loginForm.LoggedInUserRole; 
+                this.currentRole = loginForm.LoggedInUserRole;
                 this.currentUsername = loginForm.currentUsername;
                 MessageBox.Show($"Login successful! Role: {currentRole}");
                 ApplyRolePermissions();
@@ -177,6 +190,53 @@ namespace HospodaUBobra
             if (registerForm.ShowDialog() == DialogResult.OK)
             {
                 MessageBox.Show("Registration completed! You can now log in with your new credentials.");
+            }
+        }
+
+        private void btnReviews_Click(object sender, EventArgs e)
+        {
+            ManageReviewsForm manageReviewsForm = new ManageReviewsForm();
+
+            manageReviewsForm.ShowDialog();
+        }
+
+        private void btnAddPiwo_Click(object sender, EventArgs e)
+        {
+            PiwoMangement piwoMangement = new PiwoMangement();
+
+            piwoMangement.ShowDialog();
+        }
+
+        private void btnShowKlientObj_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+                    using (OracleCommand cmd = new OracleCommand("GetClientOrders", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("client_orders", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            DataTable dataTable = new DataTable();
+                            dataTable.Load(reader);
+
+                            dataGridView1.DataSource = dataTable;
+                        }
+                    }
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Oracle error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("General error: " + ex.Message);
             }
         }
     }

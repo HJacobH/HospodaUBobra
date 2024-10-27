@@ -32,6 +32,8 @@ namespace HospodaUBobra
 
             if (ValidateLogin(username, password, out userRole))
             {
+                UserSession.Username = username;
+                UserSession.Role = userRole;
                 LoggedInUserRole = userRole;
                 currentUsername = username;
                 LogUserAction("LOGIN", "User logged in successfully.", username, userRole.ToString());

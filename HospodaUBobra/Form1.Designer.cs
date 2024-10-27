@@ -34,6 +34,9 @@
             roleLabel = new Label();
             btnRegister = new Button();
             currentUserLabel = new Label();
+            btnReviews = new Button();
+            btnAddPiwo = new Button();
+            btnShowKlientObj = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -49,7 +52,7 @@
             // comboBoxTables
             // 
             comboBoxTables.FormattingEnabled = true;
-            comboBoxTables.Location = new Point(835, 175);
+            comboBoxTables.Location = new Point(835, 150);
             comboBoxTables.Name = "comboBoxTables";
             comboBoxTables.Size = new Size(121, 23);
             comboBoxTables.TabIndex = 1;
@@ -92,11 +95,44 @@
             currentUserLabel.TabIndex = 5;
             currentUserLabel.Text = "label1";
             // 
+            // btnReviews
+            // 
+            btnReviews.Location = new Point(881, 359);
+            btnReviews.Name = "btnReviews";
+            btnReviews.Size = new Size(75, 23);
+            btnReviews.TabIndex = 6;
+            btnReviews.Text = "Reviews";
+            btnReviews.UseVisualStyleBackColor = true;
+            btnReviews.Click += btnReviews_Click;
+            // 
+            // btnAddPiwo
+            // 
+            btnAddPiwo.Location = new Point(881, 330);
+            btnAddPiwo.Name = "btnAddPiwo";
+            btnAddPiwo.Size = new Size(75, 23);
+            btnAddPiwo.TabIndex = 7;
+            btnAddPiwo.Text = "Add Piwko";
+            btnAddPiwo.UseVisualStyleBackColor = true;
+            btnAddPiwo.Click += btnAddPiwo_Click;
+            // 
+            // btnShowKlientObj
+            // 
+            btnShowKlientObj.Location = new Point(881, 285);
+            btnShowKlientObj.Name = "btnShowKlientObj";
+            btnShowKlientObj.Size = new Size(75, 39);
+            btnShowKlientObj.TabIndex = 8;
+            btnShowKlientObj.Text = "Explicit cursor";
+            btnShowKlientObj.UseVisualStyleBackColor = true;
+            btnShowKlientObj.Click += btnShowKlientObj_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(btnShowKlientObj);
+            Controls.Add(btnAddPiwo);
+            Controls.Add(btnReviews);
             Controls.Add(currentUserLabel);
             Controls.Add(btnRegister);
             Controls.Add(roleLabel);
@@ -118,5 +154,8 @@
         private Label roleLabel;
         private Button btnRegister;
         private Label currentUserLabel;
+        private Button btnReviews;
+        private Button btnAddPiwo;
+        private Button btnShowKlientObj;
     }
 }
