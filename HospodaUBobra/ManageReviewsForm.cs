@@ -114,7 +114,7 @@ namespace HospodaUBobra
             }
 
             LogUserAction("Add Review", $"Added review: {title} by {UserSession.Username} for brewery ID {breweryId} and beer ID {beerId}");
-            
+
             LoadReviews();
 
             MessageBox.Show("Review added succesfully!");
@@ -123,7 +123,7 @@ namespace HospodaUBobra
         private void btnUpdateReview_Click(object sender, EventArgs e)
         {
             if (selectedReviewId <= 0) return;
-            
+
             string title = txtTitle.Text.Trim();
             string reviewText = txtReviewText.Text.Trim();
 
@@ -193,7 +193,7 @@ namespace HospodaUBobra
                     using (OracleCommand cmd = new OracleCommand(deleteQuery, conn))
                     {
                         cmd.Parameters.Add(new OracleParameter("reviewId", selectedReviewId));
-                        
+
                         int rowsAffected = cmd.ExecuteNonQuery();
 
                         if (rowsAffected > 0)
@@ -254,5 +254,9 @@ namespace HospodaUBobra
             }
         }
 
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }

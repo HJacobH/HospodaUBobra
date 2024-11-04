@@ -27,25 +27,25 @@ namespace HospodaUBobra
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Username and password cannot be empty.");
+                MessageBox.Show("Vyplňte všechna pole.");
                 return;
             }
 
             if (UsernameExists(username))
             {
-                MessageBox.Show("Username already exists. Please choose a different username.");
+                MessageBox.Show("Uživatelské jméno již existuje, vyberte si jiné.");
                 return;
             }
 
             if (RegisterUser(username, password, UserRole.User.ToString()))
             {
-                MessageBox.Show("Registration successful!");
+                MessageBox.Show("Registrace úspěšná!");
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             else
             {
-                MessageBox.Show("Registration failed. Please try again.");
+                MessageBox.Show("Registrace selhala. Zkuste to znovu.");
             }
         }
 
@@ -64,20 +64,18 @@ namespace HospodaUBobra
 
                         int userCount = Convert.ToInt32(cmd.ExecuteScalar());
 
-                        MessageBox.Show($"Debug: User count for username '{username}' is {userCount}");
-
                         return userCount > 0;
                     }
                 }
             }
             catch (OracleException ex)
             {
-                MessageBox.Show("Oracle error: " + ex.Message);
+                MessageBox.Show("Oracle chyba: " + ex.Message);
                 return false;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("General error: " + ex.Message);
+                MessageBox.Show("Obecná chyba: " + ex.Message);
                 return false;
             }
         }
@@ -103,7 +101,7 @@ namespace HospodaUBobra
 
                         if (userCount > 0)
                         {
-                            MessageBox.Show("Username already exists. Please choose a different username.");
+                            MessageBox.Show("Uživatelské jméno již existuje, vyberte si jiné.");
                             transaction.Rollback();
                             return false;
                         }
@@ -123,20 +121,20 @@ namespace HospodaUBobra
 
                     transaction.Commit();
 
-                    LogUserAction("REGISTER", "User registered successfully.", username, role);
+                    LogUserAction("REGISTRACE", "Uživatel se registroval úspěšně.", username, role);
 
                     return true;
                 }
                 catch (OracleException ex)
                 {
                     transaction.Rollback();
-                    MessageBox.Show("Oracle error: " + ex.Message);
+                    MessageBox.Show("Oracle chyba: " + ex.Message);
                     return false;
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    MessageBox.Show("General error: " + ex.Message);
+                    MessageBox.Show("Obecná chyba: " + ex.Message);
                     return false;
                 }
             }
@@ -164,5 +162,9 @@ namespace HospodaUBobra
             }
         }
 
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }

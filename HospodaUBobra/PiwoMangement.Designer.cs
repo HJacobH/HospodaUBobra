@@ -43,6 +43,7 @@
             label5 = new Label();
             label6 = new Label();
             label7 = new Label();
+            btnBack = new Button();
             SuspendLayout();
             // 
             // label1
@@ -52,7 +53,7 @@
             label1.Name = "label1";
             label1.Size = new Size(42, 15);
             label1.TabIndex = 0;
-            label1.Text = "Nazev:";
+            label1.Text = "Název:";
             // 
             // txtBeerName
             // 
@@ -109,9 +110,9 @@
             // 
             btnAddPiwo.Location = new Point(12, 256);
             btnAddPiwo.Name = "btnAddPiwo";
-            btnAddPiwo.Size = new Size(179, 23);
+            btnAddPiwo.Size = new Size(87, 27);
             btnAddPiwo.TabIndex = 8;
-            btnAddPiwo.Text = "Add Piwo";
+            btnAddPiwo.Text = "Přidat pivo";
             btnAddPiwo.UseVisualStyleBackColor = true;
             btnAddPiwo.Click += btnAddPiwo_Click;
             // 
@@ -149,7 +150,7 @@
             label5.Name = "label5";
             label5.Size = new Size(87, 15);
             label5.TabIndex = 12;
-            label5.Text = "Pocet skladem:";
+            label5.Text = "Počet skladem:";
             // 
             // label6
             // 
@@ -158,7 +159,7 @@
             label6.Name = "label6";
             label6.Size = new Size(42, 15);
             label6.TabIndex = 13;
-            label6.Text = "Baleni:";
+            label6.Text = "Balení:";
             // 
             // label7
             // 
@@ -169,11 +170,22 @@
             label7.TabIndex = 14;
             label7.Text = "Jednotka:";
             // 
+            // btnBack
+            // 
+            btnBack.Location = new Point(116, 256);
+            btnBack.Name = "btnBack";
+            btnBack.Size = new Size(89, 27);
+            btnBack.TabIndex = 15;
+            btnBack.Text = "Zpět";
+            btnBack.UseVisualStyleBackColor = true;
+            btnBack.Click += btnBack_Click;
+            // 
             // PiwoMangement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(217, 334);
+            ClientSize = new Size(217, 295);
+            Controls.Add(btnBack);
             Controls.Add(label7);
             Controls.Add(label6);
             Controls.Add(label5);
@@ -190,7 +202,7 @@
             Controls.Add(txtBeerName);
             Controls.Add(label1);
             Name = "PiwoMangement";
-            Text = "PiwoMangement";
+            Text = "Správa Piv";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -212,5 +224,6 @@
         private Label label5;
         private Label label6;
         private Label label7;
+        private Button btnBack;
     }
 }

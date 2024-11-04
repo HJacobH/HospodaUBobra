@@ -36,14 +36,14 @@ namespace HospodaUBobra
                 UserSession.Role = userRole;
                 LoggedInUserRole = userRole;
                 currentUsername = username;
-                LogUserAction("LOGIN", "User logged in successfully.", username, userRole.ToString());
+                LogUserAction("PRIHLASENI", "Uživatel se přihlásil úspěšně.", username, userRole.ToString());
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             else
             {
-                LogUserAction("LOGIN_FAILED", "Failed login attempt.", username, userRole.ToString());
-                MessageBox.Show("Invalid credentials. Please try again.");
+                LogUserAction("SELHANE_PRIHLASENI", "Nepovedený pokus přihlášení.", username, userRole.ToString());
+                MessageBox.Show("Neplatné údaje. Přihlášení selhalo.");
             }
         }
 
@@ -87,14 +87,14 @@ namespace HospodaUBobra
             }
             catch (OracleException ex)
             {
-                MessageBox.Show("Oracle error: " + ex.Message);
+                MessageBox.Show("Oracle chyba: " + ex.Message);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("General error: " + ex.Message);
+                MessageBox.Show("Obecná chyba: " + ex.Message);
             }
 
-            MessageBox.Show("Invalid credentials. Login failed.");
+            MessageBox.Show("Neplatné údaje. Přihlášení selhalo.");
             return false;
         }
 
@@ -120,5 +120,9 @@ namespace HospodaUBobra
             }
         }
 
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }

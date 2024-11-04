@@ -151,11 +151,16 @@ namespace HospodaUBobra
                     cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
                     cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
                     cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = UserSession.Username;
-                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = UserSession.Role.ToString(); 
+                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = UserSession.Role.ToString();
 
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

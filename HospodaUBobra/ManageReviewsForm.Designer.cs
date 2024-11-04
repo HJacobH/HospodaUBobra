@@ -42,6 +42,7 @@
             btnAddReview = new Button();
             btnUpdateReview = new Button();
             btnDeleteReview = new Button();
+            btnBack = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridViewReviews).BeginInit();
             SuspendLayout();
             // 
@@ -50,18 +51,18 @@
             label1.AutoSize = true;
             label1.Location = new Point(12, 9);
             label1.Name = "label1";
-            label1.Size = new Size(106, 15);
+            label1.Size = new Size(82, 15);
             label1.TabIndex = 0;
-            label1.Text = "MANAGE REVIEWS";
+            label1.Text = "Správa recenzí";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Location = new Point(12, 42);
             label2.Name = "label2";
-            label2.Size = new Size(33, 15);
+            label2.Size = new Size(32, 15);
             label2.TabIndex = 1;
-            label2.Text = "Beer:";
+            label2.Text = "Piva:";
             // 
             // comboBoxBeers
             // 
@@ -76,9 +77,9 @@
             Breweries.AutoSize = true;
             Breweries.Location = new Point(12, 71);
             Breweries.Name = "Breweries";
-            Breweries.Size = new Size(60, 15);
+            Breweries.Size = new Size(55, 15);
             Breweries.TabIndex = 3;
-            Breweries.Text = "Breweries:";
+            Breweries.Text = "Pivovary:";
             // 
             // comboBoxBreweries
             // 
@@ -93,9 +94,9 @@
             label3.AutoSize = true;
             label3.Location = new Point(12, 113);
             label3.Name = "label3";
-            label3.Size = new Size(32, 15);
+            label3.Size = new Size(42, 15);
             label3.TabIndex = 5;
-            label3.Text = "Title:";
+            label3.Text = "Název:";
             // 
             // txtTitle
             // 
@@ -117,18 +118,18 @@
             label4.AutoSize = true;
             label4.Location = new Point(12, 142);
             label4.Name = "label4";
-            label4.Size = new Size(47, 15);
+            label4.Size = new Size(31, 15);
             label4.TabIndex = 8;
-            label4.Text = "Review:";
+            label4.Text = "Text:";
             // 
             // label5
             // 
             label5.AutoSize = true;
             label5.Location = new Point(12, 256);
             label5.Name = "label5";
-            label5.Size = new Size(52, 15);
+            label5.Size = new Size(53, 15);
             label5.TabIndex = 9;
-            label5.Text = "Reviews:";
+            label5.Text = "Recenze:";
             // 
             // dataGridViewReviews
             // 
@@ -145,7 +146,7 @@
             btnAddReview.Name = "btnAddReview";
             btnAddReview.Size = new Size(100, 23);
             btnAddReview.TabIndex = 11;
-            btnAddReview.Text = "Add Review";
+            btnAddReview.Text = "Přídat recenzi";
             btnAddReview.UseVisualStyleBackColor = true;
             btnAddReview.Click += btnAddReview_Click;
             // 
@@ -153,27 +154,38 @@
             // 
             btnUpdateReview.Location = new Point(186, 472);
             btnUpdateReview.Name = "btnUpdateReview";
-            btnUpdateReview.Size = new Size(102, 23);
+            btnUpdateReview.Size = new Size(125, 23);
             btnUpdateReview.TabIndex = 12;
-            btnUpdateReview.Text = "Update Review";
+            btnUpdateReview.Text = "Aktualizovat recenzi";
             btnUpdateReview.UseVisualStyleBackColor = true;
             btnUpdateReview.Click += btnUpdateReview_Click;
             // 
             // btnDeleteReview
             // 
-            btnDeleteReview.Location = new Point(294, 472);
+            btnDeleteReview.Location = new Point(317, 472);
             btnDeleteReview.Name = "btnDeleteReview";
             btnDeleteReview.Size = new Size(106, 23);
             btnDeleteReview.TabIndex = 13;
-            btnDeleteReview.Text = "Delete Review";
+            btnDeleteReview.Text = "Odstranit recenzi";
             btnDeleteReview.UseVisualStyleBackColor = true;
             btnDeleteReview.Click += btnDeleteReview_Click;
+            // 
+            // btnBack
+            // 
+            btnBack.Location = new Point(479, 472);
+            btnBack.Name = "btnBack";
+            btnBack.Size = new Size(75, 23);
+            btnBack.TabIndex = 14;
+            btnBack.Text = "Zpět";
+            btnBack.UseVisualStyleBackColor = true;
+            btnBack.Click += btnBack_Click;
             // 
             // ManageReviewsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(566, 505);
+            Controls.Add(btnBack);
             Controls.Add(btnDeleteReview);
             Controls.Add(btnUpdateReview);
             Controls.Add(btnAddReview);
@@ -189,7 +201,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Name = "ManageReviewsForm";
-            Text = "ManageReviewsForm";
+            Text = "Recenze";
             ((System.ComponentModel.ISupportInitialize)dataGridViewReviews).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -211,5 +223,6 @@
         private Button btnAddReview;
         private Button btnUpdateReview;
         private Button btnDeleteReview;
+        private Button btnBack;
     }
 }

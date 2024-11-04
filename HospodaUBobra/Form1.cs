@@ -23,11 +23,10 @@ namespace HospodaUBobra
             roleTables = new Dictionary<UserRole, List<string>>
             {
                 { UserRole.Admin, null },
-                { UserRole.User, new List<string> { "PIVA", "PIVOVARY", "KRAJE" } },
-                { UserRole.Anonymous, new List<string> { "OKRESY" } }
+                { UserRole.User, new List<string> { "PIVA", "PIVOVARY", "RECENZE", "MESSAGES" } },
+                { UserRole.Anonymous, new List<string> { "PIVA", "PIVOVARY", "RECENZE" } }
             };
             comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
-            currentUserLabel.Text = "Current user: Anonymous";
 
             ApplyRolePermissions();
             PopulateTableList();
@@ -149,8 +148,7 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            roleLabel.Text = currentRole.ToString();
-            currentUserLabel.Text = $"Current user: {currentUsername}";
+            currentUserLabel.Text = $"Aktuální uživatel: {currentUsername}";
 
             switch (currentRole)
             {

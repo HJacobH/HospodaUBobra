@@ -34,11 +34,12 @@
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
+            btnBack = new Button();
             SuspendLayout();
             // 
             // txtUsername
             // 
-            txtUsername.Location = new Point(78, 29);
+            txtUsername.Location = new Point(120, 44);
             txtUsername.Margin = new Padding(3, 2, 3, 2);
             txtUsername.Name = "txtUsername";
             txtUsername.Size = new Size(110, 23);
@@ -46,7 +47,7 @@
             // 
             // txtPassword
             // 
-            txtPassword.Location = new Point(78, 59);
+            txtPassword.Location = new Point(120, 75);
             txtPassword.Margin = new Padding(3, 2, 3, 2);
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '*';
@@ -55,47 +56,58 @@
             // 
             // btnLogin
             // 
-            btnLogin.Location = new Point(12, 86);
+            btnLogin.Location = new Point(12, 105);
             btnLogin.Margin = new Padding(3, 2, 3, 2);
             btnLogin.Name = "btnLogin";
             btnLogin.Size = new Size(103, 31);
             btnLogin.TabIndex = 2;
-            btnLogin.Text = "Login";
+            btnLogin.Text = "Přihlásit se";
             btnLogin.UseVisualStyleBackColor = true;
             btnLogin.Click += btnLogin_Click;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(9, 32);
+            label1.Location = new Point(9, 47);
             label1.Name = "label1";
-            label1.Size = new Size(63, 15);
+            label1.Size = new Size(105, 15);
             label1.TabIndex = 3;
-            label1.Text = "Username:";
+            label1.Text = "Uživatelské jméno:";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(12, 62);
+            label2.Location = new Point(12, 78);
             label2.Name = "label2";
-            label2.Size = new Size(60, 15);
+            label2.Size = new Size(40, 15);
             label2.TabIndex = 4;
-            label2.Text = "Password:";
+            label2.Text = "Heslo:";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(9, 9);
+            label3.Location = new Point(92, 9);
             label3.Name = "label3";
-            label3.Size = new Size(42, 15);
+            label3.Size = new Size(58, 15);
             label3.TabIndex = 5;
-            label3.Text = "LOGIN";
+            label3.Text = "Přihlášení";
+            // 
+            // btnBack
+            // 
+            btnBack.Location = new Point(121, 103);
+            btnBack.Name = "btnBack";
+            btnBack.Size = new Size(109, 33);
+            btnBack.TabIndex = 6;
+            btnBack.Text = "Zpět";
+            btnBack.UseVisualStyleBackColor = true;
+            btnBack.Click += btnBack_Click;
             // 
             // LoginForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(235, 128);
+            ClientSize = new Size(242, 147);
+            Controls.Add(btnBack);
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -104,7 +116,7 @@
             Controls.Add(txtUsername);
             Margin = new Padding(3, 2, 3, 2);
             Name = "LoginForm";
-            Text = "LoginForm";
+            Text = "Přihlášení";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -117,5 +129,6 @@
         private Label label1;
         private Label label2;
         private Label label3;
+        private Button btnBack;
     }
 }

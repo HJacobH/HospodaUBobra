@@ -64,7 +64,7 @@
             btnPrihlasit.Name = "btnPrihlasit";
             btnPrihlasit.Size = new Size(75, 23);
             btnPrihlasit.TabIndex = 2;
-            btnPrihlasit.Text = "Login";
+            btnPrihlasit.Text = "Přihlášní";
             btnPrihlasit.UseVisualStyleBackColor = true;
             btnPrihlasit.Click += btnPrihlasit_Click;
             // 
@@ -82,7 +82,7 @@
             btnRegister.Name = "btnRegister";
             btnRegister.Size = new Size(75, 23);
             btnRegister.TabIndex = 4;
-            btnRegister.Text = "Register";
+            btnRegister.Text = "Registrace";
             btnRegister.UseVisualStyleBackColor = true;
             btnRegister.Click += btnRegister_Click;
             // 
@@ -101,7 +101,7 @@
             btnReviews.Name = "btnReviews";
             btnReviews.Size = new Size(75, 23);
             btnReviews.TabIndex = 6;
-            btnReviews.Text = "Reviews";
+            btnReviews.Text = "Recenze";
             btnReviews.UseVisualStyleBackColor = true;
             btnReviews.Click += btnReviews_Click;
             // 
@@ -111,7 +111,7 @@
             btnAddPiwo.Name = "btnAddPiwo";
             btnAddPiwo.Size = new Size(75, 23);
             btnAddPiwo.TabIndex = 7;
-            btnAddPiwo.Text = "Add Piwko";
+            btnAddPiwo.Text = "Přidat pivo";
             btnAddPiwo.UseVisualStyleBackColor = true;
             btnAddPiwo.Click += btnAddPiwo_Click;
             // 
