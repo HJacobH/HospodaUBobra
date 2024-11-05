@@ -30,118 +30,171 @@
         {
             dataGridView1 = new DataGridView();
             comboBoxTables = new ComboBox();
-            btnPrihlasit = new Button();
             roleLabel = new Label();
-            btnRegister = new Button();
             currentUserLabel = new Label();
-            btnReviews = new Button();
-            btnAddPiwo = new Button();
-            btnShowKlientObj = new Button();
+            menuStrip1 = new MenuStrip();
+            uživatelToolStripMenuItem = new ToolStripMenuItem();
+            loginStipItem = new ToolStripMenuItem();
+            registerStipItem = new ToolStripMenuItem();
+            recenzeToolStripMenuItem = new ToolStripMenuItem();
+            správaRecenzíToolStripMenuItem = new ToolStripMenuItem();
+            pivaToolStripMenuItem = new ToolStripMenuItem();
+            pridatPivoToolStripMenuItem = new ToolStripMenuItem();
+            pivovaryToolStripMenuItem = new ToolStripMenuItem();
+            lokaceToolStripMenuItem = new ToolStripMenuItem();
+            zamestnanciToolStripMenuItem = new ToolStripMenuItem();
+            objednavkyToolStripMenuItem = new ToolStripMenuItem();
+            explicidCursorToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 43);
+            dataGridView1.Location = new Point(14, 32);
+            dataGridView1.Margin = new Padding(3, 4, 3, 4);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(817, 395);
+            dataGridView1.Size = new Size(934, 552);
             dataGridView1.TabIndex = 0;
             // 
             // comboBoxTables
             // 
             comboBoxTables.FormattingEnabled = true;
-            comboBoxTables.Location = new Point(835, 150);
+            comboBoxTables.Location = new Point(954, 57);
+            comboBoxTables.Margin = new Padding(3, 4, 3, 4);
             comboBoxTables.Name = "comboBoxTables";
-            comboBoxTables.Size = new Size(121, 23);
+            comboBoxTables.Size = new Size(138, 28);
             comboBoxTables.TabIndex = 1;
-            // 
-            // btnPrihlasit
-            // 
-            btnPrihlasit.Location = new Point(881, 416);
-            btnPrihlasit.Margin = new Padding(3, 2, 3, 2);
-            btnPrihlasit.Name = "btnPrihlasit";
-            btnPrihlasit.Size = new Size(75, 23);
-            btnPrihlasit.TabIndex = 2;
-            btnPrihlasit.Text = "Přihlášní";
-            btnPrihlasit.UseVisualStyleBackColor = true;
-            btnPrihlasit.Click += btnPrihlasit_Click;
             // 
             // roleLabel
             // 
             roleLabel.AutoSize = true;
-            roleLabel.Location = new Point(864, 43);
+            roleLabel.Location = new Point(987, 57);
             roleLabel.Name = "roleLabel";
-            roleLabel.Size = new Size(0, 15);
+            roleLabel.Size = new Size(0, 20);
             roleLabel.TabIndex = 3;
-            // 
-            // btnRegister
-            // 
-            btnRegister.Location = new Point(881, 388);
-            btnRegister.Name = "btnRegister";
-            btnRegister.Size = new Size(75, 23);
-            btnRegister.TabIndex = 4;
-            btnRegister.Text = "Registrace";
-            btnRegister.UseVisualStyleBackColor = true;
-            btnRegister.Click += btnRegister_Click;
             // 
             // currentUserLabel
             // 
             currentUserLabel.AutoSize = true;
-            currentUserLabel.Location = new Point(12, 9);
+            currentUserLabel.Location = new Point(954, 28);
             currentUserLabel.Name = "currentUserLabel";
-            currentUserLabel.Size = new Size(38, 15);
+            currentUserLabel.Size = new Size(50, 20);
             currentUserLabel.TabIndex = 5;
             currentUserLabel.Text = "label1";
             // 
-            // btnReviews
+            // menuStrip1
             // 
-            btnReviews.Location = new Point(881, 359);
-            btnReviews.Name = "btnReviews";
-            btnReviews.Size = new Size(75, 23);
-            btnReviews.TabIndex = 6;
-            btnReviews.Text = "Recenze";
-            btnReviews.UseVisualStyleBackColor = true;
-            btnReviews.Click += btnReviews_Click;
+            menuStrip1.ImageScalingSize = new Size(20, 20);
+            menuStrip1.Items.AddRange(new ToolStripItem[] { uživatelToolStripMenuItem, recenzeToolStripMenuItem, pivaToolStripMenuItem, pivovaryToolStripMenuItem, objednavkyToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1106, 28);
+            menuStrip1.TabIndex = 9;
+            menuStrip1.Text = "menuStrip1";
             // 
-            // btnAddPiwo
+            // uživatelToolStripMenuItem
             // 
-            btnAddPiwo.Location = new Point(881, 330);
-            btnAddPiwo.Name = "btnAddPiwo";
-            btnAddPiwo.Size = new Size(75, 23);
-            btnAddPiwo.TabIndex = 7;
-            btnAddPiwo.Text = "Přidat pivo";
-            btnAddPiwo.UseVisualStyleBackColor = true;
-            btnAddPiwo.Click += btnAddPiwo_Click;
+            uživatelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loginStipItem, registerStipItem });
+            uživatelToolStripMenuItem.Name = "uživatelToolStripMenuItem";
+            uživatelToolStripMenuItem.Size = new Size(76, 24);
+            uživatelToolStripMenuItem.Text = "Uživatel";
             // 
-            // btnShowKlientObj
+            // loginStipItem
             // 
-            btnShowKlientObj.Location = new Point(881, 285);
-            btnShowKlientObj.Name = "btnShowKlientObj";
-            btnShowKlientObj.Size = new Size(75, 39);
-            btnShowKlientObj.TabIndex = 8;
-            btnShowKlientObj.Text = "Explicit cursor";
-            btnShowKlientObj.UseVisualStyleBackColor = true;
-            btnShowKlientObj.Click += btnShowKlientObj_Click;
+            loginStipItem.Name = "loginStipItem";
+            loginStipItem.Size = new Size(162, 26);
+            loginStipItem.Text = "Přihlásit se";
+            loginStipItem.Click += loginStipItem_Click;
+            // 
+            // registerStipItem
+            // 
+            registerStipItem.Name = "registerStipItem";
+            registerStipItem.Size = new Size(162, 26);
+            registerStipItem.Text = "Registrace";
+            registerStipItem.Click += registerStipItem_Click;
+            // 
+            // recenzeToolStripMenuItem
+            // 
+            recenzeToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { správaRecenzíToolStripMenuItem });
+            recenzeToolStripMenuItem.Name = "recenzeToolStripMenuItem";
+            recenzeToolStripMenuItem.Size = new Size(78, 24);
+            recenzeToolStripMenuItem.Text = "Recenze";
+            // 
+            // správaRecenzíToolStripMenuItem
+            // 
+            správaRecenzíToolStripMenuItem.Name = "správaRecenzíToolStripMenuItem";
+            správaRecenzíToolStripMenuItem.Size = new Size(188, 26);
+            správaRecenzíToolStripMenuItem.Text = "Správa recenzí";
+            správaRecenzíToolStripMenuItem.Click += správaRecenzíToolStripMenuItem_Click;
+            // 
+            // pivaToolStripMenuItem
+            // 
+            pivaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { pridatPivoToolStripMenuItem });
+            pivaToolStripMenuItem.Name = "pivaToolStripMenuItem";
+            pivaToolStripMenuItem.Size = new Size(50, 24);
+            pivaToolStripMenuItem.Text = "Piva";
+            // 
+            // pridatPivoToolStripMenuItem
+            // 
+            pridatPivoToolStripMenuItem.Name = "pridatPivoToolStripMenuItem";
+            pridatPivoToolStripMenuItem.Size = new Size(131, 26);
+            pridatPivoToolStripMenuItem.Text = "Přidat";
+            pridatPivoToolStripMenuItem.Click += pridatPivoToolStripMenuItem_Click;
+            // 
+            // pivovaryToolStripMenuItem
+            // 
+            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem });
+            pivovaryToolStripMenuItem.Name = "pivovaryToolStripMenuItem";
+            pivovaryToolStripMenuItem.Size = new Size(78, 24);
+            pivovaryToolStripMenuItem.Text = "Pivovary";
+            // 
+            // lokaceToolStripMenuItem
+            // 
+            lokaceToolStripMenuItem.Name = "lokaceToolStripMenuItem";
+            lokaceToolStripMenuItem.Size = new Size(224, 26);
+            lokaceToolStripMenuItem.Text = "Lokace";
+            lokaceToolStripMenuItem.Click += lokaceToolStripMenuItem_Click;
+            // 
+            // zamestnanciToolStripMenuItem
+            // 
+            zamestnanciToolStripMenuItem.Name = "zamestnanciToolStripMenuItem";
+            zamestnanciToolStripMenuItem.Size = new Size(224, 26);
+            zamestnanciToolStripMenuItem.Text = "Zaměstnanci";
+            zamestnanciToolStripMenuItem.Click += zamestnanciToolStripMenuItem_Click;
+            // 
+            // objednavkyToolStripMenuItem
+            // 
+            objednavkyToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { explicidCursorToolStripMenuItem });
+            objednavkyToolStripMenuItem.Name = "objednavkyToolStripMenuItem";
+            objednavkyToolStripMenuItem.Size = new Size(101, 24);
+            objednavkyToolStripMenuItem.Text = "Objednavky";
+            // 
+            // explicidCursorToolStripMenuItem
+            // 
+            explicidCursorToolStripMenuItem.Name = "explicidCursorToolStripMenuItem";
+            explicidCursorToolStripMenuItem.Size = new Size(265, 26);
+            explicidCursorToolStripMenuItem.Text = "Klienti a jejich objednávky";
+            explicidCursorToolStripMenuItem.Click += explicidCursorToolStripMenuItem_Click;
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(968, 450);
-            Controls.Add(btnShowKlientObj);
-            Controls.Add(btnAddPiwo);
-            Controls.Add(btnReviews);
+            ClientSize = new Size(1106, 600);
             Controls.Add(currentUserLabel);
-            Controls.Add(btnRegister);
             Controls.Add(roleLabel);
-            Controls.Add(btnPrihlasit);
             Controls.Add(comboBoxTables);
             Controls.Add(dataGridView1);
+            Controls.Add(menuStrip1);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "Form1";
             Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -150,12 +203,20 @@
 
         private DataGridView dataGridView1;
         private ComboBox comboBoxTables;
-        private Button btnPrihlasit;
         private Label roleLabel;
-        private Button btnRegister;
         private Label currentUserLabel;
-        private Button btnReviews;
-        private Button btnAddPiwo;
-        private Button btnShowKlientObj;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem uživatelToolStripMenuItem;
+        private ToolStripMenuItem loginStipItem;
+        private ToolStripMenuItem registerStipItem;
+        private ToolStripMenuItem recenzeToolStripMenuItem;
+        private ToolStripMenuItem správaRecenzíToolStripMenuItem;
+        private ToolStripMenuItem pivaToolStripMenuItem;
+        private ToolStripMenuItem pridatPivoToolStripMenuItem;
+        private ToolStripMenuItem pivovaryToolStripMenuItem;
+        private ToolStripMenuItem lokaceToolStripMenuItem;
+        private ToolStripMenuItem zamestnanciToolStripMenuItem;
+        private ToolStripMenuItem objednavkyToolStripMenuItem;
+        private ToolStripMenuItem explicidCursorToolStripMenuItem;
     }
 }

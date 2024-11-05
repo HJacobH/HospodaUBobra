@@ -1,4 +1,4 @@
-using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.ManagedDataAccess.Client;
 using System.Data;
 
 namespace HospodaUBobra
@@ -32,12 +32,13 @@ namespace HospodaUBobra
             PopulateTableList();
         }
 
+
         private void SetButtonVisibility()
         {
             if (currentRole != UserRole.Admin)
             {
-                btnAddPiwo.Visible = false;
-                btnShowKlientObj.Visible = false;
+                zamestnanciToolStripMenuItem.Visible = false;
+                pridatPivoToolStripMenuItem.Visible = false;
             }
         }
 
@@ -148,13 +149,13 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            currentUserLabel.Text = $"Aktu�ln� u�ivatel: {currentUsername}";
+            currentUserLabel.Text = $"Aktuální uživatel: {currentUsername}";
 
             switch (currentRole)
             {
                 case UserRole.Admin:
-                    btnAddPiwo.Visible = true;
-                    btnShowKlientObj.Visible = true;
+                    pridatPivoToolStripMenuItem.Visible = true;
+                    zamestnanciToolStripMenuItem.Visible = true;
                     break;
                 case UserRole.User:
                     break;
@@ -165,45 +166,7 @@ namespace HospodaUBobra
             PopulateTableList();
         }
 
-        private void btnPrihlasit_Click(object sender, EventArgs e)
-        {
-            LoginForm loginForm = new LoginForm();
 
-            if (loginForm.ShowDialog() == DialogResult.OK)
-            {
-                this.currentRole = loginForm.LoggedInUserRole;
-                this.currentUsername = loginForm.currentUsername;
-                MessageBox.Show($"Login successful! Role: {currentRole}");
-                ApplyRolePermissions();
-            }
-            else
-            {
-                MessageBox.Show("Login cancelled or failed.");
-            }
-        }
-
-        private void btnRegister_Click(object sender, EventArgs e)
-        {
-            RegisterForm registerForm = new RegisterForm();
-            if (registerForm.ShowDialog() == DialogResult.OK)
-            {
-                MessageBox.Show("Registration completed! You can now log in with your new credentials.");
-            }
-        }
-
-        private void btnReviews_Click(object sender, EventArgs e)
-        {
-            ManageReviewsForm manageReviewsForm = new ManageReviewsForm();
-
-            manageReviewsForm.ShowDialog();
-        }
-
-        private void btnAddPiwo_Click(object sender, EventArgs e)
-        {
-            PiwoMangement piwoMangement = new PiwoMangement();
-
-            piwoMangement.ShowDialog();
-        }
 
         private void btnShowKlientObj_Click(object sender, EventArgs e)
         {
@@ -236,6 +199,119 @@ namespace HospodaUBobra
             {
                 MessageBox.Show("General error: " + ex.Message);
             }
+        }
+
+        private void loginStipItem_Click(object sender, EventArgs e)
+        {
+            LoginForm loginForm = new LoginForm();
+
+            if (loginForm.ShowDialog() == DialogResult.OK)
+            {
+                this.currentRole = loginForm.LoggedInUserRole;
+                this.currentUsername = loginForm.currentUsername;
+                MessageBox.Show($"P?ihlášení úsp?šné!");
+                ApplyRolePermissions();
+            }
+            else
+            {
+                MessageBox.Show("P?ihlášení selhalo.");
+            }
+        }
+
+        private void registerStipItem_Click(object sender, EventArgs e)
+        {
+            RegisterForm registerForm = new RegisterForm();
+            if (registerForm.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show("Registrace úspěšná!");
+            }
+        }
+
+        private void správaRecenzíToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ManageReviewsForm manageReviewsForm = new ManageReviewsForm();
+
+            manageReviewsForm.ShowDialog();
+        }
+
+        private void pridatPivoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PiwoMangement piwoMangement = new PiwoMangement();
+
+            piwoMangement.ShowDialog();
+        }
+
+        private void lokaceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM pivovar_mesto_kraj";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            dataGridView1.DataSource = dataTable;
+                        }
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Oracle error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("General error: " + ex.Message);
+            }
+        }
+
+        private void zamestnanciToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM hierarchie";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            dataGridView1.DataSource = dataTable;
+                        }
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Oracle error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("General error: " + ex.Message);
+            }
+        }
+
+        private void explicidCursorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
