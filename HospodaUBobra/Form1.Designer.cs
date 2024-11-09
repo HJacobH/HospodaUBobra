@@ -185,7 +185,7 @@
             btnLogout.Name = "btnLogout";
             btnLogout.Size = new Size(121, 37);
             btnLogout.TabIndex = 10;
-            btnLogout.Text = "Odlásit se";
+            btnLogout.Text = "Odhlásit se";
             btnLogout.UseVisualStyleBackColor = true;
             btnLogout.Click += btnLogout_Click;
             // 

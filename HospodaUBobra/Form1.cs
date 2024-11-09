@@ -32,6 +32,8 @@ namespace HospodaUBobra
 
             ApplyRolePermissions();
             PopulateTableList();
+            btnLogout.Enabled = false;
+            currentUserLabel.Text = UserSession.Username;
         }
 
 
@@ -207,11 +209,13 @@ namespace HospodaUBobra
             if (UserSession.Username != "Anonymous" && UserSession.Role != "Anonymous")
             {
                 MessageBox.Show("Přihlášení úspěšné!");
+                btnLogout.Enabled = true;
+                currentUserLabel.Text = UserSession.Username;
                 ApplyRolePermissions();
             }
             else
             {
-                MessageBox.Show("Přihlášení selhalo!");
+                //MessageBox.Show("Přihlášení selhalo!");
             }
         }
 
@@ -311,11 +315,15 @@ namespace HospodaUBobra
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            UserSession.ClearSession();
-
-            ApplyRolePermissions();
-
-            MessageBox.Show("Odhlášení úspěšné!");
+            if (UserSession.Role != "Anonymous")
+            {
+                UserSession.ClearSession();
+                ApplyRolePermissions();
+                MessageBox.Show("Odhlášení úspěšné!");
+                btnLogout.Enabled = false;
+                currentUserLabel.Text = "Anonymous";
+ 
+            }
         }
     }
 }
