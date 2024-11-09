@@ -9,22 +9,24 @@ namespace HospodaUBobra
         string heslo = "Server2022";
         string connectionString;
 
-        private UserRole currentRole = UserRole.Anonymous;
+        private string currentRole;
         private string currentUsername;
-        private Dictionary<UserRole, List<string>> roleTables;
+        private Dictionary<string, List<string>> roleTables;
 
-        public Form1()
+        public Form1(string roleName)
         {
             InitializeComponent();
             connectionString = $"User Id={st};Password={heslo};Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
 
             SetButtonVisibility();
 
-            roleTables = new Dictionary<UserRole, List<string>>
+            currentRole = roleName;
+
+            roleTables = new Dictionary<string, List<string>>
             {
-                { UserRole.Admin, null },
-                { UserRole.User, new List<string> { "PIVA", "PIVOVARY", "RECENZE", "MESSAGES" } },
-                { UserRole.Anonymous, new List<string> { "PIVA", "PIVOVARY", "RECENZE" } }
+                { "Admin", null },
+                { "User", new List<string> { "PIVA", "PIVOVARY", "RECENZE", "MESSAGES" } },
+                { "Anonymous", new List<string> { "PIVA", "PIVOVARY", "RECENZE" } }
             };
             comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
 
@@ -35,7 +37,7 @@ namespace HospodaUBobra
 
         private void SetButtonVisibility()
         {
-            if (currentRole != UserRole.Admin)
+            if (currentRole != "Admin")
             {
                 zamestnanciToolStripMenuItem.Visible = false;
                 pridatPivoToolStripMenuItem.Visible = false;
@@ -87,14 +89,15 @@ namespace HospodaUBobra
 
         private bool CanAccessTable(string tableName)
         {
-            if (currentRole == UserRole.Admin)
+
+            if (UserSession.Role == "Admin")
             {
                 return true;
             }
 
-            if (roleTables.ContainsKey(currentRole) && roleTables[currentRole] != null)
+            if (roleTables.ContainsKey(UserSession.Role) && roleTables[UserSession.Role] != null)
             {
-                return roleTables[currentRole].Contains(tableName);
+                return roleTables[UserSession.Role].Contains(tableName);
             }
 
             return false;
@@ -149,19 +152,8 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            currentUserLabel.Text = $"Aktuální uživatel: {currentUsername}";
-
-            switch (currentRole)
-            {
-                case UserRole.Admin:
-                    pridatPivoToolStripMenuItem.Visible = true;
-                    zamestnanciToolStripMenuItem.Visible = true;
-                    break;
-                case UserRole.User:
-                    break;
-                case UserRole.Anonymous:
-                    break;
-            }
+            zamestnanciToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            pridatPivoToolStripMenuItem.Visible = UserSession.Role == "Admin";
 
             PopulateTableList();
         }
@@ -203,18 +195,23 @@ namespace HospodaUBobra
 
         private void loginStipItem_Click(object sender, EventArgs e)
         {
-            LoginForm loginForm = new LoginForm();
-
-            if (loginForm.ShowDialog() == DialogResult.OK)
+            if (UserSession.Role != "Anonymous")
             {
-                this.currentRole = loginForm.LoggedInUserRole;
-                this.currentUsername = loginForm.currentUsername;
-                MessageBox.Show($"P?ihlášení úsp?šné!");
+                MessageBox.Show("Již jste přihlášeni. Nejdříve se odhlašte, než se pokusíte znovu přihlásit.");
+                return;
+            }
+
+            LoginForm loginForm = new LoginForm();
+            loginForm.ShowDialog();
+
+            if (UserSession.Username != "Anonymous" && UserSession.Role != "Anonymous")
+            {
+                MessageBox.Show("Přihlášení úspěšné!");
                 ApplyRolePermissions();
             }
             else
             {
-                MessageBox.Show("P?ihlášení selhalo.");
+                MessageBox.Show("Přihlášení selhalo!");
             }
         }
 
@@ -312,6 +309,15 @@ namespace HospodaUBobra
         private void explicidCursorToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            UserSession.ClearSession();
+
+            ApplyRolePermissions();
+
+            MessageBox.Show("Odhlášení úspěšné!");
         }
     }
 }
