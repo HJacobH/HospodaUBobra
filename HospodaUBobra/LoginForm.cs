@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -44,28 +45,24 @@ namespace HospodaUBobra
         {
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
-            UserRole userRole = UserRole.Anonymous;
 
-            if (ValidateLogin(username, password, out userRole))
+            if (ValidateLogin(username, password, out string roleName))
             {
                 UserSession.Username = username;
-                UserSession.Role = userRole;
-                LoggedInUserRole = userRole;
-                currentUsername = username;
-                LogUserAction("PRIHLASENI", "Uživatel se přihlásil úspěšně.", username, userRole.ToString());
-                DialogResult = DialogResult.OK;
-                Close();
+                UserSession.Role = roleName;
+
+                this.Close();
             }
             else
             {
-                LogUserAction("SELHANE_PRIHLASENI", "Nepovedený pokus přihlášení.", username, userRole.ToString());
-                MessageBox.Show("Neplatné údaje. Přihlášení selhalo.");
+                MessageBox.Show("Invalid credentials. Please try again.");
             }
         }
 
-        private bool ValidateLogin(string username, string password, out UserRole role)
+
+        private bool ValidateLogin(string username, string password, out string roleName)
         {
-            role = UserRole.Anonymous;
+            roleName = "Anonymous"; 
 
             try
             {
@@ -73,7 +70,11 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = "SELECT password, salt, role FROM Users WHERE username = :username";
+                    string query = @"
+                        SELECT u.PASSWORD, u.SALT, r.ROLE_NAME
+                        FROM Users u
+                        JOIN Role r ON u.ROLE_ID = r.ROLE_ID
+                        WHERE u.USERNAME = :username";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -85,15 +86,23 @@ namespace HospodaUBobra
                             {
                                 string storedHashedPassword = reader.GetString(0);
                                 string salt = reader.GetString(1);
-                                string userRole = reader.GetString(2);
+                                roleName = reader.GetString(2);
 
-                                string hashedInputPassword = PasswordHelper.HashPassword(password, salt);
+                                string hashedInputPassword = HashPassword(password, salt);
+
 
                                 if (hashedInputPassword == storedHashedPassword)
                                 {
-                                    role = Enum.Parse<UserRole>(userRole, true);
                                     return true;
                                 }
+                                else
+                                {
+                                    MessageBox.Show("Špatné heslo.");
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("Uživatel s tímto jménem nebyl nalezen.");
                             }
                         }
                     }
@@ -103,16 +112,16 @@ namespace HospodaUBobra
             }
             catch (OracleException ex)
             {
-                MessageBox.Show("Oracle chyba: " + ex.Message);
+                MessageBox.Show("Oracle error: " + ex.Message);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Obecná chyba: " + ex.Message);
+                MessageBox.Show("General error: " + ex.Message);
             }
 
-            MessageBox.Show("Neplatné údaje. Přihlášení selhalo.");
-            return false;
+            return false; 
         }
+
 
         private void LogUserAction(string actionType, string actionDesc, string username, string role)
         {
@@ -135,6 +144,23 @@ namespace HospodaUBobra
                 conn.Close();
             }
         }
+
+        private string HashPassword(string password, string salt)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(password + salt);
+                byte[] hash = sha256.ComputeHash(bytes);
+
+                StringBuilder result = new StringBuilder();
+                foreach (byte b in hash)
+                {
+                    result.Append(b.ToString("x2"));
+                }
+                return result.ToString();
+            }
+        }
+
 
         private void btnBack_Click(object sender, EventArgs e)
         {

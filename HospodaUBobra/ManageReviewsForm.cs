@@ -15,6 +15,7 @@ namespace HospodaUBobra
     {
         string connectionString = $"User Id=st69639;Password=Server2022;Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
         private int selectedReviewId;
+        private string selectedReviewUser;
 
         public ManageReviewsForm()
         {
@@ -22,6 +23,13 @@ namespace HospodaUBobra
             LoadBeers();
             LoadBreweries();
             LoadReviews();
+
+            if (UserSession.Role == "Anonymous")
+            {
+                btnAddReview.Enabled = false;
+                btnUpdateReview.Enabled = false;
+                btnDeleteReview.Enabled = false;
+            }
         }
 
         private void LoadBeers()
@@ -80,6 +88,8 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
                         dataGridViewReviews.DataSource = dt;
+
+                        //dataGridViewReviews.Columns["user_id"].Visible = false;
                     }
                 }
             }
@@ -87,6 +97,13 @@ namespace HospodaUBobra
 
         private void btnAddReview_Click(object sender, EventArgs e)
         {
+
+            if (UserSession.Role == "Anonymous")
+            {
+                MessageBox.Show("Musíte být přihlášeni, abyste mohli zanechat recenzi.");
+                return;
+            }
+
             string title = txtTitle.Text.Trim();
             string reviewText = txtReviewText.Text.Trim();
             int breweryId = Convert.ToInt32(comboBoxBreweries.SelectedValue);
@@ -94,7 +111,7 @@ namespace HospodaUBobra
 
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(reviewText))
             {
-                MessageBox.Show("Title and review text cannot be empty.");
+                MessageBox.Show("Název a obsah recenze nesmí být prázdý.");
                 return;
             }
 
@@ -113,15 +130,21 @@ namespace HospodaUBobra
                 }
             }
 
-            LogUserAction("Add Review", $"Added review: {title} by {UserSession.Username} for brewery ID {breweryId} and beer ID {beerId}");
+            LogUserAction("Přidat recenzi", $"Přidaná recenze: {title} od {UserSession.Username} pro pivovar s ID {breweryId} a pivo s ID {beerId}");
 
             LoadReviews();
 
-            MessageBox.Show("Review added succesfully!");
+            MessageBox.Show("Recenze přidána úspěšně!");
         }
 
         private void btnUpdateReview_Click(object sender, EventArgs e)
         {
+            if (UserSession.Role == "Anonymous" || selectedReviewUser != UserSession.Username)
+            {
+                MessageBox.Show("Můžete aktualizovat pouze své recenze.");
+                return;
+            }
+
             if (selectedReviewId <= 0) return;
 
             string title = txtTitle.Text.Trim();
@@ -129,7 +152,7 @@ namespace HospodaUBobra
 
             if (comboBoxBreweries.SelectedValue == null || comboBoxBeers.SelectedValue == null)
             {
-                MessageBox.Show("Please select a brewery and a beer.");
+                MessageBox.Show("Vyberte pivovar a pivo.");
                 return;
             }
 
@@ -138,7 +161,7 @@ namespace HospodaUBobra
 
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(reviewText))
             {
-                MessageBox.Show("Title and review text cannot be empty.");
+                MessageBox.Show("Název a obsah recenze nesmí být prázdý.");
                 return;
             }
 
@@ -160,7 +183,7 @@ namespace HospodaUBobra
                     }
                 }
 
-                LogUserAction("Update Review", $"Updated review ID: {selectedReviewId} by {UserSession.Username}");
+                LogUserAction("Aktualizování recenze", $"Aktualizace recenze s ID: {selectedReviewId} od {UserSession.Username}");
 
                 LoadReviews();
 
