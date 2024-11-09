@@ -207,14 +207,14 @@ namespace HospodaUBobra
 
             if (loginForm.ShowDialog() == DialogResult.OK)
             {
-                this.currentRole = loginForm.LoggedInUserRole;
-                this.currentUsername = loginForm.currentUsername;
-                MessageBox.Show($"P?ihlášení úsp?šné!");
+                currentRole = loginForm.LoggedInUserRole;
+                currentUsername = loginForm.currentUsername;
+                MessageBox.Show($"Přihlášení úspěšné!");
                 ApplyRolePermissions();
             }
             else
             {
-                MessageBox.Show("P?ihlášení selhalo.");
+                //MessageBox.Show("Přihlášení selhalo.");
             }
         }
 
@@ -227,17 +227,15 @@ namespace HospodaUBobra
             }
         }
 
-        private void správaRecenzíToolStripMenuItem_Click(object sender, EventArgs e)
+        private void spravaRecenziToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ManageReviewsForm manageReviewsForm = new ManageReviewsForm();
-
             manageReviewsForm.ShowDialog();
         }
 
         private void pridatPivoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PiwoMangement piwoMangement = new PiwoMangement();
-
             piwoMangement.ShowDialog();
         }
 

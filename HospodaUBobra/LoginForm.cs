@@ -22,6 +22,22 @@ namespace HospodaUBobra
         public LoginForm()
         {
             InitializeComponent();
+            KeyPreview = true;
+            KeyDown += (sender, e) =>
+            {
+                if (e.KeyCode == Keys.Escape)
+                {
+                    Close();
+                }
+            };
+            
+            KeyDown += (sender, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    btnLogin_Click(sender, e);
+                }
+            };
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -37,8 +53,8 @@ namespace HospodaUBobra
                 LoggedInUserRole = userRole;
                 currentUsername = username;
                 LogUserAction("PRIHLASENI", "Uživatel se přihlásil úspěšně.", username, userRole.ToString());
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                DialogResult = DialogResult.OK;
+                Close();
             }
             else
             {
@@ -122,7 +138,7 @@ namespace HospodaUBobra
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

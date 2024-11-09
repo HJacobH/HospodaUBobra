@@ -18,6 +18,22 @@ namespace HospodaUBobra
         public RegisterForm()
         {
             InitializeComponent();
+            KeyPreview = true;
+            KeyDown += (sender, e) =>
+            {
+                if (e.KeyCode == Keys.Escape)
+                {
+                    Close();
+                }
+            };
+
+            KeyDown += (sender, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    btnRegister_Click(sender, e);
+                }
+            };
         }
 
         private void btnRegister_Click(object sender, EventArgs e)
@@ -40,8 +56,8 @@ namespace HospodaUBobra
             if (RegisterUser(username, password, UserRole.User.ToString()))
             {
                 MessageBox.Show("Registrace úspěšná!");
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                DialogResult = DialogResult.OK;
+                Close();
             }
             else
             {
@@ -164,7 +180,7 @@ namespace HospodaUBobra
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }
