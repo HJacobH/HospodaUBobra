@@ -46,6 +46,10 @@
             label6 = new Label();
             label7 = new Label();
             txtReviewDetails = new TextBox();
+            comboBoxUsers = new ComboBox();
+            label8 = new Label();
+            pocetRecenziLabel = new Label();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridViewReviews).BeginInit();
             SuspendLayout();
             // 
@@ -129,7 +133,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(12, 256);
+            label5.Location = new Point(12, 254);
             label5.Name = "label5";
             label5.Size = new Size(53, 15);
             label5.TabIndex = 9;
@@ -138,9 +142,9 @@
             // dataGridViewReviews
             // 
             dataGridViewReviews.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewReviews.Location = new Point(80, 256);
+            dataGridViewReviews.Location = new Point(80, 254);
             dataGridViewReviews.Name = "dataGridViewReviews";
-            dataGridViewReviews.Size = new Size(474, 210);
+            dataGridViewReviews.Size = new Size(474, 183);
             dataGridViewReviews.TabIndex = 10;
             dataGridViewReviews.SelectionChanged += dataGridViewReviews_SelectionChanged;
             // 
@@ -210,11 +214,52 @@
             txtReviewDetails.Size = new Size(343, 94);
             txtReviewDetails.TabIndex = 17;
             // 
+            // comboBoxUsers
+            // 
+            comboBoxUsers.FormattingEnabled = true;
+            comboBoxUsers.Location = new Point(252, 443);
+            comboBoxUsers.Name = "comboBoxUsers";
+            comboBoxUsers.Size = new Size(99, 23);
+            comboBoxUsers.TabIndex = 18;
+            comboBoxUsers.SelectedIndexChanged += comboBoxUsers_SelectedIndexChanged;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(80, 446);
+            label8.Name = "label8";
+            label8.Size = new Size(166, 15);
+            label8.TabIndex = 19;
+            label8.Text = "Recenze od určitého uživatele:";
+            // 
+            // pocetRecenziLabel
+            // 
+            pocetRecenziLabel.AutoSize = true;
+            pocetRecenziLabel.Location = new Point(357, 446);
+            pocetRecenziLabel.Name = "pocetRecenziLabel";
+            pocetRecenziLabel.Size = new Size(10, 15);
+            pocetRecenziLabel.TabIndex = 20;
+            pocetRecenziLabel.Text = ".";
+            // 
+            // button1
+            // 
+            button1.Location = new Point(452, 5);
+            button1.Name = "button1";
+            button1.Size = new Size(102, 23);
+            button1.TabIndex = 21;
+            button1.Text = "Všechny recenze";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // ManageReviewsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(566, 505);
+            Controls.Add(button1);
+            Controls.Add(pocetRecenziLabel);
+            Controls.Add(label8);
+            Controls.Add(comboBoxUsers);
             Controls.Add(txtReviewDetails);
             Controls.Add(label7);
             Controls.Add(label6);
@@ -260,5 +305,9 @@
         private Label label6;
         private Label label7;
         private TextBox txtReviewDetails;
+        private ComboBox comboBoxUsers;
+        private Label label8;
+        private Label pocetRecenziLabel;
+        private Button button1;
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace HospodaUBobra
 {
@@ -22,7 +23,7 @@ namespace HospodaUBobra
             InitializeComponent();
             LoadBeers();
             LoadBreweries();
-            LoadReviews();
+            LoadUsers();
 
             dataGridViewReviews.ReadOnly = true;
 
@@ -33,9 +34,37 @@ namespace HospodaUBobra
                 btnDeleteReview.Enabled = false;
             }
 
+            pocetRecenziLabel.Text = $"Počet recenzí uživatele  je {GetReviewCountByUsername("")}.";
+
             txtReviewDetails.WordWrap = true;
             txtReviewDetails.ReadOnly = true;
+            LoadReviews();
         }
+
+        private void LoadUsers()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT USERNAME FROM USERS";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        comboBoxUsers.DataSource = dt;
+                        comboBoxUsers.DisplayMember = "USERNAME";
+                        comboBoxUsers.ValueMember = "USERNAME";
+
+                        comboBoxUsers.SelectedIndex = -1;
+                    }
+                }
+            }
+        }
+
 
         private void LoadBeers()
         {
@@ -56,7 +85,7 @@ namespace HospodaUBobra
                     }
                 }
             }
-        }        
+        }
 
         private void LoadBreweries()
         {
@@ -261,7 +290,10 @@ namespace HospodaUBobra
                 comboBoxBreweries.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivovar_id_pivovaru"].Value;
                 comboBoxBeers.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivo_id_piva"].Value;
 
-                selectedReviewUser = dataGridViewReviews.CurrentRow.Cells["USER_ID"].Value.ToString();
+                if (UserSession.Role != "Anonymous")
+                {
+                    selectedReviewUser = dataGridViewReviews.CurrentRow.Cells["USER_ID"].Value.ToString();
+                }
             }
         }
 
@@ -337,10 +369,73 @@ namespace HospodaUBobra
                     txtReviewDetails.Text = "Žádná recenze pro toto pivo nenalezena.";
                 }
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 //MessageBox.Show(ex.Message);
-            }          
+            }
+        }
+
+        public int GetReviewCountByUsername(string username)
+        {
+            int reviewCount = 0;
+
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT GetReviewCountByUsername(:username) FROM DUAL";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("username", username));
+
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        reviewCount = Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            return reviewCount;
+        }
+
+        public void DisplayUserReviews(string username)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                using (OracleCommand cmd = new OracleCommand("GetUserReviewsProcedure", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("p_username", OracleDbType.Varchar2).Value = username;
+
+                    cmd.Parameters.Add("p_reviews", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+                        dataGridViewReviews.DataSource = dt;
+                    }
+                }
+            }
+        }
+
+        private void comboBoxUsers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBoxUsers.SelectedValue != null)
+            {
+                string selectedUsername = comboBoxUsers.SelectedValue.ToString();
+                DisplayUserReviews(selectedUsername);
+                pocetRecenziLabel.Text = $"Počet recenzí uživatele {selectedUsername} je {GetReviewCountByUsername(selectedUsername)}.";
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            LoadReviews();
         }
     }
 }
