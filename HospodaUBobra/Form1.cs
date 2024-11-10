@@ -158,6 +158,7 @@ namespace HospodaUBobra
         {
             zamestnanciToolStripMenuItem.Visible = UserSession.Role == "Admin";
             pridatPivoToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            vytvoritUzivateleToolStripMenuItem.Visible = UserSession.Role == "Admin";
 
             PopulateTableList();
         }
@@ -224,18 +225,26 @@ namespace HospodaUBobra
 
         private async Task UpdateProfilePictureAsync(string username)
         {
+            Image cachedImage = UserSession.GetCachedProfilePicture(username);
+            if (cachedImage != null)
+            {
+                profilePictureBox.Image = cachedImage;
+                return;
+            }
+
             SetLoadingMessage();
 
             Image profilePicture = await Task.Run(() => GetUserProfilePicture(username));
 
             if (profilePicture != null)
             {
+                UserSession.CacheProfilePicture(username, profilePicture);
                 profilePictureBox.Image = profilePicture;
                 profilePictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
             }
             else
             {
-                profilePictureBox.Image = null; 
+                profilePictureBox.Image = null;
             }
 
         }
@@ -326,36 +335,7 @@ namespace HospodaUBobra
 
         private void zamestnanciToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                using (OracleConnection conn = new OracleConnection(connectionString))
-                {
-                    conn.Open();
 
-                    string query = "SELECT * FROM hierarchie";
-
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
-                    {
-                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
-                        {
-                            DataTable dataTable = new DataTable();
-                            adapter.Fill(dataTable);
-
-                            dataGridView1.DataSource = dataTable;
-                        }
-                    }
-
-                    conn.Close();
-                }
-            }
-            catch (OracleException ex)
-            {
-                MessageBox.Show("Oracle error: " + ex.Message);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("General error: " + ex.Message);
-            }
         }
 
         private void explicidCursorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -439,6 +419,53 @@ namespace HospodaUBobra
             {
                 MessageBox.Show("Musíte být přihlášeni!");
             }
+        }
+
+        private void vytvoritUzivateleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateUser addUserForm = new CreateUser(connectionString);
+
+            addUserForm.ShowDialog();
+        }
+
+        private void zobrazitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM hierarchie";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            dataGridView1.DataSource = dataTable;
+                        }
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Oracle error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("General error: " + ex.Message);
+            }
+        }
+
+        private void spravovatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EmplyeeManagement emplyeeManagement = new EmplyeeManagement(connectionString);
+            emplyeeManagement.ShowDialog();
         }
     }
 }

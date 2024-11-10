@@ -51,11 +51,14 @@ namespace HospodaUBobra
                 UserSession.Username = username;
                 UserSession.Role = roleName;
 
+                LogUserAction("Přihlášení", "Úspěšné přihlášení", username, roleName);
+
                 this.Close();
             }
             else
             {
-                MessageBox.Show("Invalid credentials. Please try again.");
+                LogUserAction("Přihlášení", "Neúspěšné přihlášení", username, roleName);
+                MessageBox.Show("Neplatné údaje.");
             }
         }
 
