@@ -46,8 +46,11 @@
             objednavkyToolStripMenuItem = new ToolStripMenuItem();
             explicidCursorToolStripMenuItem = new ToolStripMenuItem();
             btnLogout = new Button();
+            profilePictureBox = new PictureBox();
+            uploadPfpToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
             SuspendLayout();
             // 
             // dataGridView1
@@ -62,7 +65,7 @@
             // comboBoxTables
             // 
             comboBoxTables.FormattingEnabled = true;
-            comboBoxTables.Location = new Point(835, 43);
+            comboBoxTables.Location = new Point(835, 110);
             comboBoxTables.Name = "comboBoxTables";
             comboBoxTables.Size = new Size(121, 23);
             comboBoxTables.TabIndex = 1;
@@ -78,7 +81,7 @@
             // currentUserLabel
             // 
             currentUserLabel.AutoSize = true;
-            currentUserLabel.Location = new Point(835, 114);
+            currentUserLabel.Location = new Point(835, 92);
             currentUserLabel.Name = "currentUserLabel";
             currentUserLabel.Size = new Size(38, 15);
             currentUserLabel.TabIndex = 5;
@@ -97,7 +100,7 @@
             // 
             // uživatelToolStripMenuItem
             // 
-            uživatelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loginStipItem, registerStipItem });
+            uživatelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loginStipItem, registerStipItem, uploadPfpToolStripMenuItem });
             uživatelToolStripMenuItem.Name = "uživatelToolStripMenuItem";
             uživatelToolStripMenuItem.Size = new Size(60, 20);
             uživatelToolStripMenuItem.Text = "Uživatel";
@@ -105,14 +108,14 @@
             // loginStipItem
             // 
             loginStipItem.Name = "loginStipItem";
-            loginStipItem.Size = new Size(130, 22);
+            loginStipItem.Size = new Size(204, 22);
             loginStipItem.Text = "Přihlásit se";
             loginStipItem.Click += loginStipItem_Click;
             // 
             // registerStipItem
             // 
             registerStipItem.Name = "registerStipItem";
-            registerStipItem.Size = new Size(130, 22);
+            registerStipItem.Size = new Size(204, 22);
             registerStipItem.Text = "Registrace";
             registerStipItem.Click += registerStipItem_Click;
             // 
@@ -126,7 +129,7 @@
             // správaRecenzíToolStripMenuItem
             // 
             správaRecenzíToolStripMenuItem.Name = "správaRecenzíToolStripMenuItem";
-            správaRecenzíToolStripMenuItem.Size = new Size(180, 22);
+            správaRecenzíToolStripMenuItem.Size = new Size(149, 22);
             správaRecenzíToolStripMenuItem.Text = "Správa recenzí";
             správaRecenzíToolStripMenuItem.Click += spravaRecenziToolStripMenuItem_Click;
             // 
@@ -189,11 +192,27 @@
             btnLogout.UseVisualStyleBackColor = true;
             btnLogout.Click += btnLogout_Click;
             // 
+            // profilePictureBox
+            // 
+            profilePictureBox.Location = new Point(835, 27);
+            profilePictureBox.Name = "profilePictureBox";
+            profilePictureBox.Size = new Size(64, 62);
+            profilePictureBox.TabIndex = 11;
+            profilePictureBox.TabStop = false;
+            // 
+            // uploadPfpToolStripMenuItem
+            // 
+            uploadPfpToolStripMenuItem.Name = "uploadPfpToolStripMenuItem";
+            uploadPfpToolStripMenuItem.Size = new Size(204, 22);
+            uploadPfpToolStripMenuItem.Text = "Nahrát profilový obrázek";
+            uploadPfpToolStripMenuItem.Click += uploadPfpToolStripMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(profilePictureBox);
             Controls.Add(btnLogout);
             Controls.Add(currentUserLabel);
             Controls.Add(roleLabel);
@@ -205,6 +224,7 @@
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)profilePictureBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -229,5 +249,7 @@
         private ToolStripMenuItem objednavkyToolStripMenuItem;
         private ToolStripMenuItem explicidCursorToolStripMenuItem;
         private Button btnLogout;
+        private ToolStripMenuItem uploadPfpToolStripMenuItem;
+        private PictureBox profilePictureBox;
     }
 }
