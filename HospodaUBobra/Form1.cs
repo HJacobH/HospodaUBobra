@@ -322,7 +322,7 @@ namespace HospodaUBobra
                 MessageBox.Show("Odhlášení úspěšné!");
                 btnLogout.Enabled = false;
                 currentUserLabel.Text = "Anonymous";
- 
+
             }
         }
     }

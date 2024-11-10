@@ -43,6 +43,9 @@
             btnUpdateReview = new Button();
             btnDeleteReview = new Button();
             btnBack = new Button();
+            label6 = new Label();
+            label7 = new Label();
+            txtReviewDetails = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridViewReviews).BeginInit();
             SuspendLayout();
             // 
@@ -71,6 +74,7 @@
             comboBoxBeers.Name = "comboBoxBeers";
             comboBoxBeers.Size = new Size(121, 23);
             comboBoxBeers.TabIndex = 2;
+            comboBoxBeers.SelectedIndexChanged += comboBoxBeers_SelectedIndexChanged;
             // 
             // Breweries
             // 
@@ -180,11 +184,40 @@
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(207, 9);
+            label6.Name = "label6";
+            label6.Size = new Size(163, 15);
+            label6.TabIndex = 15;
+            label6.Text = "Nejlepší recenze daného piva:";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(-25, 466);
+            label7.Name = "label7";
+            label7.Size = new Size(38, 15);
+            label7.TabIndex = 16;
+            label7.Text = "label7";
+            // 
+            // txtReviewDetails
+            // 
+            txtReviewDetails.Location = new Point(211, 39);
+            txtReviewDetails.Multiline = true;
+            txtReviewDetails.Name = "txtReviewDetails";
+            txtReviewDetails.Size = new Size(343, 94);
+            txtReviewDetails.TabIndex = 17;
+            // 
             // ManageReviewsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(566, 505);
+            Controls.Add(txtReviewDetails);
+            Controls.Add(label7);
+            Controls.Add(label6);
             Controls.Add(btnBack);
             Controls.Add(btnDeleteReview);
             Controls.Add(btnUpdateReview);
@@ -224,5 +257,8 @@
         private Button btnUpdateReview;
         private Button btnDeleteReview;
         private Button btnBack;
+        private Label label6;
+        private Label label7;
+        private TextBox txtReviewDetails;
     }
 }

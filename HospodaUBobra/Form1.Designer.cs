@@ -126,7 +126,7 @@
             // správaRecenzíToolStripMenuItem
             // 
             správaRecenzíToolStripMenuItem.Name = "správaRecenzíToolStripMenuItem";
-            správaRecenzíToolStripMenuItem.Size = new Size(149, 22);
+            správaRecenzíToolStripMenuItem.Size = new Size(180, 22);
             správaRecenzíToolStripMenuItem.Text = "Správa recenzí";
             správaRecenzíToolStripMenuItem.Click += spravaRecenziToolStripMenuItem_Click;
             // 

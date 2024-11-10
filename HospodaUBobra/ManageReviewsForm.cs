@@ -24,12 +24,17 @@ namespace HospodaUBobra
             LoadBreweries();
             LoadReviews();
 
+            dataGridViewReviews.ReadOnly = true;
+
             if (UserSession.Role == "Anonymous")
             {
                 btnAddReview.Enabled = false;
                 btnUpdateReview.Enabled = false;
                 btnDeleteReview.Enabled = false;
             }
+
+            txtReviewDetails.WordWrap = true;
+            txtReviewDetails.ReadOnly = true;
         }
 
         private void LoadBeers()
@@ -46,12 +51,12 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
                         comboBoxBeers.DataSource = dt;
-                        comboBoxBeers.DisplayMember = "nazev";
-                        comboBoxBeers.ValueMember = "id_piva";
+                        comboBoxBeers.DisplayMember = "NAZEV";
+                        comboBoxBeers.ValueMember = "ID_PIVA";
                     }
                 }
             }
-        }
+        }        
 
         private void LoadBreweries()
         {
@@ -79,7 +84,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_recenze, titulek, text_recenze, pivovar_id_pivovaru, pivo_id_piva FROM RECENZE";
+                string query = "SELECT id_recenze, titulek, text_recenze, pivovar_id_pivovaru, pivo_id_piva, pocet_hvezdicek, user_id FROM RECENZE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -89,7 +94,7 @@ namespace HospodaUBobra
                         adapter.Fill(dt);
                         dataGridViewReviews.DataSource = dt;
 
-                        //dataGridViewReviews.Columns["user_id"].Visible = false;
+                        dataGridViewReviews.Columns["user_id"].Visible = false;
                     }
                 }
             }
@@ -201,9 +206,15 @@ namespace HospodaUBobra
 
         private void btnDeleteReview_Click(object sender, EventArgs e)
         {
+            if (UserSession.Role == "Anonymous" || selectedReviewUser != UserSession.Username)
+            {
+                MessageBox.Show("Můžete odstranit pouze Vaše recenze.");
+                return;
+            }
+
             if (selectedReviewId <= 0)
             {
-                MessageBox.Show("Please select a review to delete.");
+                MessageBox.Show("Vyberte recenzi ke smazání.");
                 return;
             }
 
@@ -221,21 +232,21 @@ namespace HospodaUBobra
 
                         if (rowsAffected > 0)
                         {
-                            LogUserAction("Delete Review", $"Deleted review ID: {selectedReviewId} by {UserSession.Username}");
+                            LogUserAction("Recenze odstraněna", $"ID odstraněné recenze: {selectedReviewId} od {UserSession.Username}");
 
                             LoadReviews();
 
-                            MessageBox.Show("Review deleted successfully!");
+                            MessageBox.Show("Recenze odstraněna úspěšně!");
                         }
                         else
                         {
-                            MessageBox.Show("No review found with the specified ID.");
+                            MessageBox.Show("Recenze s daným ID nenalezena.");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error deleting review: " + ex.Message);
+                    MessageBox.Show("Chyba při mazání recenze: " + ex.Message);
                 }
             }
         }
@@ -249,6 +260,8 @@ namespace HospodaUBobra
                 txtReviewText.Text = dataGridViewReviews.CurrentRow.Cells["text_recenze"].Value.ToString();
                 comboBoxBreweries.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivovar_id_pivovaru"].Value;
                 comboBoxBeers.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivo_id_piva"].Value;
+
+                selectedReviewUser = dataGridViewReviews.CurrentRow.Cells["USER_ID"].Value.ToString();
             }
         }
 
@@ -280,6 +293,54 @@ namespace HospodaUBobra
         private void btnBack_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private string GetHighestRatedReview(int productId)
+        {
+            string reviewDetails = string.Empty;
+
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "SELECT GetHighestRatedReview(:productId) AS ReviewDetails FROM DUAL";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("productId", productId));
+
+                    object result = cmd.ExecuteScalar();
+                    if (result != null)
+                    {
+                        reviewDetails = result.ToString();
+                    }
+                }
+            }
+
+            return reviewDetails;
+        }
+
+        private void comboBoxBeers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                int productId = Convert.ToInt32(comboBoxBeers.SelectedValue);
+
+                string reviewDetails = GetHighestRatedReview(productId);
+
+                if (!string.IsNullOrEmpty(reviewDetails))
+                {
+                    txtReviewDetails.Text = reviewDetails;
+                }
+                else
+                {
+                    txtReviewDetails.Text = "Žádná recenze pro toto pivo nenalezena.";
+                }
+
+            } catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }          
         }
     }
 }
