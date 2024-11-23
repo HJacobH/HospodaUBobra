@@ -121,17 +121,45 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = $"SELECT * FROM {tableName}";
+                    // 1. Generování dynamického seznamu sloupců
+                    string columnQuery = $@"
+                        SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_id)
+                        FROM user_tab_columns 
+                        WHERE table_name = UPPER('{tableName}') 
+                        AND column_name NOT LIKE 'ID_%'";
 
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    string columns = null;
+
+                    using (OracleCommand cmd = new OracleCommand(columnQuery, conn))
                     {
-                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        using (OracleDataReader reader = cmd.ExecuteReader())
                         {
-                            DataTable dataTable = new DataTable();
-                            adapter.Fill(dataTable);
-
-                            dataGridView1.DataSource = dataTable;
+                            if (reader.Read())
+                            {
+                                columns = reader.GetString(0); // Načte dynamicky vytvořený seznam sloupců
+                            }
                         }
+                    }
+
+                    if (!string.IsNullOrEmpty(columns))
+                    {
+                        // 2. Vytvoření a vykonání dotazu s dynamickými sloupci
+                        string dataQuery = $"SELECT {columns} FROM {tableName}";
+
+                        using (OracleCommand cmd = new OracleCommand(dataQuery, conn))
+                        {
+                            using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                            {
+                                DataTable dataTable = new DataTable();
+                                adapter.Fill(dataTable);
+
+                                dataGridView1.DataSource = dataTable;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("No columns found to query.");
                     }
 
                     conn.Close();
@@ -147,6 +175,7 @@ namespace HospodaUBobra
                 Log("General error: " + ex.Message);
                 MessageBox.Show("General error: " + ex.Message);
             }
+
         }
 
         private void Log(string message)
