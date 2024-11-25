@@ -174,7 +174,7 @@
             // lokaceToolStripMenuItem
             // 
             lokaceToolStripMenuItem.Name = "lokaceToolStripMenuItem";
-            lokaceToolStripMenuItem.Size = new Size(180, 22);
+            lokaceToolStripMenuItem.Size = new Size(142, 22);
             lokaceToolStripMenuItem.Text = "Lokace";
             lokaceToolStripMenuItem.Click += lokaceToolStripMenuItem_Click;
             // 
@@ -182,21 +182,21 @@
             // 
             zamestnanciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { zobrazitToolStripMenuItem, spravovatToolStripMenuItem });
             zamestnanciToolStripMenuItem.Name = "zamestnanciToolStripMenuItem";
-            zamestnanciToolStripMenuItem.Size = new Size(180, 22);
+            zamestnanciToolStripMenuItem.Size = new Size(142, 22);
             zamestnanciToolStripMenuItem.Text = "Zaměstnanci";
             zamestnanciToolStripMenuItem.Click += zamestnanciToolStripMenuItem_Click;
             // 
             // zobrazitToolStripMenuItem
             // 
             zobrazitToolStripMenuItem.Name = "zobrazitToolStripMenuItem";
-            zobrazitToolStripMenuItem.Size = new Size(180, 22);
+            zobrazitToolStripMenuItem.Size = new Size(126, 22);
             zobrazitToolStripMenuItem.Text = "Zobrazit";
             zobrazitToolStripMenuItem.Click += zobrazitToolStripMenuItem_Click;
             // 
             // spravovatToolStripMenuItem
             // 
             spravovatToolStripMenuItem.Name = "spravovatToolStripMenuItem";
-            spravovatToolStripMenuItem.Size = new Size(180, 22);
+            spravovatToolStripMenuItem.Size = new Size(126, 22);
             spravovatToolStripMenuItem.Text = "Spravovat";
             spravovatToolStripMenuItem.Click += spravovatToolStripMenuItem_Click;
             // 

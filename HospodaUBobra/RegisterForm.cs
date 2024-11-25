@@ -39,6 +39,8 @@ namespace HospodaUBobra
         private void btnRegister_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string telefon = txtTelefon.Text.Trim();
             string password = txtPassword.Text.Trim();
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
@@ -47,13 +49,13 @@ namespace HospodaUBobra
                 return;
             }
 
-            if (UsernameExists(username))
+            if (UsernameExists(email))
             {
-                MessageBox.Show("Uživatelské jméno již existuje, vyberte si jiné.");
+                MessageBox.Show("Uživatel s tímto emailem již existuje.");
                 return;
             }
 
-            if (RegisterUser(username, password, UserRole.User.ToString()))
+            if (RegisterUser(username, email, telefon, password, UserRole.User.ToString()))
             {
                 MessageBox.Show("Registrace úspěšná!");
                 DialogResult = DialogResult.OK;
@@ -65,18 +67,18 @@ namespace HospodaUBobra
             }
         }
 
-        private bool UsernameExists(string username)
+        private bool UsernameExists(string email)
         {
             try
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "SELECT COUNT(*) FROM Users WHERE username = :username";
+                    string query = "SELECT COUNT(*) FROM UZIVATELE WHERE email = :email";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
-                        cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
+                        cmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = email;
 
                         int userCount = Convert.ToInt32(cmd.ExecuteScalar());
 
@@ -96,87 +98,79 @@ namespace HospodaUBobra
             }
         }
 
-        private bool RegisterUser(string username, string password, string role)
+        private bool RegisterUser(string username, string email, string telefon, string password, string role)
         {
             string salt = PasswordHelper.GenerateSalt();
             string hashedPassword = PasswordHelper.HashPassword(password, salt);
 
-            using (OracleConnection conn = new OracleConnection(connectionString))
+            try
             {
-                conn.Open();
-                OracleTransaction transaction = conn.BeginTransaction();
-
-                try
+                using (OracleConnection conn = new OracleConnection(connectionString))
                 {
-                    string checkQuery = "SELECT COUNT(*) FROM Users WHERE username = :username";
-                    using (OracleCommand checkCmd = new OracleCommand(checkQuery, conn))
-                    {
-                        checkCmd.Transaction = transaction;
-                        checkCmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
-                        int userCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    conn.Open();
 
-                        if (userCount > 0)
-                        {
-                            MessageBox.Show("Uživatelské jméno již existuje, vyberte si jiné.");
-                            transaction.Rollback();
-                            return false;
-                        }
-                    }
-
-                    string insertQuery = "INSERT INTO Users (username, password, salt, role) VALUES (:username, :password, :salt, :role)";
-                    using (OracleCommand cmd = new OracleCommand(insertQuery, conn))
+                    using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
                     {
-                        cmd.Transaction = transaction;
-                        cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
-                        cmd.Parameters.Add(new OracleParameter("password", OracleDbType.Varchar2)).Value = hashedPassword;
-                        cmd.Parameters.Add(new OracleParameter("salt", OracleDbType.Varchar2)).Value = salt;
-                        cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
+                        cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = GetNextUserId();
+                        cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username;
+                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
+                        cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon;
+                        cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = DateTime.Now;
+                        cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
+                        cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
+                        cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = 3;
+                        cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = DBNull.Value;
 
                         cmd.ExecuteNonQuery();
+
+                        return true;
                     }
-
-                    transaction.Commit();
-
-                    LogUserAction("REGISTRACE", "Uživatel se registroval úspěšně.", username, role);
-
-                    return true;
-                }
-                catch (OracleException ex)
-                {
-                    transaction.Rollback();
-                    MessageBox.Show("Oracle chyba: " + ex.Message);
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    MessageBox.Show("Obecná chyba: " + ex.Message);
-                    return false;
                 }
             }
-        }
-
-
-
-        private void LogUserAction(string actionType, string actionDesc, string userId, string role)
-        {
-            using (OracleConnection conn = new OracleConnection(connectionString))
+            catch (OracleException ex)
             {
-                conn.Open();
-                string query = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, :actionDate, :userId, :role)";
-
-                using (OracleCommand cmd = new OracleCommand(query, conn))
-                {
-                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
-                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
-                    cmd.Parameters.Add(new OracleParameter("actionDate", OracleDbType.Date)).Value = DateTime.Now;
-                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Varchar2)).Value = userId; // assuming userId corresponds to username
-                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
-
-                    cmd.ExecuteNonQuery();
-                }
+                MessageBox.Show("Oracle chyba: " + ex.Message);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Obecná chyba: " + ex.Message);
+                return false;
             }
         }
+
+        private int GetNextUserId()
+        {
+            int nextId = 0;
+
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT NVL(MAX(ID_UZIVATELE), 0) + 1 FROM UZIVATELE";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            nextId = Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Chyba při získávání ID uživatele: " + ex.Message);
+            }
+
+            return nextId;
+        }
+    
 
         private void btnBack_Click(object sender, EventArgs e)
         {

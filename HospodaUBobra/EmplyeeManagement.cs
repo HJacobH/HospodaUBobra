@@ -67,8 +67,6 @@ namespace HospodaUBobra
 
                     cmd.ExecuteNonQuery();
 
-                    LogUserAction("Odstranění zaměstnance", $"Zaměstnanec s ID {selectedZamestnanecId} odstraněn úspěšně.");
-
                     MessageBox.Show("Zaměstnanec odstraněn úspěšně!");
                     LoadEmployees();
                 }
@@ -125,8 +123,7 @@ namespace HospodaUBobra
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        LogUserAction("Aktualizace zaměstnance", $"Zaměstnanec '{firstName} {lastName}' aktualizován úspěšně.");
-
+                        
                         MessageBox.Show("Zaměstnanec aktualizován úspěšně!");
                         LoadEmployees();
                     }
@@ -171,8 +168,7 @@ namespace HospodaUBobra
                     cmd.Parameters.Add("favBeer", OracleDbType.Varchar2).Value = favBeer;
 
                     cmd.ExecuteNonQuery();
-                    LogUserAction("Přidání zaměstnance", $"Zaměstnanec '{firstName} {lastName}' přidán úspěšně.");
-
+                    
                     MessageBox.Show("Zaměstnanec úspěšně přidán!");
                     LoadEmployees();
                 }
@@ -193,28 +189,5 @@ namespace HospodaUBobra
                 txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value.ToString();
             }
         }
-
-        private void LogUserAction(string actionType, string actionDesc)
-        {
-            using (OracleConnection conn = new OracleConnection(connectionString))
-            {
-                conn.Open();
-
-                string insertLogQuery = @"
-            INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) 
-            VALUES (:actionType, :actionDesc, SYSDATE, :userId, :role)";
-
-                using (OracleCommand cmd = new OracleCommand(insertLogQuery, conn))
-                {
-                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
-                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
-                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Varchar2)).Value = UserSession.Username;
-                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = UserSession.Role;
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
     }
 }

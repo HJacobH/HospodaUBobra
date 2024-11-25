@@ -35,7 +35,7 @@ namespace HospodaUBobra
             ApplyRolePermissions();
             PopulateTableList();
             btnLogout.Enabled = false;
-            currentUserLabel.Text = UserSession.Username;
+            currentUserLabel.Text = "Anonymous";
         }
 
 
@@ -192,8 +192,6 @@ namespace HospodaUBobra
             PopulateTableList();
         }
 
-
-
         private void btnShowKlientObj_Click(object sender, EventArgs e)
         {
             try
@@ -238,13 +236,13 @@ namespace HospodaUBobra
             LoginForm loginForm = new LoginForm();
             loginForm.ShowDialog();
 
-            if (UserSession.Username != "Anonymous" && UserSession.Role != "Anonymous")
+            if ( UserSession.Role != "Anonymous")
             {
                 MessageBox.Show("Přihlášení úspěšné!");
                 btnLogout.Enabled = true;
-                currentUserLabel.Text = UserSession.Username;
-                UpdateProfilePictureAsync(UserSession.Username);
                 ApplyRolePermissions();
+                currentUserLabel.Text = GetUserUsername(UserSession.UserID);
+                UpdateProfilePictureAsync(UserSession.UserID);
             }
             else
             {
@@ -252,22 +250,48 @@ namespace HospodaUBobra
             }
         }
 
-        private async Task UpdateProfilePictureAsync(string username)
+        private string GetUserUsername(int userId)
         {
-            Image cachedImage = UserSession.GetCachedProfilePicture(username);
-            if (cachedImage != null)
+            string username = null; 
+
+            using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                profilePictureBox.Image = cachedImage;
-                return;
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT uzivatelske_jmeno FROM UZIVATELE WHERE ID_UZIVATELE = :userId";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
+
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            username = result.ToString(); 
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
-            SetLoadingMessage();
+            return username;
+        }
 
-            Image profilePicture = await Task.Run(() => GetUserProfilePicture(username));
+
+        private void UpdateProfilePictureAsync(int id)
+        {
+            Image profilePicture =  GetUserProfilePicture(UserSession.UserID);
 
             if (profilePicture != null)
             {
-                UserSession.CacheProfilePicture(username, profilePicture);
                 profilePictureBox.Image = profilePicture;
                 profilePictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
             }
@@ -278,16 +302,16 @@ namespace HospodaUBobra
 
         }
 
-        public Image GetUserProfilePicture(string username)
+        public Image GetUserProfilePicture(int id)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT PROFILE_PICTURE FROM USERS WHERE USERNAME = :username";
+                string query = "SELECT PROFILE_PICTURE FROM UZIVATELE WHERE id_uzivatele = :id";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
-                    cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
+                    cmd.Parameters.Add(new OracleParameter("id_uzivatele", OracleDbType.Varchar2)).Value = id;
 
                     using (OracleDataReader reader = cmd.ExecuteReader())
                     {
@@ -394,30 +418,71 @@ namespace HospodaUBobra
             g.Dispose();
         }
 
-        public void UpdateUserProfilePicture(string username, Image profilePicture)
+        public void UpdateUserProfilePicture(string userEmail, Image profilePicture)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "UPDATE USERS SET PROFILE_PICTURE = :profilePicture WHERE USERNAME = :username";
 
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                // Fetch the current user details to pass them to the procedure
+                string fetchQuery = @"
+            SELECT ID_UZIVATELE, UZIVATELSKE_JMENO, EMAIL, TELEFON, DATUM_REGISTRACE, PASSWORD, SALT, ROLE_ID
+            FROM UZIVATELE
+            WHERE email = :userEmail";
+
+                using (OracleCommand fetchCmd = new OracleCommand(fetchQuery, conn))
                 {
-                    using (MemoryStream ms = new MemoryStream())
+                    fetchCmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = userEmail;
+
+                    using (OracleDataReader reader = fetchCmd.ExecuteReader())
                     {
-                        profilePicture.Save(ms, profilePicture.RawFormat);
-                        byte[] imageBytes = ms.ToArray();
+                        if (reader.Read())
+                        {
+                            // Retrieve existing user data
+                            int userId = reader.GetInt32(0);
+                            string userName = reader.GetString(1);
+                            string email = reader.GetString(2);
+                            string phone = reader.GetString(3);
+                            DateTime? registrationDate = reader.IsDBNull(4) ? null : reader.GetDateTime(4);
+                            string password = reader.GetString(5);
+                            string salt = reader.GetString(6);
+                            int roleId = reader.GetInt32(7);
 
-                        OracleParameter blobParameter = new OracleParameter("profilePicture", OracleDbType.Blob);
-                        blobParameter.Value = imageBytes;
-                        cmd.Parameters.Add(blobParameter);
+                            // Convert profile picture to byte array
+                            byte[] profilePictureBytes = null;
+                            if (profilePicture != null)
+                            {
+                                using (MemoryStream ms = new MemoryStream())
+                                {
+                                    profilePicture.Save(ms, profilePicture.RawFormat);
+                                    profilePictureBytes = ms.ToArray();
+                                }
+                            }
+
+                            // Call the sprava_uzivatele procedure to update the profile picture
+                            using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = userId; // Update existing user
+                                cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+                                cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = userName;
+                                cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
+                                cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = phone;
+                                cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
+                                cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = password;
+                                cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
+                                cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
+                                cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = profilePictureBytes;
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("User not found.");
+                        }
                     }
-
-                    OracleParameter usernameParameter = new OracleParameter("username", OracleDbType.Varchar2);
-                    usernameParameter.Value = username;
-                    cmd.Parameters.Add(usernameParameter);
-
-                    cmd.ExecuteNonQuery();
                 }
             }
         }
@@ -438,7 +503,7 @@ namespace HospodaUBobra
                         Image profileImage = Image.FromFile(filePath);
                         profilePictureBox.Image = profileImage;
 
-                        UpdateUserProfilePicture(UserSession.Username, profileImage);
+                        //UpdateUserProfilePicture(UserSession.Username, profileImage);
 
                         MessageBox.Show("Profile picture uploaded successfully.");
                     }

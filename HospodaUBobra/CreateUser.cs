@@ -47,10 +47,12 @@ namespace HospodaUBobra
         private void btnCreate_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string telefon = txtTelefon.Text.Trim();
             string password = txtPassword.Text;
             string role = comboBoxRole.SelectedItem?.ToString();
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(role))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(telefon) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(role))
             {
                 MessageBox.Show("Vyplňte všechna pole.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -59,58 +61,85 @@ namespace HospodaUBobra
             string salt = PasswordHelper.GenerateSalt();
             string hashedPassword = PasswordHelper.HashPassword(password, salt);
 
+            int roleId = GetRoleId(role); 
+
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
 
-                using (OracleCommand cmd = new OracleCommand("InsertUser", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_username", OracleDbType.Varchar2).Value = username;
+                    // Parameters for the sprava_uzivatele procedure
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
+                    cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = GetNextUserId(); 
+                    cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username;
+                    cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value =email; 
+                    cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon;
+                    cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = DateTime.Now; 
                     cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
                     cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
-                    cmd.Parameters.Add("p_role_name", OracleDbType.Varchar2).Value = role;
+                    cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
+                    cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = DBNull.Value; 
 
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        LogUserAction("Vytvoření uživatele", $"Uživatel '{username}' s rolí {role} vytvořen.", username, role);
-
 
                         MessageBox.Show("Uživatel úspěšně přidán!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Close();
                     }
                     catch (OracleException ex)
                     {
-                        LogUserAction("Selhané vytvoření uživatele", $"Nepodařilo se vytvořit uživatele '{username}': {ex.Message}", username, role);
-
                         MessageBox.Show("Chyba při vytváření uživatele: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
         }
 
-        private void LogUserAction(string actionType, string actionDesc, string username, string role = "Admin")
+        private int GetNextUserId()
         {
-            using (OracleConnection conn = new OracleConnection(connectionString))
+            int nextId = 0;
+
+            try
             {
-                conn.Open();
-
-                string insertLogQuery = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, :actionDate, :userId, :role)";
-                using (OracleCommand cmd = new OracleCommand(insertLogQuery, conn))
+                using (OracleConnection conn = new OracleConnection(connectionString))
                 {
-                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
-                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
-                    cmd.Parameters.Add(new OracleParameter("actionDate", OracleDbType.Date)).Value = DateTime.Now;
-                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Varchar2)).Value = username;
-                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
+                    conn.Open();
+                    string query = "SELECT NVL(MAX(ID_UZIVATELE), 0) + 1 FROM UZIVATELE";
 
-                    cmd.ExecuteNonQuery();
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            nextId = Convert.ToInt32(result);
+                        }
+                    }
                 }
             }
-        }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Chyba při získávání ID uživatele: " + ex.Message);
+            }
 
+            return nextId;
+        }
+        private int GetRoleId(string roleName)
+        {
+            switch (roleName.ToLower())
+            {
+                case "admin":
+                    return 1;
+                case "klient":
+                    return 2;
+                case "user":
+                    return 3;
+                default:
+                    throw new ArgumentException("Neplatná role: " + roleName);
+            }
+        }
 
         private void btnBack_Click(object sender, EventArgs e)
         {

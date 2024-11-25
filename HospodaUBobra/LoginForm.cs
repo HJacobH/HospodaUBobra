@@ -48,16 +48,35 @@ namespace HospodaUBobra
 
             if (ValidateLogin(username, password, out string roleName))
             {
-                UserSession.Username = username;
+                // Fetch the user ID based on the email (username)
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT ID_UZIVATELE FROM UZIVATELE WHERE EMAIL = :email";
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = username;
+
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            UserSession.UserID = Convert.ToInt32(result); // Assign the user ID to the session
+                        }
+                        else
+                        {
+                            MessageBox.Show("Uživatelský účet nebyl nalezen.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+                }
+
                 UserSession.Role = roleName;
 
-                LogUserAction("Přihlášení", "Úspěšné přihlášení", username, roleName);
 
                 this.Close();
             }
             else
             {
-                LogUserAction("Přihlášení", "Neúspěšné přihlášení", username, roleName);
                 MessageBox.Show("Neplatné údaje.");
             }
         }
@@ -75,9 +94,9 @@ namespace HospodaUBobra
 
                     string query = @"
                         SELECT u.PASSWORD, u.SALT, r.ROLE_NAME
-                        FROM Users u
+                        FROM uzivatele u
                         JOIN Role r ON u.ROLE_ID = r.ROLE_ID
-                        WHERE u.USERNAME = :username";
+                        WHERE u.email = :username";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -123,29 +142,6 @@ namespace HospodaUBobra
             }
 
             return false; 
-        }
-
-
-        private void LogUserAction(string actionType, string actionDesc, string username, string role)
-        {
-            using (OracleConnection conn = new OracleConnection(connectionString))
-            {
-                conn.Open();
-
-                string insertLogQuery = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, :actionDate, :userId, :role)";
-                using (OracleCommand cmd = new OracleCommand(insertLogQuery, conn))
-                {
-                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
-                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
-                    cmd.Parameters.Add(new OracleParameter("actionDate", OracleDbType.Date)).Value = DateTime.Now;
-                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Varchar2)).Value = username;
-                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = role;
-
-                    cmd.ExecuteNonQuery();
-                }
-
-                conn.Close();
-            }
         }
 
         private string HashPassword(string password, string salt)

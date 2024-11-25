@@ -1,4 +1,5 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Microsoft.VisualBasic.ApplicationServices;
+using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,6 +25,7 @@ namespace HospodaUBobra
             LoadBeers();
             LoadBreweries();
             LoadUsers();
+            PopulateRatings();
 
             dataGridViewReviews.ReadOnly = true;
 
@@ -34,11 +36,21 @@ namespace HospodaUBobra
                 btnDeleteReview.Enabled = false;
             }
 
-            pocetRecenziLabel.Text = $"Počet recenzí uživatele  je {GetReviewCountByUsername("")}.";
+            pocetRecenziLabel.Text = $"Počet recenzí uživatele  je {GetReviewCountByEmail(0)}.";
 
             txtReviewDetails.WordWrap = true;
             txtReviewDetails.ReadOnly = true;
             LoadReviews();
+        }
+
+        private void PopulateRatings()
+        {
+            cbHodnoceni.Items.Clear();
+            for (int i = 1; i <= 5; i++)
+            {
+                cbHodnoceni.Items.Add(i);
+            }
+            cbHodnoceni.SelectedIndex = 0;
         }
 
         private void LoadUsers()
@@ -46,7 +58,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT USERNAME FROM USERS";
+                string query = "SELECT id_uzivatele, email FROM UZIVATELE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -56,8 +68,8 @@ namespace HospodaUBobra
                         adapter.Fill(dt);
 
                         comboBoxUsers.DataSource = dt;
-                        comboBoxUsers.DisplayMember = "USERNAME";
-                        comboBoxUsers.ValueMember = "USERNAME";
+                        comboBoxUsers.DisplayMember = "EMAIL";
+                        comboBoxUsers.ValueMember = "ID_UZIVATELE";
 
                         comboBoxUsers.SelectedIndex = -1;
                     }
@@ -113,7 +125,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_recenze, titulek, text_recenze, pivovar_id_pivovaru, pivo_id_piva, pocet_hvezdicek, user_id FROM RECENZE";
+                string query = "SELECT id_recenze, titulek, text_recenze, pivovar_id_pivovaru, pivo_id_piva, pocet_hvezdicek, id_uzivatele FROM RECENZE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -123,7 +135,7 @@ namespace HospodaUBobra
                         adapter.Fill(dt);
                         dataGridViewReviews.DataSource = dt;
 
-                        dataGridViewReviews.Columns["user_id"].Visible = false;
+                        dataGridViewReviews.Columns["id_uzivatele"].Visible = false;
                     }
                 }
             }
@@ -142,6 +154,15 @@ namespace HospodaUBobra
             string reviewText = txtReviewText.Text.Trim();
             int breweryId = Convert.ToInt32(comboBoxBreweries.SelectedValue);
             int beerId = Convert.ToInt32(comboBoxBeers.SelectedValue);
+            int userId = UserSession.UserID;
+
+            if (cbHodnoceni.SelectedItem == null)
+            {
+                MessageBox.Show("Vyberte hodnocení od 1 do 5.");
+                return;
+            }
+
+            int rating = Convert.ToInt32(cbHodnoceni.SelectedItem);
 
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(reviewText))
             {
@@ -152,19 +173,22 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string insertQuery = "INSERT INTO RECENZE (TITULEK, text_recenze, pivovar_id_pivovaru, pivo_id_piva) VALUES (:title, :text, :breweryId, :beerId)";
-                using (OracleCommand cmd = new OracleCommand(insertQuery, conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
                 {
-                    cmd.Parameters.Add(new OracleParameter("TITULEK", title));
-                    cmd.Parameters.Add(new OracleParameter("text_recenze", reviewText));
-                    cmd.Parameters.Add(new OracleParameter("pivovar_id_pivovaru", breweryId));
-                    cmd.Parameters.Add(new OracleParameter("pivo_id_piva", beerId));
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
+                    cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Value = DBNull.Value;
+                    cmd.Parameters.Add("p_titulek", OracleDbType.Varchar2).Value = title;
+                    cmd.Parameters.Add("p_text_recenze", OracleDbType.Clob).Value = reviewText;
+                    cmd.Parameters.Add("p_pivovar_id_pivovaru", OracleDbType.Int32).Value = breweryId;
+                    cmd.Parameters.Add("p_pivo_id_piva", OracleDbType.Int32).Value = beerId;
+                    cmd.Parameters.Add("p_pocet_hvezdicek", OracleDbType.Int32).Value = rating;
+                    cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
 
                     cmd.ExecuteNonQuery();
                 }
             }
-
-            LogUserAction("Přidat recenzi", $"Přidaná recenze: {title} od {UserSession.Username} pro pivovar s ID {breweryId} a pivo s ID {beerId}");
 
             LoadReviews();
 
@@ -173,7 +197,7 @@ namespace HospodaUBobra
 
         private void btnUpdateReview_Click(object sender, EventArgs e)
         {
-            if (UserSession.Role == "Anonymous" || selectedReviewUser != UserSession.Username)
+            if (UserSession.Role == "Anonymous")
             {
                 MessageBox.Show("Můžete aktualizovat pouze své recenze.");
                 return;
@@ -181,17 +205,38 @@ namespace HospodaUBobra
 
             if (selectedReviewId <= 0) return;
 
+            int userId = UserSession.UserID;
+
+            // Check if the logged-in user is the owner of the review
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT ID_UZIVATELE FROM RECENZE WHERE ID_RECENZE = :id_recenze";
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add("id_recenze", OracleDbType.Int32).Value = selectedReviewId;
+
+                    object result = cmd.ExecuteScalar();
+                    if (result == null || Convert.ToInt32(result) != userId)
+                    {
+                        MessageBox.Show("Nemáte oprávnění upravit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+            }
+
             string title = txtTitle.Text.Trim();
             string reviewText = txtReviewText.Text.Trim();
+            int breweryId = Convert.ToInt32(comboBoxBreweries.SelectedValue);
+            int beerId = Convert.ToInt32(comboBoxBeers.SelectedValue);
 
-            if (comboBoxBreweries.SelectedValue == null || comboBoxBeers.SelectedValue == null)
+            if (cbHodnoceni.SelectedItem == null)
             {
-                MessageBox.Show("Vyberte pivovar a pivo.");
+                MessageBox.Show("Vyberte hodnocení od 1 do 5.");
                 return;
             }
 
-            int breweryId = Convert.ToInt32(comboBoxBreweries.SelectedValue);
-            int beerId = Convert.ToInt32(comboBoxBeers.SelectedValue);
+            int rating = Convert.ToInt32(cbHodnoceni.SelectedItem);
 
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(reviewText))
             {
@@ -199,43 +244,34 @@ namespace HospodaUBobra
                 return;
             }
 
-            try
+            using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                using (OracleConnection conn = new OracleConnection(connectionString))
+                conn.Open();
+                using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
                 {
-                    conn.Open();
-                    string updateQuery = "UPDATE Recenze SET Titulek = :title, text_recenze = :text, pivovar_id_pivovaru = :breweryId, pivo_id_piva = :beerId WHERE id_recenze = :reviewId";
-                    using (OracleCommand cmd = new OracleCommand(updateQuery, conn))
-                    {
-                        cmd.Parameters.Add(new OracleParameter("Titulek", title));
-                        cmd.Parameters.Add(new OracleParameter("text_recenze", reviewText));
-                        cmd.Parameters.Add(new OracleParameter("pivovar_id_pivovaru", breweryId));
-                        cmd.Parameters.Add(new OracleParameter("pivo_id_piva", beerId));
-                        cmd.Parameters.Add(new OracleParameter("id_recenze", selectedReviewId));
-                        cmd.ExecuteNonQuery();
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                    }
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Non-NULL for update
+                    cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Value = selectedReviewId;
+                    cmd.Parameters.Add("p_titulek", OracleDbType.Varchar2).Value = title;
+                    cmd.Parameters.Add("p_text_recenze", OracleDbType.Clob).Value = reviewText;
+                    cmd.Parameters.Add("p_pivovar_id_pivovaru", OracleDbType.Int32).Value = breweryId;
+                    cmd.Parameters.Add("p_pivo_id_piva", OracleDbType.Int32).Value = beerId;
+                    cmd.Parameters.Add("p_pocet_hvezdicek", OracleDbType.Int32).Value = rating;
+                    cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+
+                    cmd.ExecuteNonQuery();
                 }
-
-                LogUserAction("Aktualizování recenze", $"Aktualizace recenze s ID: {selectedReviewId} od {UserSession.Username}");
-
-                LoadReviews();
-
-                MessageBox.Show("Review updated succesfully!");
             }
-            catch (OracleException ex)
-            {
-                MessageBox.Show("Oracle error: " + ex.Message);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("General error: " + ex.Message);
-            }
+
+            LoadReviews();
+
+            MessageBox.Show("Recenze byla úspěšně aktualizována!");
         }
 
         private void btnDeleteReview_Click(object sender, EventArgs e)
         {
-            if (UserSession.Role == "Anonymous" || selectedReviewUser != UserSession.Username)
+            if (UserSession.Role == "Anonymous")
             {
                 MessageBox.Show("Můžete odstranit pouze Vaše recenze.");
                 return;
@@ -261,8 +297,6 @@ namespace HospodaUBobra
 
                         if (rowsAffected > 0)
                         {
-                            LogUserAction("Recenze odstraněna", $"ID odstraněné recenze: {selectedReviewId} od {UserSession.Username}");
-
                             LoadReviews();
 
                             MessageBox.Show("Recenze odstraněna úspěšně!");
@@ -289,36 +323,12 @@ namespace HospodaUBobra
                 txtReviewText.Text = dataGridViewReviews.CurrentRow.Cells["text_recenze"].Value.ToString();
                 comboBoxBreweries.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivovar_id_pivovaru"].Value;
                 comboBoxBeers.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivo_id_piva"].Value;
+                cbHodnoceni.SelectedItem = Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value);
 
-                if (UserSession.Role != "Anonymous")
+                /*if (UserSession.Role != "Anonymous")
                 {
-                    selectedReviewUser = dataGridViewReviews.CurrentRow.Cells["USER_ID"].Value.ToString();
-                }
-            }
-        }
-
-        private void LogUserAction(string actionType, string actionDesc)
-        {
-            try
-            {
-                using (OracleConnection conn = new OracleConnection(connectionString))
-                {
-                    conn.Open();
-                    string insertLogQuery = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, SYSDATE, :userId, :role)";
-                    using (OracleCommand cmd = new OracleCommand(insertLogQuery, conn))
-                    {
-                        cmd.Parameters.Add(new OracleParameter("actionType", actionType));
-                        cmd.Parameters.Add(new OracleParameter("actionDesc", actionDesc));
-                        cmd.Parameters.Add(new OracleParameter("userId", UserSession.Username));
-                        cmd.Parameters.Add(new OracleParameter("role", UserSession.Role.ToString()));
-
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error logging action: " + ex.Message);
+                    selectedReviewUser = dataGridViewReviews.CurrentRow.Cells["id_uzivatele"].Value.ToString();
+                }*/
             }
         }
 
@@ -376,18 +386,18 @@ namespace HospodaUBobra
             }
         }
 
-        public int GetReviewCountByUsername(string username)
+        public int GetReviewCountByEmail(int id)
         {
             int reviewCount = 0;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT GetReviewCountByUsername(:username) FROM DUAL";
+                string query = "SELECT GetReviewCountByUsername(:id) FROM DUAL";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
-                    cmd.Parameters.Add(new OracleParameter("username", username));
+                    cmd.Parameters.Add(new OracleParameter("id", id));
 
                     object result = cmd.ExecuteScalar();
                     if (result != null && result != DBNull.Value)
@@ -400,7 +410,7 @@ namespace HospodaUBobra
             return reviewCount;
         }
 
-        public void DisplayUserReviews(string username)
+        public void DisplayUserReviews(int id)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -409,27 +419,32 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_username", OracleDbType.Varchar2).Value = username;
+                    // Pass the user ID to the procedure
+                    cmd.Parameters.Add("p_user_id", OracleDbType.Int32).Value = id;
 
+                    // Define the output parameter as a REF CURSOR
                     cmd.Parameters.Add("p_reviews", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
 
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+
+                        // Populate the DataGridView with the user's reviews
                         dataGridViewReviews.DataSource = dt;
                     }
                 }
             }
         }
 
+
         private void comboBoxUsers_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBoxUsers.SelectedValue != null)
+            if (comboBoxUsers.SelectedValue != null && int.TryParse(comboBoxUsers.SelectedValue.ToString(), out int userId))
             {
-                string selectedUsername = comboBoxUsers.SelectedValue.ToString();
-                DisplayUserReviews(selectedUsername);
-                pocetRecenziLabel.Text = $"Počet recenzí uživatele {selectedUsername} je {GetReviewCountByUsername(selectedUsername)}.";
+                DisplayUserReviews(userId);
+
+                pocetRecenziLabel.Text = $"Počet recenzí uživatele  je {GetReviewCountByEmail(userId)}.";
             }
         }
 

@@ -122,9 +122,7 @@ namespace HospodaUBobra
                     {
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Beer added successfully!");
-
-                        LogUserAction("Add Beer", $"Added beer: {nazev}, Alcohol Content: {obsahAlkoholu}, Volume: {objem}, Price: {cena}, Stock: {pocetKsSkladem}");
-
+                                               
                         this.Close();
                     }
                     catch (OracleException ex)
@@ -139,24 +137,6 @@ namespace HospodaUBobra
             }
         }
 
-        private void LogUserAction(string actionType, string actionDesc)
-        {
-            using (OracleConnection conn = new OracleConnection(connectionString))
-            {
-                conn.Open();
-                string logQuery = "INSERT INTO User_logs (ACTION_TYPE, ACTION_DESC, ACTION_DATE, USER_ID, ROLE) VALUES (:actionType, :actionDesc, SYSDATE, :username, :role)";
-
-                using (OracleCommand cmd = new OracleCommand(logQuery, conn))
-                {
-                    cmd.Parameters.Add(new OracleParameter("actionType", OracleDbType.Varchar2)).Value = actionType;
-                    cmd.Parameters.Add(new OracleParameter("actionDesc", OracleDbType.Varchar2)).Value = actionDesc;
-                    cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = UserSession.Username;
-                    cmd.Parameters.Add(new OracleParameter("role", OracleDbType.Varchar2)).Value = UserSession.Role.ToString();
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
 
         private void btnBack_Click(object sender, EventArgs e)
         {

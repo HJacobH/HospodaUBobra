@@ -35,6 +35,10 @@
             txtPassword = new TextBox();
             btnRegister = new Button();
             btnBack = new Button();
+            txtEmail = new TextBox();
+            txtTelefon = new TextBox();
+            label4 = new Label();
+            label5 = new Label();
             SuspendLayout();
             // 
             // label1
@@ -58,7 +62,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(12, 79);
+            label3.Location = new Point(12, 140);
             label3.Name = "label3";
             label3.Size = new Size(40, 15);
             label3.TabIndex = 2;
@@ -73,7 +77,7 @@
             // 
             // txtPassword
             // 
-            txtPassword.Location = new Point(123, 76);
+            txtPassword.Location = new Point(123, 137);
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '*';
             txtPassword.Size = new Size(100, 23);
@@ -81,7 +85,7 @@
             // 
             // btnRegister
             // 
-            btnRegister.Location = new Point(12, 114);
+            btnRegister.Location = new Point(12, 183);
             btnRegister.Name = "btnRegister";
             btnRegister.Size = new Size(105, 27);
             btnRegister.TabIndex = 5;
@@ -91,7 +95,7 @@
             // 
             // btnBack
             // 
-            btnBack.Location = new Point(132, 113);
+            btnBack.Location = new Point(129, 182);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(94, 28);
             btnBack.TabIndex = 6;
@@ -99,11 +103,47 @@
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
+            // txtEmail
+            // 
+            txtEmail.Location = new Point(123, 79);
+            txtEmail.Name = "txtEmail";
+            txtEmail.Size = new Size(100, 23);
+            txtEmail.TabIndex = 7;
+            // 
+            // txtTelefon
+            // 
+            txtTelefon.Location = new Point(123, 108);
+            txtTelefon.Name = "txtTelefon";
+            txtTelefon.Size = new Size(100, 23);
+            txtTelefon.TabIndex = 8;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(12, 111);
+            label4.Name = "label4";
+            label4.Size = new Size(48, 15);
+            label4.TabIndex = 9;
+            label4.Text = "Telefon:";
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(12, 82);
+            label5.Name = "label5";
+            label5.Size = new Size(39, 15);
+            label5.TabIndex = 10;
+            label5.Text = "Email:";
+            // 
             // RegisterForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(238, 148);
+            ClientSize = new Size(238, 226);
+            Controls.Add(label5);
+            Controls.Add(label4);
+            Controls.Add(txtTelefon);
+            Controls.Add(txtEmail);
             Controls.Add(btnBack);
             Controls.Add(btnRegister);
             Controls.Add(txtPassword);
@@ -126,5 +166,9 @@
         private TextBox txtPassword;
         private Button btnRegister;
         private Button btnBack;
+        private TextBox txtEmail;
+        private TextBox txtTelefon;
+        private Label label4;
+        private Label label5;
     }
 }
