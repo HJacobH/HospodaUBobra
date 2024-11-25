@@ -49,6 +49,7 @@
             spravovatToolStripMenuItem = new ToolStripMenuItem();
             objednavkyToolStripMenuItem = new ToolStripMenuItem();
             explicidCursorToolStripMenuItem = new ToolStripMenuItem();
+            SpravaCiselnikuToolStrip = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -59,45 +60,49 @@
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 24);
+            dataGridView1.Location = new Point(17, 40);
+            dataGridView1.Margin = new Padding(4, 5, 4, 5);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(817, 414);
+            dataGridView1.Size = new Size(1167, 690);
             dataGridView1.TabIndex = 0;
             // 
             // comboBoxTables
             // 
             comboBoxTables.FormattingEnabled = true;
-            comboBoxTables.Location = new Point(835, 110);
+            comboBoxTables.Location = new Point(1193, 183);
+            comboBoxTables.Margin = new Padding(4, 5, 4, 5);
             comboBoxTables.Name = "comboBoxTables";
-            comboBoxTables.Size = new Size(121, 23);
+            comboBoxTables.Size = new Size(171, 33);
             comboBoxTables.TabIndex = 1;
             // 
             // roleLabel
             // 
             roleLabel.AutoSize = true;
-            roleLabel.Location = new Point(864, 43);
+            roleLabel.Location = new Point(1234, 72);
+            roleLabel.Margin = new Padding(4, 0, 4, 0);
             roleLabel.Name = "roleLabel";
-            roleLabel.Size = new Size(0, 15);
+            roleLabel.Size = new Size(0, 25);
             roleLabel.TabIndex = 3;
             // 
             // currentUserLabel
             // 
             currentUserLabel.AutoSize = true;
-            currentUserLabel.Location = new Point(835, 92);
+            currentUserLabel.Location = new Point(1193, 153);
+            currentUserLabel.Margin = new Padding(4, 0, 4, 0);
             currentUserLabel.Name = "currentUserLabel";
-            currentUserLabel.Size = new Size(38, 15);
+            currentUserLabel.Size = new Size(59, 25);
             currentUserLabel.TabIndex = 5;
             currentUserLabel.Text = "label1";
             // 
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { uživatelToolStripMenuItem, recenzeToolStripMenuItem, pivaToolStripMenuItem, pivovaryToolStripMenuItem, objednavkyToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { uživatelToolStripMenuItem, recenzeToolStripMenuItem, pivaToolStripMenuItem, pivovaryToolStripMenuItem, objednavkyToolStripMenuItem, SpravaCiselnikuToolStrip });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Padding = new Padding(5, 2, 0, 2);
-            menuStrip1.Size = new Size(968, 24);
+            menuStrip1.Padding = new Padding(7, 3, 0, 3);
+            menuStrip1.Size = new Size(1383, 35);
             menuStrip1.TabIndex = 9;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -105,34 +110,34 @@
             // 
             uživatelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loginStipItem, registerStipItem, uploadPfpToolStripMenuItem, vytvoritUzivateleToolStripMenuItem });
             uživatelToolStripMenuItem.Name = "uživatelToolStripMenuItem";
-            uživatelToolStripMenuItem.Size = new Size(60, 20);
+            uživatelToolStripMenuItem.Size = new Size(89, 29);
             uživatelToolStripMenuItem.Text = "Uživatel";
             // 
             // loginStipItem
             // 
             loginStipItem.Name = "loginStipItem";
-            loginStipItem.Size = new Size(204, 22);
+            loginStipItem.Size = new Size(311, 34);
             loginStipItem.Text = "Přihlásit se";
             loginStipItem.Click += loginStipItem_Click;
             // 
             // registerStipItem
             // 
             registerStipItem.Name = "registerStipItem";
-            registerStipItem.Size = new Size(204, 22);
+            registerStipItem.Size = new Size(311, 34);
             registerStipItem.Text = "Registrace";
             registerStipItem.Click += registerStipItem_Click;
             // 
             // uploadPfpToolStripMenuItem
             // 
             uploadPfpToolStripMenuItem.Name = "uploadPfpToolStripMenuItem";
-            uploadPfpToolStripMenuItem.Size = new Size(204, 22);
+            uploadPfpToolStripMenuItem.Size = new Size(311, 34);
             uploadPfpToolStripMenuItem.Text = "Nahrát profilový obrázek";
             uploadPfpToolStripMenuItem.Click += uploadPfpToolStripMenuItem_Click;
             // 
             // vytvoritUzivateleToolStripMenuItem
             // 
             vytvoritUzivateleToolStripMenuItem.Name = "vytvoritUzivateleToolStripMenuItem";
-            vytvoritUzivateleToolStripMenuItem.Size = new Size(204, 22);
+            vytvoritUzivateleToolStripMenuItem.Size = new Size(311, 34);
             vytvoritUzivateleToolStripMenuItem.Text = "Vytvořit uživatele";
             vytvoritUzivateleToolStripMenuItem.Click += vytvoritUzivateleToolStripMenuItem_Click;
             // 
@@ -140,13 +145,13 @@
             // 
             recenzeToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { správaRecenzíToolStripMenuItem });
             recenzeToolStripMenuItem.Name = "recenzeToolStripMenuItem";
-            recenzeToolStripMenuItem.Size = new Size(62, 20);
+            recenzeToolStripMenuItem.Size = new Size(91, 29);
             recenzeToolStripMenuItem.Text = "Recenze";
             // 
             // správaRecenzíToolStripMenuItem
             // 
             správaRecenzíToolStripMenuItem.Name = "správaRecenzíToolStripMenuItem";
-            správaRecenzíToolStripMenuItem.Size = new Size(149, 22);
+            správaRecenzíToolStripMenuItem.Size = new Size(227, 34);
             správaRecenzíToolStripMenuItem.Text = "Správa recenzí";
             správaRecenzíToolStripMenuItem.Click += spravaRecenziToolStripMenuItem_Click;
             // 
@@ -154,13 +159,13 @@
             // 
             pivaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { pridatPivoToolStripMenuItem });
             pivaToolStripMenuItem.Name = "pivaToolStripMenuItem";
-            pivaToolStripMenuItem.Size = new Size(41, 20);
+            pivaToolStripMenuItem.Size = new Size(60, 29);
             pivaToolStripMenuItem.Text = "Piva";
             // 
             // pridatPivoToolStripMenuItem
             // 
             pridatPivoToolStripMenuItem.Name = "pridatPivoToolStripMenuItem";
-            pridatPivoToolStripMenuItem.Size = new Size(105, 22);
+            pridatPivoToolStripMenuItem.Size = new Size(160, 34);
             pridatPivoToolStripMenuItem.Text = "Přidat";
             pridatPivoToolStripMenuItem.Click += pridatPivoToolStripMenuItem_Click;
             // 
@@ -168,13 +173,13 @@
             // 
             pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem });
             pivovaryToolStripMenuItem.Name = "pivovaryToolStripMenuItem";
-            pivovaryToolStripMenuItem.Size = new Size(64, 20);
+            pivovaryToolStripMenuItem.Size = new Size(95, 29);
             pivovaryToolStripMenuItem.Text = "Pivovary";
             // 
             // lokaceToolStripMenuItem
             // 
             lokaceToolStripMenuItem.Name = "lokaceToolStripMenuItem";
-            lokaceToolStripMenuItem.Size = new Size(142, 22);
+            lokaceToolStripMenuItem.Size = new Size(213, 34);
             lokaceToolStripMenuItem.Text = "Lokace";
             lokaceToolStripMenuItem.Click += lokaceToolStripMenuItem_Click;
             // 
@@ -182,21 +187,21 @@
             // 
             zamestnanciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { zobrazitToolStripMenuItem, spravovatToolStripMenuItem });
             zamestnanciToolStripMenuItem.Name = "zamestnanciToolStripMenuItem";
-            zamestnanciToolStripMenuItem.Size = new Size(142, 22);
+            zamestnanciToolStripMenuItem.Size = new Size(213, 34);
             zamestnanciToolStripMenuItem.Text = "Zaměstnanci";
             zamestnanciToolStripMenuItem.Click += zamestnanciToolStripMenuItem_Click;
             // 
             // zobrazitToolStripMenuItem
             // 
             zobrazitToolStripMenuItem.Name = "zobrazitToolStripMenuItem";
-            zobrazitToolStripMenuItem.Size = new Size(126, 22);
+            zobrazitToolStripMenuItem.Size = new Size(194, 34);
             zobrazitToolStripMenuItem.Text = "Zobrazit";
             zobrazitToolStripMenuItem.Click += zobrazitToolStripMenuItem_Click;
             // 
             // spravovatToolStripMenuItem
             // 
             spravovatToolStripMenuItem.Name = "spravovatToolStripMenuItem";
-            spravovatToolStripMenuItem.Size = new Size(126, 22);
+            spravovatToolStripMenuItem.Size = new Size(194, 34);
             spravovatToolStripMenuItem.Text = "Spravovat";
             spravovatToolStripMenuItem.Click += spravovatToolStripMenuItem_Click;
             // 
@@ -204,21 +209,29 @@
             // 
             objednavkyToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { explicidCursorToolStripMenuItem });
             objednavkyToolStripMenuItem.Name = "objednavkyToolStripMenuItem";
-            objednavkyToolStripMenuItem.Size = new Size(82, 20);
-            objednavkyToolStripMenuItem.Text = "Objednavky";
+            objednavkyToolStripMenuItem.Size = new Size(123, 29);
+            objednavkyToolStripMenuItem.Text = "Objednávky";
             // 
             // explicidCursorToolStripMenuItem
             // 
             explicidCursorToolStripMenuItem.Name = "explicidCursorToolStripMenuItem";
-            explicidCursorToolStripMenuItem.Size = new Size(211, 22);
+            explicidCursorToolStripMenuItem.Size = new Size(316, 34);
             explicidCursorToolStripMenuItem.Text = "Klienti a jejich objednávky";
             explicidCursorToolStripMenuItem.Click += explicidCursorToolStripMenuItem_Click;
             // 
+            // SpravaCiselnikuToolStrip
+            // 
+            SpravaCiselnikuToolStrip.Name = "SpravaCiselnikuToolStrip";
+            SpravaCiselnikuToolStrip.Size = new Size(153, 29);
+            SpravaCiselnikuToolStrip.Text = "Správa číselníků";
+            SpravaCiselnikuToolStrip.Click += SpravaCiselnikuToolStrip_Click;
+            // 
             // btnLogout
             // 
-            btnLogout.Location = new Point(835, 401);
+            btnLogout.Location = new Point(1193, 668);
+            btnLogout.Margin = new Padding(4, 5, 4, 5);
             btnLogout.Name = "btnLogout";
-            btnLogout.Size = new Size(121, 37);
+            btnLogout.Size = new Size(173, 62);
             btnLogout.TabIndex = 10;
             btnLogout.Text = "Odhlásit se";
             btnLogout.UseVisualStyleBackColor = true;
@@ -226,17 +239,18 @@
             // 
             // profilePictureBox
             // 
-            profilePictureBox.Location = new Point(835, 27);
+            profilePictureBox.Location = new Point(1193, 45);
+            profilePictureBox.Margin = new Padding(4, 5, 4, 5);
             profilePictureBox.Name = "profilePictureBox";
-            profilePictureBox.Size = new Size(64, 62);
+            profilePictureBox.Size = new Size(91, 103);
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(968, 450);
+            ClientSize = new Size(1383, 750);
             Controls.Add(profilePictureBox);
             Controls.Add(btnLogout);
             Controls.Add(currentUserLabel);
@@ -244,8 +258,9 @@
             Controls.Add(comboBoxTables);
             Controls.Add(dataGridView1);
             Controls.Add(menuStrip1);
+            Margin = new Padding(4, 5, 4, 5);
             Name = "Form1";
-            Text = "Form1";
+            Text = "Hospoda U Bobra";
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
@@ -279,5 +294,6 @@
         private ToolStripMenuItem vytvoritUzivateleToolStripMenuItem;
         private ToolStripMenuItem zobrazitToolStripMenuItem;
         private ToolStripMenuItem spravovatToolStripMenuItem;
+        private ToolStripMenuItem SpravaCiselnikuToolStrip;
     }
 }

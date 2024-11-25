@@ -58,7 +58,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_uzivatele, email FROM UZIVATELE";
+                string query = "SELECT id_uzivatele, uzivatelske_jmeno FROM UZIVATELE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -68,7 +68,7 @@ namespace HospodaUBobra
                         adapter.Fill(dt);
 
                         comboBoxUsers.DataSource = dt;
-                        comboBoxUsers.DisplayMember = "EMAIL";
+                        comboBoxUsers.DisplayMember = "UZIVATELSKE_JMENO";
                         comboBoxUsers.ValueMember = "ID_UZIVATELE";
 
                         comboBoxUsers.SelectedIndex = -1;
@@ -136,6 +136,7 @@ namespace HospodaUBobra
                         dataGridViewReviews.DataSource = dt;
 
                         dataGridViewReviews.Columns["id_uzivatele"].Visible = false;
+                        dataGridViewReviews.Columns["id_recenze"].Visible = false;
                     }
                 }
             }

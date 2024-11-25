@@ -236,7 +236,7 @@ namespace HospodaUBobra
             LoginForm loginForm = new LoginForm();
             loginForm.ShowDialog();
 
-            if ( UserSession.Role != "Anonymous")
+            if (UserSession.Role != "Anonymous")
             {
                 MessageBox.Show("Přihlášení úspěšné!");
                 btnLogout.Enabled = true;
@@ -252,7 +252,7 @@ namespace HospodaUBobra
 
         private string GetUserUsername(int userId)
         {
-            string username = null; 
+            string username = null;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -268,7 +268,7 @@ namespace HospodaUBobra
                         object result = cmd.ExecuteScalar();
                         if (result != null && result != DBNull.Value)
                         {
-                            username = result.ToString(); 
+                            username = result.ToString();
                         }
                     }
                 }
@@ -288,7 +288,7 @@ namespace HospodaUBobra
 
         private void UpdateProfilePictureAsync(int id)
         {
-            Image profilePicture =  GetUserProfilePicture(UserSession.UserID);
+            Image profilePicture = GetUserProfilePicture(UserSession.UserID);
 
             if (profilePicture != null)
             {
@@ -560,6 +560,12 @@ namespace HospodaUBobra
         {
             EmplyeeManagement emplyeeManagement = new EmplyeeManagement(connectionString);
             emplyeeManagement.ShowDialog();
+        }
+
+        private void SpravaCiselnikuToolStrip_Click(object sender, EventArgs e)
+        {
+            CounterManagement counterManagement = new CounterManagement();
+            counterManagement.ShowDialog();
         }
     }
 }
