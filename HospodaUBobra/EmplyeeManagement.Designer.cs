@@ -47,6 +47,7 @@
             btnUpdate = new Button();
             btnDelete = new Button();
             btnBack = new Button();
+            cbPozice = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)dgvZamestnanci).BeginInit();
             SuspendLayout();
             // 
@@ -129,7 +130,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(12, 127);
+            label3.Location = new Point(12, 122);
             label3.Name = "label3";
             label3.Size = new Size(44, 15);
             label3.TabIndex = 10;
@@ -211,11 +212,20 @@
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
+            // cbPozice
+            // 
+            cbPozice.FormattingEnabled = true;
+            cbPozice.Location = new Point(217, 119);
+            cbPozice.Name = "cbPozice";
+            cbPozice.Size = new Size(121, 23);
+            cbPozice.TabIndex = 19;
+            // 
             // EmplyeeManagement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(606, 575);
+            Controls.Add(cbPozice);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
@@ -263,5 +273,6 @@
         private Button btnUpdate;
         private Button btnDelete;
         private Button btnBack;
+        private ComboBox cbPozice;
     }
 }

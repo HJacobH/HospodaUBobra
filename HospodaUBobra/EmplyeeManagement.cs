@@ -21,6 +21,7 @@ namespace HospodaUBobra
             InitializeComponent();
             this.connectionString = connectionString;
             LoadEmployees();
+            LoadPositions();
         }
 
         private void LoadEmployees()
@@ -37,6 +38,29 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
                         dgvZamestnanci.DataSource = dt;
+                    }
+                }
+            }
+        }
+
+        private void LoadPositions()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT ID_POZICE, NAZEV_POZICE FROM POZICE_PRACOVNIKA";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        cbPozice.DataSource = dt;
+                        cbPozice.DisplayMember = "NAZEV_POZICE";
+                        cbPozice.ValueMember = "ID_POZICE";
+                        cbPozice.SelectedIndex = -1; // Clear selection
                     }
                 }
             }
@@ -84,7 +108,6 @@ namespace HospodaUBobra
             string firstName = txtJmeno.Text;
             string lastName = txtPrijmeni.Text;
             DateTime dob = dateTimePickerNarozeni.Value;
-            string position = txtPozice.Text;
             decimal salary;
             if (!decimal.TryParse(txtVyplata.Text, out salary))
             {
@@ -93,38 +116,31 @@ namespace HospodaUBobra
             }
             DateTime startDate = dateTimePickerStartWorking.Value;
             string favBeer = txtFavBeer.Text;
+            int positionId = Convert.ToInt32(cbPozice.SelectedValue);
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
 
-                string query = @"
-            UPDATE ZAMESTNANCI 
-            SET JMENO = :firstName, 
-                PRIJMENI = :lastName, 
-                DATUM_NAROZENI = :dob, 
-                POZICE = :position, 
-                PLAT = :salary, 
-                DATUM_NASTUPU = :startDate, 
-                OBLIBENA_PIVA = :favBeer 
-            WHERE ID_ZAMESTNANCE = :employeeId";
-
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_zamestnanci", conn))
                 {
-                    cmd.Parameters.Add("firstName", OracleDbType.Varchar2).Value = firstName;
-                    cmd.Parameters.Add("lastName", OracleDbType.Varchar2).Value = lastName;
-                    cmd.Parameters.Add("dob", OracleDbType.Date).Value = dob;
-                    cmd.Parameters.Add("position", OracleDbType.Varchar2).Value = position;
-                    cmd.Parameters.Add("salary", OracleDbType.Decimal).Value = salary;
-                    cmd.Parameters.Add("startDate", OracleDbType.Date).Value = startDate;
-                    cmd.Parameters.Add("favBeer", OracleDbType.Varchar2).Value = favBeer;
-                    cmd.Parameters.Add("employeeId", OracleDbType.Int32).Value = selectedZamestnanecId;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Non-NULL for update
+                    cmd.Parameters.Add("p_id_zamestnance", OracleDbType.Int32).Value = selectedZamestnanecId;
+                    cmd.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = firstName;
+                    cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = lastName;
+                    cmd.Parameters.Add("p_datum_narozeni", OracleDbType.Date).Value = dob;
+                    cmd.Parameters.Add("p_pozice", OracleDbType.Int32).Value = positionId;
+                    cmd.Parameters.Add("p_plat", OracleDbType.Decimal).Value = salary;
+                    cmd.Parameters.Add("p_datum_nastupu", OracleDbType.Date).Value = startDate;
+                    cmd.Parameters.Add("p_oblibena_piva", OracleDbType.Clob).Value = favBeer;
 
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        
-                        MessageBox.Show("Zaměstnanec aktualizován úspěšně!");
+
+                        MessageBox.Show("Zaměstnanec úspěšně aktualizován!");
                         LoadEmployees();
                     }
                     catch (OracleException ex)
@@ -140,7 +156,6 @@ namespace HospodaUBobra
             string firstName = txtJmeno.Text;
             string lastName = txtPrijmeni.Text;
             DateTime dob = dateTimePickerNarozeni.Value;
-            string position = txtPozice.Text;
             decimal salary;
             if (!decimal.TryParse(txtVyplata.Text, out salary))
             {
@@ -149,31 +164,70 @@ namespace HospodaUBobra
             }
             DateTime startDate = dateTimePickerStartWorking.Value;
             string favBeer = txtFavBeer.Text;
+            int positionId = Convert.ToInt32(cbPozice.SelectedValue);
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
 
-                string query = "INSERT INTO ZAMESTNANCI (JMENO, PRIJMENI, DATUM_NAROZENI, POZICE, PLAT, DATUM_NASTUPU, OBLIBENA_PIVA) " +
-                               "VALUES (:firstName, :lastName, :dob, :position, :salary, :startDate, :favBeer)";
-
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_zamestnanci", conn))
                 {
-                    cmd.Parameters.Add("firstName", OracleDbType.Varchar2).Value = firstName;
-                    cmd.Parameters.Add("lastName", OracleDbType.Varchar2).Value = lastName;
-                    cmd.Parameters.Add("dob", OracleDbType.Date).Value = dob;
-                    cmd.Parameters.Add("position", OracleDbType.Varchar2).Value = position;
-                    cmd.Parameters.Add("salary", OracleDbType.Decimal).Value = salary;
-                    cmd.Parameters.Add("startDate", OracleDbType.Date).Value = startDate;
-                    cmd.Parameters.Add("favBeer", OracleDbType.Varchar2).Value = favBeer;
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.ExecuteNonQuery();
-                    
-                    MessageBox.Show("Zaměstnanec úspěšně přidán!");
-                    LoadEmployees();
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // NULL for insert
+                    cmd.Parameters.Add("p_id_zamestnance", OracleDbType.Int32).Value = GetNextEmployeeId();
+                    cmd.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = firstName;
+                    cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = lastName;
+                    cmd.Parameters.Add("p_datum_narozeni", OracleDbType.Date).Value = dob;
+                    cmd.Parameters.Add("p_pozice", OracleDbType.Int32).Value = positionId;
+                    cmd.Parameters.Add("p_plat", OracleDbType.Decimal).Value = salary;
+                    cmd.Parameters.Add("p_datum_nastupu", OracleDbType.Date).Value = startDate;
+                    cmd.Parameters.Add("p_oblibena_piva", OracleDbType.Clob).Value = favBeer;
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+
+                        MessageBox.Show("Zaměstnanec úspěšně přidán!");
+                        LoadEmployees();
+                    }
+                    catch (OracleException ex)
+                    {
+                        MessageBox.Show("Error adding employee: " + ex.Message);
+                    }
                 }
             }
         }
+
+        private int GetNextEmployeeId()
+        {
+            int nextId = 0;
+
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT NVL(MAX(ID_ZAMESTNANCE), 0) + 1 FROM ZAMESTNANCI";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            nextId = Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Chyba při získávání ID zaměstnance: " + ex.Message);
+            }
+
+            return nextId;
+        }
+
 
         private void dgvZamestnanci_SelectionChanged(object sender, EventArgs e)
         {
@@ -183,7 +237,7 @@ namespace HospodaUBobra
                 txtJmeno.Text = dgvZamestnanci.CurrentRow.Cells["JMENO"].Value.ToString();
                 txtPrijmeni.Text = dgvZamestnanci.CurrentRow.Cells["PRIJMENI"].Value.ToString();
                 dateTimePickerNarozeni.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NAROZENI"].Value);
-                txtPozice.Text = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value.ToString();
+                cbPozice.SelectedValue = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value;
                 txtVyplata.Text = dgvZamestnanci.CurrentRow.Cells["PLAT"].Value.ToString();
                 dateTimePickerStartWorking.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value);
                 txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value.ToString();
