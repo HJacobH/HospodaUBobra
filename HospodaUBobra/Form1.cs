@@ -45,7 +45,7 @@ namespace HospodaUBobra
             {
                 zamestnanciToolStripMenuItem.Visible = false;
                 pridatPivoToolStripMenuItem.Visible = false;
-                //spravovatToolStripMenuItem.Visible = false;
+                SpravaCiselnikuToolStrip.Visible = false;
             }
         }
 
@@ -189,6 +189,7 @@ namespace HospodaUBobra
             zamestnanciToolStripMenuItem.Visible = UserSession.Role == "Admin";
             pridatPivoToolStripMenuItem.Visible = UserSession.Role == "Admin";
             vytvoritUzivateleToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            SpravaCiselnikuToolStrip.Visible = UserSession.Role == "Admin";
 
             PopulateTableList();
         }
