@@ -143,6 +143,7 @@ namespace HospodaUBobra
 
             return nextId;
         }
+
         private int GetRoleId(string roleName)
         {
             switch (roleName.ToLower())
@@ -302,7 +303,7 @@ namespace HospodaUBobra
                     }
                 }
             }
-        }        
+        }
 
         private void dataGridViewUsers_SelectionChanged(object sender, EventArgs e)
         {
@@ -313,6 +314,6 @@ namespace HospodaUBobra
                 txtTelefon.Text = dataGridViewUsers.CurrentRow.Cells["TELEFON"].Value.ToString();
                 comboBoxRole.SelectedIndex = Convert.ToInt32(dataGridViewUsers.CurrentRow.Cells["ROLE_ID"].Value) - 1;
             }
-        }
+        }     
     }
 }

@@ -190,6 +190,10 @@ namespace HospodaUBobra
             pridatPivoToolStripMenuItem.Visible = UserSession.Role == "Admin";
             vytvoritUzivateleToolStripMenuItem.Visible = UserSession.Role == "Admin";
             SpravaCiselnikuToolStrip.Visible = UserSession.Role == "Admin";
+            vyrobkyToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            objednavkyToolStripMenuItem1.Visible = UserSession.Role == "Admin";
+            nizkyPocetPivToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            nesplneneObjednavkyToolStripMenuItem.Visible = UserSession.Role == "Admin";
 
             PopulateTableList();
         }
@@ -356,6 +360,7 @@ namespace HospodaUBobra
 
         private void lokaceToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //pivovar_mesto_kraj UKOL3 view 2
             try
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
@@ -395,7 +400,36 @@ namespace HospodaUBobra
 
         private void explicidCursorToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //UKOL5 procedura 3
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
 
+                    using (OracleCommand cmd = new OracleCommand("GetIncompleteOrders", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_incomplete_orders", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            adapter.Fill(dt);
+                            dataGridView1.DataSource = dt;
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
@@ -568,6 +602,151 @@ namespace HospodaUBobra
         {
             CounterManagement counterManagement = new CounterManagement();
             counterManagement.ShowDialog();
+        }
+
+        private void vyrobkyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //UKOL3 view VYROBY_VIEW view 1
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM VYROBY_VIEW";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            adapter.Fill(dt);
+
+                            dataGridView1.DataSource = dt;
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void objednavkyToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            //UKOL3 view OBJEDNAVKY_VIEW view 3
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM OBJEDNAVKY_VIEW";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            adapter.Fill(dt);
+
+                            dataGridView1.DataSource = dt;
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void nizkyPocetPivToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //UKOL5 funkce 1
+            string input = Microsoft.VisualBasic.Interaction.InputBox("Zadejte spotní hranu:", "Zobrazení málo piv", "100");
+
+            if (int.TryParse(input, out int threshold))
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    try
+                    {
+                        conn.Open();
+
+                        using (OracleCommand cmd = new OracleCommand("GetLowStockBeers", conn))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+
+                            cmd.Parameters.Add("p_threshold", OracleDbType.Int32).Value = threshold;
+
+                            cmd.Parameters.Add("p_low_stock_beers", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                            using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                            {
+                                DataTable dt = new DataTable();
+                                adapter.Fill(dt);
+                                dataGridView1.DataSource = dt;
+                            }
+                        }
+                    }
+                    catch (OracleException ex)
+                    {
+                        MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Zadejte validní číslo prosím.", "Neplatný vstup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void statistikyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //UKOL5 procedura 2
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("PivaStats", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_beer_stats", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            adapter.Fill(dt);
+                            dataGridView1.DataSource = dt;
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }
