@@ -45,6 +45,7 @@ namespace HospodaUBobra
             {
                 zamestnanciToolStripMenuItem.Visible = false;
                 pridatPivoToolStripMenuItem.Visible = false;
+                spravovatToolStripMenuItem.Visible = false;
             }
         }
 

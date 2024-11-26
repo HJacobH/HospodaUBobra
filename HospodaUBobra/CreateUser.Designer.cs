@@ -40,6 +40,10 @@
             txtTelefon = new TextBox();
             label4 = new Label();
             label5 = new Label();
+            dataGridViewUsers = new DataGridView();
+            btnUpdate = new Button();
+            btnDelete = new Button();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -94,19 +98,19 @@
             // 
             // btnCreate
             // 
-            btnCreate.Location = new Point(12, 214);
+            btnCreate.Location = new Point(12, 491);
             btnCreate.Name = "btnCreate";
-            btnCreate.Size = new Size(88, 43);
+            btnCreate.Size = new Size(114, 28);
             btnCreate.TabIndex = 6;
-            btnCreate.Text = "Vytvořit";
+            btnCreate.Text = "Vytvořit uživatele";
             btnCreate.UseVisualStyleBackColor = true;
             btnCreate.Click += btnCreate_Click;
             // 
             // btnBack
             // 
-            btnBack.Location = new Point(136, 214);
+            btnBack.Location = new Point(471, 491);
             btnBack.Name = "btnBack";
-            btnBack.Size = new Size(90, 43);
+            btnBack.Size = new Size(90, 28);
             btnBack.TabIndex = 7;
             btnBack.Text = "Zpět";
             btnBack.UseVisualStyleBackColor = true;
@@ -144,11 +148,43 @@
             label5.TabIndex = 11;
             label5.Text = "Telefon:";
             // 
+            // dataGridViewUsers
+            // 
+            dataGridViewUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewUsers.Location = new Point(12, 217);
+            dataGridViewUsers.Name = "dataGridViewUsers";
+            dataGridViewUsers.Size = new Size(549, 268);
+            dataGridViewUsers.TabIndex = 12;
+            dataGridViewUsers.SelectionChanged += dataGridViewUsers_SelectionChanged;
+            // 
+            // btnUpdate
+            // 
+            btnUpdate.Location = new Point(132, 491);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(137, 28);
+            btnUpdate.TabIndex = 13;
+            btnUpdate.Text = "Aktualizovat uživatele";
+            btnUpdate.UseVisualStyleBackColor = true;
+            btnUpdate.Click += btnUpdate_Click;
+            // 
+            // btnDelete
+            // 
+            btnDelete.Location = new Point(275, 491);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(118, 28);
+            btnDelete.TabIndex = 14;
+            btnDelete.Text = "Odstranit uživatele";
+            btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
+            // 
             // CreateUser
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(238, 269);
+            ClientSize = new Size(573, 522);
+            Controls.Add(btnDelete);
+            Controls.Add(btnUpdate);
+            Controls.Add(dataGridViewUsers);
             Controls.Add(label5);
             Controls.Add(label4);
             Controls.Add(txtTelefon);
@@ -162,7 +198,8 @@
             Controls.Add(txtUsername);
             Controls.Add(label1);
             Name = "CreateUser";
-            Text = "CreateUser";
+            Text = "Správa uživatelů";
+            ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -181,5 +218,8 @@
         private TextBox txtTelefon;
         private Label label4;
         private Label label5;
+        private DataGridView dataGridViewUsers;
+        private Button btnUpdate;
+        private Button btnDelete;
     }
 }
