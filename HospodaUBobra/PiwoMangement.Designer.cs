@@ -44,6 +44,10 @@
             label6 = new Label();
             label7 = new Label();
             btnBack = new Button();
+            btnUpdate = new Button();
+            btnDelete = new Button();
+            dgvPiva = new DataGridView();
+            ((System.ComponentModel.ISupportInitialize)dgvPiva).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -108,7 +112,7 @@
             // 
             // btnAddPiwo
             // 
-            btnAddPiwo.Location = new Point(12, 256);
+            btnAddPiwo.Location = new Point(12, 459);
             btnAddPiwo.Name = "btnAddPiwo";
             btnAddPiwo.Size = new Size(87, 27);
             btnAddPiwo.TabIndex = 8;
@@ -172,7 +176,7 @@
             // 
             // btnBack
             // 
-            btnBack.Location = new Point(116, 256);
+            btnBack.Location = new Point(443, 459);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(89, 27);
             btnBack.TabIndex = 15;
@@ -180,11 +184,43 @@
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
+            // btnUpdate
+            // 
+            btnUpdate.Location = new Point(105, 459);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(116, 27);
+            btnUpdate.TabIndex = 16;
+            btnUpdate.Text = "Aktualizovat pivo";
+            btnUpdate.UseVisualStyleBackColor = true;
+            btnUpdate.Click += btnUpdate_Click;
+            // 
+            // btnDelete
+            // 
+            btnDelete.Location = new Point(227, 459);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(110, 27);
+            btnDelete.TabIndex = 17;
+            btnDelete.Text = "Odstranit pivo";
+            btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
+            // 
+            // dgvPiva
+            // 
+            dgvPiva.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvPiva.Location = new Point(12, 239);
+            dgvPiva.Name = "dgvPiva";
+            dgvPiva.Size = new Size(520, 214);
+            dgvPiva.TabIndex = 18;
+            dgvPiva.SelectionChanged += dgvPiva_SelectionChanged;
+            // 
             // PiwoMangement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(217, 295);
+            ClientSize = new Size(544, 498);
+            Controls.Add(dgvPiva);
+            Controls.Add(btnDelete);
+            Controls.Add(btnUpdate);
             Controls.Add(btnBack);
             Controls.Add(label7);
             Controls.Add(label6);
@@ -203,6 +239,7 @@
             Controls.Add(label1);
             Name = "PiwoMangement";
             Text = "Správa Piv";
+            ((System.ComponentModel.ISupportInitialize)dgvPiva).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -225,5 +262,8 @@
         private Label label6;
         private Label label7;
         private Button btnBack;
+        private Button btnUpdate;
+        private Button btnDelete;
+        private DataGridView dgvPiva;
     }
 }

@@ -122,7 +122,7 @@ namespace HospodaUBobra
                         cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
                         cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
                         cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = 3;
-                        cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = DBNull.Value;
+                        cmd.Parameters.Add("p_profile_picture", OracleDbType.Int32).Value = DBNull.Value;
 
                         cmd.ExecuteNonQuery();
 

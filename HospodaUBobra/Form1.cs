@@ -2,6 +2,7 @@
 using System.Data;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace HospodaUBobra
 {
@@ -305,7 +306,6 @@ namespace HospodaUBobra
             {
                 profilePictureBox.Image = null;
             }
-
         }
 
         public Image GetUserProfilePicture(int id)
@@ -313,17 +313,18 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT PROFILE_PICTURE FROM UZIVATELE WHERE id_uzivatele = :id";
+                // Fetch the profile picture from the PROFILOVE_OBRAZKY table
+                string query = "SELECT PICTURE FROM PROFILOVE_OBRAZKY WHERE ID_UZIVATELE = :id_uzivatele";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
-                    cmd.Parameters.Add(new OracleParameter("id_uzivatele", OracleDbType.Varchar2)).Value = id;
+                    cmd.Parameters.Add(new OracleParameter("id_uzivatele", OracleDbType.Int32)).Value = UserSession.UserID;
 
                     using (OracleDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read() && !reader.IsDBNull(0))
                         {
-                            byte[] imageBytes = (byte[])reader["PROFILE_PICTURE"];
+                            byte[] imageBytes = (byte[])reader["PICTURE"];
                             using (MemoryStream ms = new MemoryStream(imageBytes))
                             {
                                 return Image.FromStream(ms);
@@ -333,6 +334,7 @@ namespace HospodaUBobra
                 }
             }
 
+            // Return null if no profile picture is found
             return null;
         }
 
@@ -454,27 +456,26 @@ namespace HospodaUBobra
             g.Dispose();
         }
 
-        public void UpdateUserProfilePicture(string userEmail, Image profilePicture)
+        public void UpdateUserProfilePicture(int id, Image profilePicture)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
 
-                // Fetch the current user details to pass them to the procedure
+                // Fetch the current user details
                 string fetchQuery = @"
-            SELECT ID_UZIVATELE, UZIVATELSKE_JMENO, EMAIL, TELEFON, DATUM_REGISTRACE, PASSWORD, SALT, ROLE_ID
-            FROM UZIVATELE
-            WHERE email = :userEmail";
+        SELECT ID_UZIVATELE, UZIVATELSKE_JMENO, EMAIL, TELEFON, DATUM_REGISTRACE, PASSWORD, SALT, ROLE_ID
+        FROM UZIVATELE
+        WHERE id_uzivatele = :id";
 
                 using (OracleCommand fetchCmd = new OracleCommand(fetchQuery, conn))
                 {
-                    fetchCmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = userEmail;
+                    fetchCmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = id;
 
                     using (OracleDataReader reader = fetchCmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            // Retrieve existing user data
                             int userId = reader.GetInt32(0);
                             string userName = reader.GetString(1);
                             string email = reader.GetString(2);
@@ -484,39 +485,65 @@ namespace HospodaUBobra
                             string salt = reader.GetString(6);
                             int roleId = reader.GetInt32(7);
 
-                            // Convert profile picture to byte array
-                            byte[] profilePictureBytes = null;
-                            if (profilePicture != null)
+                            // Update user details
+                            using (OracleCommand userCmd = new OracleCommand("sprava_uzivatele", conn))
                             {
-                                using (MemoryStream ms = new MemoryStream())
+                                userCmd.CommandType = CommandType.StoredProcedure;
+
+                                userCmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
+                                userCmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+                                userCmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = userName;
+                                userCmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
+                                userCmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = phone;
+                                userCmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
+                                userCmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = password;
+                                userCmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
+                                userCmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
+                                userCmd.Parameters.Add("p_profile_picture_id", OracleDbType.Int32).Value = DBNull.Value; // Profile picture handled separately
+
+                                userCmd.ExecuteNonQuery();
+                            }
+
+
+                            byte[] profilePictureBytes;
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                profilePicture.Save(ms, profilePicture.RawFormat);
+                                profilePictureBytes = ms.ToArray();
+                            }
+
+                            string fileName = "profile_pic.jpg"; // Replace with actual file name
+                            string fileType = "image/jpeg";      // Replace with actual MIME type
+                            string fileExtension = Path.GetExtension(fileName); // Extract extension
+
+                            using (OracleCommand profileCmd = new OracleCommand("sprava_profilove_obrazky", conn))
+                            {
+                                profileCmd.CommandType = CommandType.StoredProcedure;
+
+                                // Set `p_identifikator` to NULL to indicate an insert
+                                profileCmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // New insert
+                                profileCmd.Parameters.Add("p_id_picture", OracleDbType.Int32).Direction = ParameterDirection.Output; // Get the new ID
+                                profileCmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+                                profileCmd.Parameters.Add("p_picture", OracleDbType.Blob).Value = profilePictureBytes; // Byte array of the image
+                                profileCmd.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = fileName; // Example: "profile_pic.jpg"
+                                profileCmd.Parameters.Add("p_file_type", OracleDbType.Varchar2).Value = fileType; // Example: "image/jpeg"
+                                profileCmd.Parameters.Add("p_file_extension", OracleDbType.Varchar2).Value = fileExtension; // Example: ".jpg"
+                                profileCmd.Parameters.Add("p_upload_date", OracleDbType.Date).Value = DateTime.Now;
+
+                                profileCmd.ExecuteNonQuery();
+
+                                // Retrieve the newly inserted ID for future reference
+                                int newPictureId = Convert.ToInt32(profileCmd.Parameters["p_id_picture"].Value);
+
+                                // Optionally, update the `UZIVATELE` table with the new profile picture ID
+                                using (OracleCommand userCmd = new OracleCommand("UPDATE UZIVATELE SET PROFILE_OBRAZKY_ID = :profileObrazkyId WHERE ID_UZIVATELE = :userId", conn))
                                 {
-                                    profilePicture.Save(ms, profilePicture.RawFormat);
-                                    profilePictureBytes = ms.ToArray();
+                                    userCmd.Parameters.Add("profileObrazkyId", OracleDbType.Int32).Value = newPictureId;
+                                    userCmd.Parameters.Add("userId", OracleDbType.Int32).Value = userId;
+
+                                    userCmd.ExecuteNonQuery();
                                 }
                             }
-
-                            // Call the sprava_uzivatele procedure to update the profile picture
-                            using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-
-                                cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = userId; // Update existing user
-                                cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
-                                cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = userName;
-                                cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
-                                cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = phone;
-                                cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
-                                cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = password;
-                                cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
-                                cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
-                                cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = profilePictureBytes;
-
-                                cmd.ExecuteNonQuery();
-                            }
-                        }
-                        else
-                        {
-                            throw new Exception("User not found.");
                         }
                     }
                 }
@@ -539,7 +566,7 @@ namespace HospodaUBobra
                         Image profileImage = Image.FromFile(filePath);
                         profilePictureBox.Image = profileImage;
 
-                        //UpdateUserProfilePicture(UserSession.Username, profileImage);
+                        UpdateUserProfilePicture(UserSession.UserID, profileImage);
 
                         MessageBox.Show("Profile picture uploaded successfully.");
                     }

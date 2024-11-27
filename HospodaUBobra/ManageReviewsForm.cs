@@ -325,11 +325,6 @@ namespace HospodaUBobra
                 comboBoxBreweries.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivovar_id_pivovaru"].Value;
                 comboBoxBeers.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivo_id_piva"].Value;
                 cbHodnoceni.SelectedItem = Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value);
-
-                /*if (UserSession.Role != "Anonymous")
-                {
-                    selectedReviewUser = dataGridViewReviews.CurrentRow.Cells["id_uzivatele"].Value.ToString();
-                }*/
             }
         }
 

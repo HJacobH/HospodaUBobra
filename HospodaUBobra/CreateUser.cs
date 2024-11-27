@@ -178,12 +178,13 @@ namespace HospodaUBobra
             string currentPassword = null;
             string currentSalt = null;
             DateTime? currentRegistrationDate = null;
-            byte[] currentProfilePicture = null;
+
+            byte[] currentProfilePicture = null; // Ensure currentProfilePicture is defined
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT PASSWORD, SALT, DATUM_REGISTRACE, PROFILE_PICTURE FROM UZIVATELE WHERE ID_UZIVATELE = :userId";
+                string query = "SELECT PASSWORD, SALT, DATUM_REGISTRACE FROM UZIVATELE WHERE ID_UZIVATELE = :userId";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -196,7 +197,22 @@ namespace HospodaUBobra
                             currentPassword = reader["PASSWORD"] as string;
                             currentSalt = reader["SALT"] as string;
                             currentRegistrationDate = reader["DATUM_REGISTRACE"] as DateTime?;
-                            currentProfilePicture = reader["PROFILE_PICTURE"] as byte[];
+                        }
+                    }
+                }
+
+                // Load profile picture from the PROFILOVE_OBRAZKY table
+                query = "SELECT PICTURE FROM PROFILOVE_OBRAZKY WHERE ID_UZIVATELE = :userId";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
+
+                    using (OracleDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            currentProfilePicture = reader["PICTURE"] as byte[];
                         }
                     }
                 }
@@ -219,40 +235,63 @@ namespace HospodaUBobra
             string salt = string.IsNullOrEmpty(password) ? currentSalt : PasswordHelper.GenerateSalt();
             string hashedPassword = string.IsNullOrEmpty(password) ? currentPassword : PasswordHelper.HashPassword(password, salt);
 
-            // Preserve existing registration date and profile picture if not changed
+            // Preserve existing registration date
             DateTime registrationDate = currentRegistrationDate ?? DateTime.Now;
-            byte[] profilePicture = currentProfilePicture;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
+                OracleTransaction transaction = conn.BeginTransaction();
 
-                using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
+                try
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
-                    cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
-                    cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username;
-                    cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
-                    cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon;
-                    cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
-                    cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
-                    cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
-                    cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
-                    cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = (object)profilePicture ?? DBNull.Value;
-
-                    try
+                    // Call sprava_uzivatele procedure
+                    using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
+                        cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+                        cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username;
+                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
+                        cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon;
+                        cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
+                        cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
+                        cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
+                        cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
+                        cmd.Parameters.Add("p_profile_picture", OracleDbType.Int32).Value = DBNull.Value; // Profile picture handled separately
+
                         cmd.ExecuteNonQuery();
+                    }
 
-                        MessageBox.Show("Uživatel úspěšně aktualizován!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadUsers();
-                    }
-                    catch (OracleException ex)
+                    // Handle profile picture update using sprava_profilove_obrazky
+                    if (currentProfilePicture != null)
                     {
-                        MessageBox.Show("Chyba při aktualizaci uživatele: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        using (OracleCommand profileCmd = new OracleCommand("sprava_profilove_obrazky", conn))
+                        {
+                            profileCmd.CommandType = CommandType.StoredProcedure;
+
+                            profileCmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
+                            profileCmd.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = userId; // Assuming profile picture ID matches user ID
+                            profileCmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+                            profileCmd.Parameters.Add("p_picture", OracleDbType.Blob).Value = currentProfilePicture;
+                            profileCmd.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = "profile_pic.jpg"; // Example
+                            profileCmd.Parameters.Add("p_file_type", OracleDbType.Varchar2).Value = "image/jpeg"; // Example
+                            profileCmd.Parameters.Add("p_file_extension", OracleDbType.Varchar2).Value = ".jpg"; // Example
+                            profileCmd.Parameters.Add("p_upload_date", OracleDbType.Date).Value = DateTime.Now;
+
+                            profileCmd.ExecuteNonQuery();
+                        }
                     }
+
+                    transaction.Commit();
+                    MessageBox.Show("Uživatel úspěšně aktualizován!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadUsers();
+                }
+                catch (OracleException ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show("Chyba při aktualizaci uživatele: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

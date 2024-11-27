@@ -43,6 +43,7 @@
             pivaToolStripMenuItem = new ToolStripMenuItem();
             pridatPivoToolStripMenuItem = new ToolStripMenuItem();
             nizkyPocetPivToolStripMenuItem = new ToolStripMenuItem();
+            statistikyToolStripMenuItem = new ToolStripMenuItem();
             pivovaryToolStripMenuItem = new ToolStripMenuItem();
             lokaceToolStripMenuItem = new ToolStripMenuItem();
             zamestnanciToolStripMenuItem = new ToolStripMenuItem();
@@ -55,7 +56,6 @@
             SpravaCiselnikuToolStrip = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
-            statistikyToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -166,7 +166,7 @@
             // 
             pridatPivoToolStripMenuItem.Name = "pridatPivoToolStripMenuItem";
             pridatPivoToolStripMenuItem.Size = new Size(180, 22);
-            pridatPivoToolStripMenuItem.Text = "Přidat";
+            pridatPivoToolStripMenuItem.Text = "Správa";
             pridatPivoToolStripMenuItem.Click += pridatPivoToolStripMenuItem_Click;
             // 
             // nizkyPocetPivToolStripMenuItem
@@ -175,6 +175,13 @@
             nizkyPocetPivToolStripMenuItem.Size = new Size(180, 22);
             nizkyPocetPivToolStripMenuItem.Text = "Nizky pocet piv";
             nizkyPocetPivToolStripMenuItem.Click += nizkyPocetPivToolStripMenuItem_Click;
+            // 
+            // statistikyToolStripMenuItem
+            // 
+            statistikyToolStripMenuItem.Name = "statistikyToolStripMenuItem";
+            statistikyToolStripMenuItem.Size = new Size(180, 22);
+            statistikyToolStripMenuItem.Text = "Statistiky";
+            statistikyToolStripMenuItem.Click += statistikyToolStripMenuItem_Click;
             // 
             // pivovaryToolStripMenuItem
             // 
@@ -264,13 +271,6 @@
             profilePictureBox.Size = new Size(64, 62);
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
-            // 
-            // statistikyToolStripMenuItem
-            // 
-            statistikyToolStripMenuItem.Name = "statistikyToolStripMenuItem";
-            statistikyToolStripMenuItem.Size = new Size(180, 22);
-            statistikyToolStripMenuItem.Text = "Statistiky";
-            statistikyToolStripMenuItem.Click += statistikyToolStripMenuItem_Click;
             // 
             // Form1
             // 
