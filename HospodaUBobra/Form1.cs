@@ -249,14 +249,67 @@ namespace HospodaUBobra
                 MessageBox.Show("Přihlášení úspěšné!");
                 btnLogout.Enabled = true;
                 ApplyRolePermissions();
-                currentUserLabel.Text = GetUserUsername(UserSession.UserID);
+
+                // Check if the user is from KLIENTI or UZIVATELE and set the currentUserLabel accordingly
+                if (UserSession.Role == "Klient")
+                {
+                    // Get klient's name or business name
+                    string klientName = GetKlientNameOrBusinessName(UserSession.UserID);
+                    currentUserLabel.Text = klientName;
+                }
+                else
+                {
+                    // Get username for UZIVATELE
+                    currentUserLabel.Text = GetUserUsername(UserSession.UserID);
+                }
+
                 UpdateProfilePictureAsync(UserSession.UserID);
             }
             else
             {
-                //MessageBox.Show("Přihlášení selhalo!");
+                // Optionally handle login failure
             }
         }
+
+        private string GetKlientNameOrBusinessName(int userId)
+        {
+            string klientName = "Klient";
+
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = @"
+                SELECT NVL(TRIM(JMENO || ' ' || PRIJMENI), NAZEV) AS FULL_NAME
+                FROM KLIENTI
+                WHERE ID_KLIENTA = :userId";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
+
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            klientName = result.ToString();
+                        }
+                    }
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show($"Oracle error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"General error: {ex.Message}");
+            }
+
+            return klientName;
+        }
+
 
         private string GetUserUsername(int userId)
         {
@@ -795,6 +848,24 @@ namespace HospodaUBobra
         {
             SpravaObjednavek spravaObjednavek = new SpravaObjednavek();
             spravaObjednavek.ShowDialog();
+        }
+
+        private void spravaPivovaruToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaPivovaru spravaPivovaru = new SpravaPivovaru();
+            spravaPivovaru.ShowDialog();
+        }
+
+        private void vlastniciToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaVlastnikuPivovaru spravaVlastnikuPivovaru = new SpravaVlastnikuPivovaru();
+            spravaVlastnikuPivovaru.ShowDialog();
+        }
+
+        private void spravaKlientuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaKlientu spravaKlientu = new SpravaKlientu();
+            spravaKlientu.ShowDialog();
         }
     }
 }

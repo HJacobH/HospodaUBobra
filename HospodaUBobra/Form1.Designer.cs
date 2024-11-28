@@ -51,15 +51,18 @@
             spravovatToolStripMenuItem = new ToolStripMenuItem();
             vyrobkyToolStripMenuItem = new ToolStripMenuItem();
             objednavkyToolStripMenuItem1 = new ToolStripMenuItem();
+            spravaPivovaruToolStripMenuItem = new ToolStripMenuItem();
+            vlastniciToolStripMenuItem = new ToolStripMenuItem();
             objednavkyToolStripMenuItem = new ToolStripMenuItem();
             nesplneneObjednavkyToolStripMenuItem = new ToolStripMenuItem();
             evidenceToolStripMenuItem = new ToolStripMenuItem();
+            spravaObjednavekToolStripMenuItem = new ToolStripMenuItem();
             SpravaCiselnikuToolStrip = new ToolStripMenuItem();
             zobrazitSpravuCiselnikuToolStripMenuItem = new ToolStripMenuItem();
             spravaMestVesnicToolStripMenuItem = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
-            spravaObjednavekToolStripMenuItem = new ToolStripMenuItem();
+            spravaKlientuToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -112,7 +115,7 @@
             // 
             // uživatelToolStripMenuItem
             // 
-            uživatelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loginStipItem, registerStipItem, uploadPfpToolStripMenuItem, vytvoritUzivateleToolStripMenuItem });
+            uživatelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loginStipItem, registerStipItem, uploadPfpToolStripMenuItem, vytvoritUzivateleToolStripMenuItem, spravaKlientuToolStripMenuItem });
             uživatelToolStripMenuItem.Name = "uživatelToolStripMenuItem";
             uživatelToolStripMenuItem.Size = new Size(60, 20);
             uživatelToolStripMenuItem.Text = "Uživatel";
@@ -189,7 +192,7 @@
             // 
             // pivovaryToolStripMenuItem
             // 
-            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem, vyrobkyToolStripMenuItem, objednavkyToolStripMenuItem1 });
+            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem, vyrobkyToolStripMenuItem, objednavkyToolStripMenuItem1, spravaPivovaruToolStripMenuItem, vlastniciToolStripMenuItem });
             pivovaryToolStripMenuItem.Name = "pivovaryToolStripMenuItem";
             pivovaryToolStripMenuItem.Size = new Size(64, 20);
             pivovaryToolStripMenuItem.Text = "Pivovary";
@@ -197,7 +200,7 @@
             // lokaceToolStripMenuItem
             // 
             lokaceToolStripMenuItem.Name = "lokaceToolStripMenuItem";
-            lokaceToolStripMenuItem.Size = new Size(142, 22);
+            lokaceToolStripMenuItem.Size = new Size(158, 22);
             lokaceToolStripMenuItem.Text = "Lokace";
             lokaceToolStripMenuItem.Click += lokaceToolStripMenuItem_Click;
             // 
@@ -205,7 +208,7 @@
             // 
             zamestnanciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { zobrazitToolStripMenuItem, spravovatToolStripMenuItem });
             zamestnanciToolStripMenuItem.Name = "zamestnanciToolStripMenuItem";
-            zamestnanciToolStripMenuItem.Size = new Size(142, 22);
+            zamestnanciToolStripMenuItem.Size = new Size(158, 22);
             zamestnanciToolStripMenuItem.Text = "Zaměstnanci";
             zamestnanciToolStripMenuItem.Click += zamestnanciToolStripMenuItem_Click;
             // 
@@ -226,16 +229,30 @@
             // vyrobkyToolStripMenuItem
             // 
             vyrobkyToolStripMenuItem.Name = "vyrobkyToolStripMenuItem";
-            vyrobkyToolStripMenuItem.Size = new Size(142, 22);
+            vyrobkyToolStripMenuItem.Size = new Size(158, 22);
             vyrobkyToolStripMenuItem.Text = "Vyrobky";
             vyrobkyToolStripMenuItem.Click += vyrobkyToolStripMenuItem_Click;
             // 
             // objednavkyToolStripMenuItem1
             // 
             objednavkyToolStripMenuItem1.Name = "objednavkyToolStripMenuItem1";
-            objednavkyToolStripMenuItem1.Size = new Size(142, 22);
+            objednavkyToolStripMenuItem1.Size = new Size(158, 22);
             objednavkyToolStripMenuItem1.Text = "Objednavky";
             objednavkyToolStripMenuItem1.Click += objednavkyToolStripMenuItem1_Click;
+            // 
+            // spravaPivovaruToolStripMenuItem
+            // 
+            spravaPivovaruToolStripMenuItem.Name = "spravaPivovaruToolStripMenuItem";
+            spravaPivovaruToolStripMenuItem.Size = new Size(158, 22);
+            spravaPivovaruToolStripMenuItem.Text = "Správa pivovarů";
+            spravaPivovaruToolStripMenuItem.Click += spravaPivovaruToolStripMenuItem_Click;
+            // 
+            // vlastniciToolStripMenuItem
+            // 
+            vlastniciToolStripMenuItem.Name = "vlastniciToolStripMenuItem";
+            vlastniciToolStripMenuItem.Size = new Size(158, 22);
+            vlastniciToolStripMenuItem.Text = "Vlastníci";
+            vlastniciToolStripMenuItem.Click += vlastniciToolStripMenuItem_Click;
             // 
             // objednavkyToolStripMenuItem
             // 
@@ -257,6 +274,13 @@
             evidenceToolStripMenuItem.Size = new Size(238, 22);
             evidenceToolStripMenuItem.Text = "Evidence";
             evidenceToolStripMenuItem.Click += evidenceToolStripMenuItem_Click;
+            // 
+            // spravaObjednavekToolStripMenuItem
+            // 
+            spravaObjednavekToolStripMenuItem.Name = "spravaObjednavekToolStripMenuItem";
+            spravaObjednavekToolStripMenuItem.Size = new Size(238, 22);
+            spravaObjednavekToolStripMenuItem.Text = "Sprava Objednávek";
+            spravaObjednavekToolStripMenuItem.Click += spravaObjednavekToolStripMenuItem_Click;
             // 
             // SpravaCiselnikuToolStrip
             // 
@@ -297,12 +321,12 @@
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
             // 
-            // spravaObjednavekToolStripMenuItem
+            // spravaKlientuToolStripMenuItem
             // 
-            spravaObjednavekToolStripMenuItem.Name = "spravaObjednavekToolStripMenuItem";
-            spravaObjednavekToolStripMenuItem.Size = new Size(238, 22);
-            spravaObjednavekToolStripMenuItem.Text = "Sprava Objednávek";
-            spravaObjednavekToolStripMenuItem.Click += spravaObjednavekToolStripMenuItem_Click;
+            spravaKlientuToolStripMenuItem.Name = "spravaKlientuToolStripMenuItem";
+            spravaKlientuToolStripMenuItem.Size = new Size(204, 22);
+            spravaKlientuToolStripMenuItem.Text = "Správa klientů";
+            spravaKlientuToolStripMenuItem.Click += spravaKlientuToolStripMenuItem_Click;
             // 
             // Form1
             // 
@@ -360,5 +384,8 @@
         private ToolStripMenuItem zobrazitSpravuCiselnikuToolStripMenuItem;
         private ToolStripMenuItem spravaMestVesnicToolStripMenuItem;
         private ToolStripMenuItem spravaObjednavekToolStripMenuItem;
+        private ToolStripMenuItem spravaPivovaruToolStripMenuItem;
+        private ToolStripMenuItem vlastniciToolStripMenuItem;
+        private ToolStripMenuItem spravaKlientuToolStripMenuItem;
     }
 }

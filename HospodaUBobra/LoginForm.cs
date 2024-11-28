@@ -31,7 +31,7 @@ namespace HospodaUBobra
                     Close();
                 }
             };
-            
+
             KeyDown += (sender, e) =>
             {
                 if (e.KeyCode == Keys.Enter)
@@ -46,45 +46,25 @@ namespace HospodaUBobra
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if (ValidateLogin(username, password, out string roleName))
+            if (ValidateLogin(username, password, out string roleName, out int userId, out string tableName))
             {
-                // Fetch the user ID based on the email (username)
-                using (OracleConnection conn = new OracleConnection(connectionString))
-                {
-                    conn.Open();
-                    string query = "SELECT ID_UZIVATELE FROM UZIVATELE WHERE EMAIL = :email";
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
-                    {
-                        cmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = username;
-
-                        object result = cmd.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
-                        {
-                            UserSession.UserID = Convert.ToInt32(result); // Assign the user ID to the session
-                        }
-                        else
-                        {
-                            MessageBox.Show("Uživatelský účet nebyl nalezen.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                    }
-                }
-
                 UserSession.Role = roleName;
-
+                UserSession.UserID = userId;
+                UserSession.TableName = tableName; // Store whether the user is from UZIVATELE or KLIENTI
 
                 this.Close();
             }
             else
             {
-                MessageBox.Show("Neplatné údaje.");
+                MessageBox.Show("Neplatné přihlašovací údaje.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-
-        private bool ValidateLogin(string username, string password, out string roleName)
+        private bool ValidateLogin(string username, string password, out string roleName, out int userId, out string tableName)
         {
-            roleName = "Anonymous"; 
+            roleName = "Anonymous";
+            userId = -1;
+            tableName = string.Empty;
 
             try
             {
@@ -92,41 +72,18 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = @"
-                        SELECT u.PASSWORD, u.SALT, r.ROLE_NAME
-                        FROM uzivatele u
-                        JOIN Role r ON u.ROLE_ID = r.ROLE_ID
-                        WHERE u.email = :username";
-
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    // Try to log in as UZIVATELE
+                    if (TryValidateLogin(conn, "UZIVATELE", username, password, out roleName, out userId))
                     {
-                        cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
+                        tableName = "UZIVATELE";
+                        return true;
+                    }
 
-                        using (OracleDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                string storedHashedPassword = reader.GetString(0);
-                                string salt = reader.GetString(1);
-                                roleName = reader.GetString(2);
-
-                                string hashedInputPassword = HashPassword(password, salt);
-
-
-                                if (hashedInputPassword == storedHashedPassword)
-                                {
-                                    return true;
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Špatné heslo.");
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("Uživatel s tímto jménem nebyl nalezen.");
-                            }
-                        }
+                    // Try to log in as KLIENTI
+                    if (TryValidateLogin(conn, "KLIENTI", username, password, out roleName, out userId))
+                    {
+                        tableName = "KLIENTI";
+                        return true;
                     }
 
                     conn.Close();
@@ -141,8 +98,57 @@ namespace HospodaUBobra
                 MessageBox.Show("General error: " + ex.Message);
             }
 
-            return false; 
+            return false;
         }
+
+        private bool TryValidateLogin(OracleConnection conn, string tableName, string username, string password, out string roleName, out int userId)
+        {
+            roleName = "Anonymous";
+            userId = -1;
+
+            string idColumn = tableName == "UZIVATELE" ? "ID_UZIVATELE" : "ID_KLIENTA"; // Adjust the column name
+            string passwordColumn = tableName == "UZIVATELE" ? "PASSWORD" : "HESLO"; // Adjust password column
+            string saltColumn = tableName == "UZIVATELE" ? "SALT" : "SUL"; // Adjust salt column
+            bool isUzivatele = tableName == "UZIVATELE";
+
+            string query = isUzivatele
+                ? $@"
+            SELECT u.{passwordColumn}, u.{saltColumn}, r.ROLE_NAME, u.{idColumn}
+            FROM {tableName} u
+            JOIN Role r ON u.ROLE_ID = r.ROLE_ID
+            WHERE u.EMAIL = :username"
+                : $@"
+            SELECT u.{passwordColumn}, u.{saltColumn}, r.ROLE_NAME, u.{idColumn}
+            FROM {tableName} u
+            JOIN Role r ON u.ROLE_ID = r.ROLE_ID
+            WHERE u.EMAIL = :username";
+
+            using (OracleCommand cmd = new OracleCommand(query, conn))
+            {
+                cmd.Parameters.Add(new OracleParameter("username", OracleDbType.Varchar2)).Value = username;
+
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        string storedHashedPassword = reader.GetString(0);
+                        string salt = reader.GetString(1);
+                        roleName = reader.GetString(2);
+                        userId = reader.GetInt32(3);
+
+                        string hashedInputPassword = HashPassword(password, salt);
+
+                        if (hashedInputPassword == storedHashedPassword)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
 
         private string HashPassword(string password, string salt)
         {

@@ -353,6 +353,11 @@ namespace HospodaUBobra
                 txtTelefon.Text = dataGridViewUsers.CurrentRow.Cells["TELEFON"].Value.ToString();
                 comboBoxRole.SelectedIndex = Convert.ToInt32(dataGridViewUsers.CurrentRow.Cells["ROLE_ID"].Value) - 1;
             }
-        }     
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
