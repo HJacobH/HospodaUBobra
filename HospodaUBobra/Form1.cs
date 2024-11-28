@@ -195,6 +195,7 @@ namespace HospodaUBobra
             objednavkyToolStripMenuItem1.Visible = UserSession.Role == "Admin";
             nizkyPocetPivToolStripMenuItem.Visible = UserSession.Role == "Admin";
             nesplneneObjednavkyToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            evidenceToolStripMenuItem.Visible = UserSession.Role == "Admin";
 
             PopulateTableList();
         }
@@ -625,12 +626,6 @@ namespace HospodaUBobra
             emplyeeManagement.ShowDialog();
         }
 
-        private void SpravaCiselnikuToolStrip_Click(object sender, EventArgs e)
-        {
-            CounterManagement counterManagement = new CounterManagement();
-            counterManagement.ShowDialog();
-        }
-
         private void vyrobkyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //UKOL3 view VYROBY_VIEW view 1
@@ -774,6 +769,32 @@ namespace HospodaUBobra
                     MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void evidenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaEvidence spravaEvidence = new SpravaEvidence();
+
+            spravaEvidence.ShowDialog();
+        }
+
+        private void zobrazitSpravuCiselnikuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CounterManagement counterManagement = new CounterManagement();
+            counterManagement.ShowDialog();
+        }
+
+        private void spravaMestVesnicToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaMestVesnic spravaMestVesnic = new SpravaMestVesnic();
+
+            spravaMestVesnic.ShowDialog();
+        }
+
+        private void spravaObjednavekToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaObjednavek spravaObjednavek = new SpravaObjednavek();
+            spravaObjednavek.ShowDialog();
         }
     }
 }

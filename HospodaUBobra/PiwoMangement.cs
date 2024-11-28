@@ -34,7 +34,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT * FROM PIVA"; // Query to fetch all rows from PIVA table
+                    string query = "SELECT * FROM PIVA"; 
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -42,10 +42,8 @@ namespace HospodaUBobra
                         DataTable dataTable = new DataTable();
                         adapter.Fill(dataTable);
 
-                        // Bind the DataTable to the DataGridView
                         dgvPiva.DataSource = dataTable;
 
-                        // Optionally, hide some columns or format the DataGridView
                         dgvPiva.Columns["ID_PIVA"].HeaderText = "Beer ID";
                         dgvPiva.Columns["NAZEV"].HeaderText = "Name";
                         dgvPiva.Columns["OBSAH_ALKOHOLU"].HeaderText = "Alcohol Content (%)";
@@ -58,11 +56,11 @@ namespace HospodaUBobra
                 }
                 catch (OracleException ex)
                 {
-                    MessageBox.Show("Error fetching beer data: " + ex.Message);
+                    MessageBox.Show("Chyba při získávání dat.: " + ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("General error: " + ex.Message);
+                    MessageBox.Show("Chyba: " + ex.Message);
                 }
             }
         }
@@ -134,7 +132,7 @@ namespace HospodaUBobra
                 !decimal.TryParse(txtPrice.Text, out cena) ||
                 !int.TryParse(txtStockQuantity.Text, out pocetKsSkladem))
             {
-                MessageBox.Show("Please enter valid values for all fields.");
+                MessageBox.Show("Prosím zadejte správné hodnoty.");
                 return;
             }
 
@@ -151,11 +149,10 @@ namespace HospodaUBobra
         {
             if (selectedBeerId == -1)
             {
-                MessageBox.Show("No beer selected for update. Please select a beer.");
+                MessageBox.Show("Nebylo vybráno žádné pivo.");
                 return;
             }
 
-            // Collect data from the form
             string nazev = txtBeerName.Text.Trim();
             decimal obsahAlkoholu;
             decimal objem;
@@ -164,18 +161,16 @@ namespace HospodaUBobra
             int baleniPivaId = ((Tuple<int, string>)comboBoxPackaging.SelectedItem).Item1;
             int jednotkaPivaId = ((Tuple<int, string>)comboBoxUnit.SelectedItem).Item1;
 
-            // Validate input
             if (string.IsNullOrEmpty(nazev) ||
                 !decimal.TryParse(txtAlcoholContent.Text, out obsahAlkoholu) ||
                 !decimal.TryParse(txtVolume.Text, out objem) ||
                 !decimal.TryParse(txtPrice.Text, out cena) ||
                 !int.TryParse(txtStockQuantity.Text, out pocetKsSkladem))
             {
-                MessageBox.Show("Please enter valid values for all fields.");
+                MessageBox.Show("Prosím zadejte správné hodnoty.");
                 return;
             }
 
-            // Update the selected beer
             ManageBeer(selectedBeerId, nazev, obsahAlkoholu, objem, cena, pocetKsSkladem, baleniPivaId, jednotkaPivaId);
 
         }
@@ -189,7 +184,6 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Add parameters
                     cmd.Parameters.Add(new OracleParameter("p_identifikator", OracleDbType.Int32)).Value = idPiva.HasValue ? idPiva : DBNull.Value;
                     cmd.Parameters.Add(new OracleParameter("p_id_piva", OracleDbType.Int32)).Value = idPiva;
                     cmd.Parameters.Add(new OracleParameter("p_nazev", OracleDbType.Varchar2)).Value = nazev;
@@ -203,7 +197,7 @@ namespace HospodaUBobra
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        string message = idPiva.HasValue ? "Beer updated successfully!" : "Beer added successfully!";
+                        string message = idPiva.HasValue ? "Pivo úspěšně aktualizováno!" : "Pivo úspěšně přidáno!";
                         LoadPivaData();
                         MessageBox.Show(message);
                     }
@@ -235,28 +229,27 @@ namespace HospodaUBobra
 
                         if (rowsAffected > 0)
                         {
-                            MessageBox.Show("Beer deleted successfully!");
-                            LoadPivaData(); // Refresh the DataGridView
-                            selectedBeerId = -1; // Reset the selectedBeerId
+                            MessageBox.Show("Pivo odstraněno úspěšně!");
+                            LoadPivaData(); 
+                            selectedBeerId = -1; 
                             LoadPivaData();
                         }
                         else
                         {
-                            MessageBox.Show("No beer found with the selected ID.");
+                            MessageBox.Show("Pivo s tímto ID nebylo nalezeno.");
                         }
                     }
                 }
                 catch (OracleException ex)
                 {
-                    MessageBox.Show("Oracle error: " + ex.Message);
+                    MessageBox.Show("Oracle chyba: " + ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("General error: " + ex.Message);
+                    MessageBox.Show("Chyba: " + ex.Message);
                 }
             }
-        }
-    
+        }    
 
         private void dgvPiva_SelectionChanged(object sender, EventArgs e)
         {
