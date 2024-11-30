@@ -4,6 +4,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.ApplicationServices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace HospodaUBobra
 {
@@ -1004,7 +1005,7 @@ namespace HospodaUBobra
                     using (OracleCommand cmdUpdateProfile = new OracleCommand(updateQuery, connection))
                     {
                         cmdUpdateProfile.CommandType = CommandType.Text;
-                        cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID ;
+                        cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
 
                         cmdUpdateProfile.ExecuteNonQuery();
                         Console.WriteLine($"{tableName} profile picture ID set to NULL.");
@@ -1034,5 +1035,13 @@ namespace HospodaUBobra
                 }
             }
         }
+
+        private void hierarchiePracovnikuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Hierarchie hierarchie = new Hierarchie();
+            hierarchie.ShowDialog();
+        }
+
+       
     }
 }

@@ -37,6 +37,8 @@
             loginStipItem = new ToolStripMenuItem();
             registerStipItem = new ToolStripMenuItem();
             uploadPfpToolStripMenuItem = new ToolStripMenuItem();
+            nahratToolStripMenuItem = new ToolStripMenuItem();
+            odstranitToolStripMenuItem = new ToolStripMenuItem();
             vytvoritUzivateleToolStripMenuItem = new ToolStripMenuItem();
             spravaKlientuToolStripMenuItem = new ToolStripMenuItem();
             recenzeToolStripMenuItem = new ToolStripMenuItem();
@@ -54,6 +56,7 @@
             objednavkyToolStripMenuItem1 = new ToolStripMenuItem();
             spravaPivovaruToolStripMenuItem = new ToolStripMenuItem();
             vlastniciToolStripMenuItem = new ToolStripMenuItem();
+            hierarchiePracovnikuToolStripMenuItem = new ToolStripMenuItem();
             objednavkyToolStripMenuItem = new ToolStripMenuItem();
             nesplneneObjednavkyToolStripMenuItem = new ToolStripMenuItem();
             evidenceToolStripMenuItem = new ToolStripMenuItem();
@@ -63,8 +66,7 @@
             spravaMestVesnicToolStripMenuItem = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
-            nahratToolStripMenuItem = new ToolStripMenuItem();
-            odstranitToolStripMenuItem = new ToolStripMenuItem();
+            treeView1 = new TreeView();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -76,7 +78,7 @@
             dataGridView1.Location = new Point(12, 24);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(817, 414);
+            dataGridView1.Size = new Size(485, 414);
             dataGridView1.TabIndex = 0;
             // 
             // comboBoxTables
@@ -125,14 +127,14 @@
             // loginStipItem
             // 
             loginStipItem.Name = "loginStipItem";
-            loginStipItem.Size = new Size(180, 22);
+            loginStipItem.Size = new Size(165, 22);
             loginStipItem.Text = "Přihlásit se";
             loginStipItem.Click += loginStipItem_Click;
             // 
             // registerStipItem
             // 
             registerStipItem.Name = "registerStipItem";
-            registerStipItem.Size = new Size(180, 22);
+            registerStipItem.Size = new Size(165, 22);
             registerStipItem.Text = "Registrace";
             registerStipItem.Click += registerStipItem_Click;
             // 
@@ -140,20 +142,34 @@
             // 
             uploadPfpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { nahratToolStripMenuItem, odstranitToolStripMenuItem });
             uploadPfpToolStripMenuItem.Name = "uploadPfpToolStripMenuItem";
-            uploadPfpToolStripMenuItem.Size = new Size(180, 22);
+            uploadPfpToolStripMenuItem.Size = new Size(165, 22);
             uploadPfpToolStripMenuItem.Text = "Profilový obrázek";
+            // 
+            // nahratToolStripMenuItem
+            // 
+            nahratToolStripMenuItem.Name = "nahratToolStripMenuItem";
+            nahratToolStripMenuItem.Size = new Size(123, 22);
+            nahratToolStripMenuItem.Text = "Nahrát";
+            nahratToolStripMenuItem.Click += nahratToolStripMenuItem_Click;
+            // 
+            // odstranitToolStripMenuItem
+            // 
+            odstranitToolStripMenuItem.Name = "odstranitToolStripMenuItem";
+            odstranitToolStripMenuItem.Size = new Size(123, 22);
+            odstranitToolStripMenuItem.Text = "Odstranit";
+            odstranitToolStripMenuItem.Click += odstranitToolStripMenuItem_Click;
             // 
             // vytvoritUzivateleToolStripMenuItem
             // 
             vytvoritUzivateleToolStripMenuItem.Name = "vytvoritUzivateleToolStripMenuItem";
-            vytvoritUzivateleToolStripMenuItem.Size = new Size(180, 22);
+            vytvoritUzivateleToolStripMenuItem.Size = new Size(165, 22);
             vytvoritUzivateleToolStripMenuItem.Text = "Správa uživatelů";
             vytvoritUzivateleToolStripMenuItem.Click += vytvoritUzivateleToolStripMenuItem_Click;
             // 
             // spravaKlientuToolStripMenuItem
             // 
             spravaKlientuToolStripMenuItem.Name = "spravaKlientuToolStripMenuItem";
-            spravaKlientuToolStripMenuItem.Size = new Size(180, 22);
+            spravaKlientuToolStripMenuItem.Size = new Size(165, 22);
             spravaKlientuToolStripMenuItem.Text = "Správa klientů";
             spravaKlientuToolStripMenuItem.Click += spravaKlientuToolStripMenuItem_Click;
             // 
@@ -201,7 +217,7 @@
             // 
             // pivovaryToolStripMenuItem
             // 
-            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem, vyrobkyToolStripMenuItem, objednavkyToolStripMenuItem1, spravaPivovaruToolStripMenuItem, vlastniciToolStripMenuItem });
+            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem, vyrobkyToolStripMenuItem, objednavkyToolStripMenuItem1, spravaPivovaruToolStripMenuItem, vlastniciToolStripMenuItem, hierarchiePracovnikuToolStripMenuItem });
             pivovaryToolStripMenuItem.Name = "pivovaryToolStripMenuItem";
             pivovaryToolStripMenuItem.Size = new Size(64, 20);
             pivovaryToolStripMenuItem.Text = "Pivovary";
@@ -209,7 +225,7 @@
             // lokaceToolStripMenuItem
             // 
             lokaceToolStripMenuItem.Name = "lokaceToolStripMenuItem";
-            lokaceToolStripMenuItem.Size = new Size(158, 22);
+            lokaceToolStripMenuItem.Size = new Size(190, 22);
             lokaceToolStripMenuItem.Text = "Lokace";
             lokaceToolStripMenuItem.Click += lokaceToolStripMenuItem_Click;
             // 
@@ -217,7 +233,7 @@
             // 
             zamestnanciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { zobrazitToolStripMenuItem, spravovatToolStripMenuItem });
             zamestnanciToolStripMenuItem.Name = "zamestnanciToolStripMenuItem";
-            zamestnanciToolStripMenuItem.Size = new Size(158, 22);
+            zamestnanciToolStripMenuItem.Size = new Size(190, 22);
             zamestnanciToolStripMenuItem.Text = "Zaměstnanci";
             zamestnanciToolStripMenuItem.Click += zamestnanciToolStripMenuItem_Click;
             // 
@@ -238,30 +254,37 @@
             // vyrobkyToolStripMenuItem
             // 
             vyrobkyToolStripMenuItem.Name = "vyrobkyToolStripMenuItem";
-            vyrobkyToolStripMenuItem.Size = new Size(158, 22);
+            vyrobkyToolStripMenuItem.Size = new Size(190, 22);
             vyrobkyToolStripMenuItem.Text = "Vyrobky";
             vyrobkyToolStripMenuItem.Click += vyrobkyToolStripMenuItem_Click;
             // 
             // objednavkyToolStripMenuItem1
             // 
             objednavkyToolStripMenuItem1.Name = "objednavkyToolStripMenuItem1";
-            objednavkyToolStripMenuItem1.Size = new Size(158, 22);
+            objednavkyToolStripMenuItem1.Size = new Size(190, 22);
             objednavkyToolStripMenuItem1.Text = "Objednavky";
             objednavkyToolStripMenuItem1.Click += objednavkyToolStripMenuItem1_Click;
             // 
             // spravaPivovaruToolStripMenuItem
             // 
             spravaPivovaruToolStripMenuItem.Name = "spravaPivovaruToolStripMenuItem";
-            spravaPivovaruToolStripMenuItem.Size = new Size(158, 22);
+            spravaPivovaruToolStripMenuItem.Size = new Size(190, 22);
             spravaPivovaruToolStripMenuItem.Text = "Správa pivovarů";
             spravaPivovaruToolStripMenuItem.Click += spravaPivovaruToolStripMenuItem_Click;
             // 
             // vlastniciToolStripMenuItem
             // 
             vlastniciToolStripMenuItem.Name = "vlastniciToolStripMenuItem";
-            vlastniciToolStripMenuItem.Size = new Size(158, 22);
+            vlastniciToolStripMenuItem.Size = new Size(190, 22);
             vlastniciToolStripMenuItem.Text = "Vlastníci";
             vlastniciToolStripMenuItem.Click += vlastniciToolStripMenuItem_Click;
+            // 
+            // hierarchiePracovnikuToolStripMenuItem
+            // 
+            hierarchiePracovnikuToolStripMenuItem.Name = "hierarchiePracovnikuToolStripMenuItem";
+            hierarchiePracovnikuToolStripMenuItem.Size = new Size(190, 22);
+            hierarchiePracovnikuToolStripMenuItem.Text = "Hierarchie pracovníků";
+            hierarchiePracovnikuToolStripMenuItem.Click += hierarchiePracovnikuToolStripMenuItem_Click;
             // 
             // objednavkyToolStripMenuItem
             // 
@@ -330,25 +353,19 @@
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
             // 
-            // nahratToolStripMenuItem
+            // treeView1
             // 
-            nahratToolStripMenuItem.Name = "nahratToolStripMenuItem";
-            nahratToolStripMenuItem.Size = new Size(180, 22);
-            nahratToolStripMenuItem.Text = "Nahrát";
-            nahratToolStripMenuItem.Click += nahratToolStripMenuItem_Click;
-            // 
-            // odstranitToolStripMenuItem
-            // 
-            odstranitToolStripMenuItem.Name = "odstranitToolStripMenuItem";
-            odstranitToolStripMenuItem.Size = new Size(180, 22);
-            odstranitToolStripMenuItem.Text = "Odstranit";
-            odstranitToolStripMenuItem.Click += odstranitToolStripMenuItem_Click;
+            treeView1.Location = new Point(503, 24);
+            treeView1.Name = "treeView1";
+            treeView1.Size = new Size(326, 414);
+            treeView1.TabIndex = 12;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(treeView1);
             Controls.Add(profilePictureBox);
             Controls.Add(btnLogout);
             Controls.Add(currentUserLabel);
@@ -405,5 +422,7 @@
         private ToolStripMenuItem spravaKlientuToolStripMenuItem;
         private ToolStripMenuItem nahratToolStripMenuItem;
         private ToolStripMenuItem odstranitToolStripMenuItem;
+        private ToolStripMenuItem hierarchiePracovnikuToolStripMenuItem;
+        private TreeView treeView1;
     }
 }
