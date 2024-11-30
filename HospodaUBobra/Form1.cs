@@ -593,44 +593,84 @@ namespace HospodaUBobra
                 profilePictureData = ms.ToArray();
             }
 
-            int newPictureId = GetNextPictureId();
-
             using (OracleConnection connection = new OracleConnection(connectionString))
             {
                 connection.Open();
 
-                // Step 1: Insert profile picture into PROFILOVE_OBRAZKY
-                using (OracleCommand cmdPicture = new OracleCommand("sprava_profilove_obrazky", connection))
-                {
-                    cmdPicture.CommandType = CommandType.StoredProcedure;
-
-                    cmdPicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // New picture
-                    cmdPicture.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = newPictureId;
-                    cmdPicture.Parameters.Add("p_picture", OracleDbType.Blob).Value = profilePictureData;
-                    cmdPicture.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = fileName;
-                    cmdPicture.Parameters.Add("p_file_type", OracleDbType.Varchar2).Value = fileType;
-                    cmdPicture.Parameters.Add("p_file_extension", OracleDbType.Varchar2).Value = fileExtension;
-                    cmdPicture.Parameters.Add("p_upload_date", OracleDbType.Date).Value = DateTime.Now;
-
-                    cmdPicture.ExecuteNonQuery();
-                }
-
-                // Step 2: Update the correct table with the PROFILE_OBRAZKY_ID
+                int? profilePictureId = null;
                 string tableName = isClient ? "KLIENTI" : "UZIVATELE";
                 string idColumn = isClient ? "ID_KLIENTA" : "ID_UZIVATELE";
 
-                string updateQuery = $"UPDATE {tableName} SET PROFILE_OBRAZKY_ID = :profilePictureId WHERE {idColumn} = :id";
-                using (OracleCommand cmdUpdate = new OracleCommand(updateQuery, connection))
+                // Step 1: Retrieve the PROFILE_OBRAZKY_ID from the appropriate table
+                string selectQuery = $"SELECT PROFILE_OBRAZKY_ID FROM {tableName} WHERE {idColumn} = :id";
+                using (OracleCommand cmdFetchProfile = new OracleCommand(selectQuery, connection))
                 {
-                    cmdUpdate.CommandType = CommandType.Text;
+                    cmdFetchProfile.CommandType = CommandType.Text;
+                    cmdFetchProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = id;
 
-                    cmdUpdate.Parameters.Add("profilePictureId", OracleDbType.Int32).Value = newPictureId;
-                    cmdUpdate.Parameters.Add("id", OracleDbType.Int32).Value = id;
-
-                    cmdUpdate.ExecuteNonQuery();
+                    using (OracleDataReader reader = cmdFetchProfile.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            profilePictureId = reader["PROFILE_OBRAZKY_ID"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(reader["PROFILE_OBRAZKY_ID"]);
+                        }
+                    }
                 }
 
-                Console.WriteLine($"Profile picture uploaded successfully and associated with {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
+                // Step 2: If PROFILE_OBRAZKY_ID exists, update the existing picture
+                if (profilePictureId != null)
+                {
+                    using (OracleCommand cmdUpdatePicture = new OracleCommand("sprava_profilove_obrazky", connection))
+                    {
+                        cmdUpdatePicture.CommandType = CommandType.StoredProcedure;
+
+                        cmdUpdatePicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = profilePictureId.Value; // Update existing picture
+                        cmdUpdatePicture.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = profilePictureId.Value;
+                        cmdUpdatePicture.Parameters.Add("p_picture", OracleDbType.Blob).Value = profilePictureData;
+                        cmdUpdatePicture.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = fileName;
+                        cmdUpdatePicture.Parameters.Add("p_file_type", OracleDbType.Varchar2).Value = fileType;
+                        cmdUpdatePicture.Parameters.Add("p_file_extension", OracleDbType.Varchar2).Value = fileExtension;
+                        cmdUpdatePicture.Parameters.Add("p_upload_date", OracleDbType.Date).Value = DateTime.Now;
+
+                        cmdUpdatePicture.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    // Step 3: If no PROFILE_OBRAZKY_ID exists, insert a new picture
+                    int newPictureId = GetNextPictureId();
+
+                    using (OracleCommand cmdInsertPicture = new OracleCommand("sprava_profilove_obrazky", connection))
+                    {
+                        cmdInsertPicture.CommandType = CommandType.StoredProcedure;
+
+                        cmdInsertPicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // New picture
+                        cmdInsertPicture.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = newPictureId;
+                        cmdInsertPicture.Parameters.Add("p_picture", OracleDbType.Blob).Value = profilePictureData;
+                        cmdInsertPicture.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = fileName;
+                        cmdInsertPicture.Parameters.Add("p_file_type", OracleDbType.Varchar2).Value = fileType;
+                        cmdInsertPicture.Parameters.Add("p_file_extension", OracleDbType.Varchar2).Value = fileExtension;
+                        cmdInsertPicture.Parameters.Add("p_upload_date", OracleDbType.Date).Value = DateTime.Now;
+
+                        cmdInsertPicture.ExecuteNonQuery();
+                    }
+
+                    // Step 4: Update the table with the new PROFILE_OBRAZKY_ID
+                    string updateQuery = $"UPDATE {tableName} SET PROFILE_OBRAZKY_ID = :profilePictureId WHERE {idColumn} = :id";
+                    using (OracleCommand cmdUpdate = new OracleCommand(updateQuery, connection))
+                    {
+                        cmdUpdate.CommandType = CommandType.Text;
+
+                        cmdUpdate.Parameters.Add("profilePictureId", OracleDbType.Int32).Value = newPictureId;
+                        cmdUpdate.Parameters.Add("id", OracleDbType.Int32).Value = id;
+
+                        cmdUpdate.ExecuteNonQuery();
+                    }
+                }
+
+                Console.WriteLine($"Profile picture successfully {(profilePictureId != null ? "updated" : "uploaded")} for {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
             }
         }
 
