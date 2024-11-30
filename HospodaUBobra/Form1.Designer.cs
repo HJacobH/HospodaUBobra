@@ -66,7 +66,6 @@
             spravaMestVesnicToolStripMenuItem = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
-            treeView1 = new TreeView();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -78,7 +77,7 @@
             dataGridView1.Location = new Point(12, 24);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(485, 414);
+            dataGridView1.Size = new Size(817, 414);
             dataGridView1.TabIndex = 0;
             // 
             // comboBoxTables
@@ -353,19 +352,11 @@
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
             // 
-            // treeView1
-            // 
-            treeView1.Location = new Point(503, 24);
-            treeView1.Name = "treeView1";
-            treeView1.Size = new Size(326, 414);
-            treeView1.TabIndex = 12;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
-            Controls.Add(treeView1);
             Controls.Add(profilePictureBox);
             Controls.Add(btnLogout);
             Controls.Add(currentUserLabel);
@@ -423,6 +414,5 @@
         private ToolStripMenuItem nahratToolStripMenuItem;
         private ToolStripMenuItem odstranitToolStripMenuItem;
         private ToolStripMenuItem hierarchiePracovnikuToolStripMenuItem;
-        private TreeView treeView1;
     }
 }

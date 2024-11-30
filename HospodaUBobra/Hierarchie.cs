@@ -19,10 +19,10 @@ namespace HospodaUBobra
         public Hierarchie()
         {
             InitializeComponent();
-            LoadHierarchyData();
+            LoadPivovary();
         }
 
-        private void LoadHierarchyData()
+        private void LoadHierarchyData(int pivovarId)
         {
             var positions = new List<Position>();
             var employees = new List<Employee>();
@@ -51,10 +51,17 @@ namespace HospodaUBobra
                         }
                     }
 
-                    // Query to fetch employees
-                    string employeeQuery = "SELECT ID_ZAMESTNANCE, JMENO, PRIJMENI, POZICE FROM ZAMESTNANCI";
+                    // Query to fetch employees filtered by PIVOVAR
+                    string employeeQuery = @"
+                    SELECT Z.ID_ZAMESTNANCE, Z.JMENO, Z.PRIJMENI, Z.POZICE 
+                    FROM ZAMESTNANCI Z 
+                    JOIN PRACOVNICI P ON Z.ID_ZAMESTNANCE = P.ZAMESTNANEC_ID_ZAMESTNANCE
+                    WHERE P.PIVOVAR_ID_PIVOVARU = :PivovarId";
+
                     using (OracleCommand employeeCmd = new OracleCommand(employeeQuery, conn))
                     {
+                        employeeCmd.Parameters.Add(new OracleParameter("PivovarId", pivovarId));
+
                         using (OracleDataReader reader = employeeCmd.ExecuteReader())
                         {
                             while (reader.Read())
@@ -92,8 +99,50 @@ namespace HospodaUBobra
             public int PositionID { get; set; }
         }
 
+        private void LoadPivovary()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = "SELECT DISTINCT PIVOVAR_ID_PIVOVARU FROM PRACOVNICI";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            comboBoxPivovary.Items.Clear();
+
+                            while (reader.Read())
+                            {
+                                int pivovarId = reader.GetInt32(0);
+                                comboBoxPivovary.Items.Add(pivovarId);
+                            }
+
+                            if (comboBoxPivovary.Items.Count > 0)
+                            {
+                                comboBoxPivovary.SelectedIndex = 0; // Select the first PIVOVAR by default
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading Pivovary: {ex.Message}");
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
         private void BuildTreeView(List<Position> positions, List<Employee> employees)
         {
+            treeView.Nodes.Clear();
+
             // Create a dictionary for easy lookup
             var positionLookup = new Dictionary<int, Position>();
             foreach (var position in positions)
@@ -151,6 +200,17 @@ namespace HospodaUBobra
         private void btnback_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void comboBoxPivovary_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBoxPivovary.SelectedItem != null)
+            {
+                int selectedPivovar = (int)comboBoxPivovary.SelectedItem;
+                
+                LoadHierarchyData(selectedPivovar);
+                treeView.ExpandAll();
+            }
         }
     }
 }
