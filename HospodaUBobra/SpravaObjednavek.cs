@@ -152,8 +152,35 @@ namespace HospodaUBobra
             DateTime orderDate = dtpOrderDate.Value;
             DateTime? deliveryDate = dtpDeliveryDate.Checked ? (DateTime?)dtpDeliveryDate.Value : null;
 
-            ManageOrder(null, clientId, orderStatusId, orderDate, deliveryDate);
 
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                using (OracleCommand cmd = new OracleCommand("sprava_objednavky", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // Pass parameters for adding a new order
+                    cmd.Parameters.Add(new OracleParameter("p_identifikator", OracleDbType.Int32)).Value = DBNull.Value;
+                    cmd.Parameters.Add(new OracleParameter("p_id_objednavky", OracleDbType.Int32)).Value = DBNull.Value; // Let the procedure handle the ID
+                    cmd.Parameters.Add(new OracleParameter("p_klient_id", OracleDbType.Int32)).Value = clientId;
+                    cmd.Parameters.Add(new OracleParameter("p_stav_objednavky_id", OracleDbType.Int32)).Value = orderStatusId;
+                    cmd.Parameters.Add(new OracleParameter("p_datum_obj", OracleDbType.Date)).Value = orderDate;
+                    cmd.Parameters.Add(new OracleParameter("p_datum_dod", OracleDbType.Date)).Value = deliveryDate.HasValue ? (object)deliveryDate.Value : DBNull.Value;
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        MessageBox.Show("Order added successfully!");
+                        LoadOrders();
+                        ClearFormFields();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error adding order: " + ex.Message);
+                    }
+                }
+            }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -175,8 +202,34 @@ namespace HospodaUBobra
             DateTime orderDate = dtpOrderDate.Value;
             DateTime? deliveryDate = dtpDeliveryDate.Checked ? (DateTime?)dtpDeliveryDate.Value : null;
 
-            ManageOrder(selectedOrderId, clientId, orderStatusId, orderDate, deliveryDate);
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                using (OracleCommand cmd = new OracleCommand("sprava_objednavky", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
 
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedOrderId;
+                    cmd.Parameters.Add("p_id_objednavky", OracleDbType.Int32).Value = selectedOrderId;
+                    cmd.Parameters.Add("p_klient_id", OracleDbType.Int32).Value = clientId;
+                    cmd.Parameters.Add("p_stav_objednavky_id", OracleDbType.Int32).Value = orderStatusId;
+                    cmd.Parameters.Add("p_datum_obj", OracleDbType.Date).Value = orderDate;
+                    cmd.Parameters.Add("p_datum_dod", OracleDbType.Date).Value = deliveryDate.HasValue ? (object)deliveryDate.Value : DBNull.Value;
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        MessageBox.Show("Order updated successfully!");
+                        LoadOrders();
+                        ClearFormFields();
+                        selectedOrderId = -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error updating order: " + ex.Message);
+                    }
+                }
+            }
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -211,39 +264,6 @@ namespace HospodaUBobra
                     catch (Exception ex)
                     {
                         MessageBox.Show("Error deleting order: " + ex.Message);
-                    }
-                }
-            }
-        }
-
-        private void ManageOrder(int? orderId, int clientId, int orderStatusId, DateTime orderDate, DateTime? deliveryDate)
-        {
-            using (OracleConnection conn = new OracleConnection(connectionString))
-            {
-                conn.Open();
-                using (OracleCommand cmd = new OracleCommand("sprava_objednavky", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.Add(new OracleParameter("p_identifikator", OracleDbType.Int32)).Value = orderId.HasValue ? orderId : DBNull.Value;
-                    cmd.Parameters.Add(new OracleParameter("p_id_objednavky", OracleDbType.Int32)).Value = orderId.HasValue ? orderId : DBNull.Value;
-                    cmd.Parameters.Add(new OracleParameter("p_klient_id", OracleDbType.Int32)).Value = clientId;
-                    cmd.Parameters.Add(new OracleParameter("p_stav_objednavky_id", OracleDbType.Int32)).Value = orderStatusId;
-                    cmd.Parameters.Add(new OracleParameter("p_datum_obj", OracleDbType.Date)).Value = orderDate;
-                    cmd.Parameters.Add(new OracleParameter("p_datum_dod", OracleDbType.Date)).Value = deliveryDate.HasValue ? (object)deliveryDate : DBNull.Value;
-
-                    try
-                    {
-                        cmd.ExecuteNonQuery();
-                        string message = orderId.HasValue ? "Order updated successfully!" : "Order added successfully!";
-                        MessageBox.Show(message);
-                        LoadOrders();
-                        ClearFormFields();
-                        selectedOrderId = -1;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error managing order: " + ex.Message);
                     }
                 }
             }
