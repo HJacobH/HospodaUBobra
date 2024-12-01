@@ -23,6 +23,10 @@ namespace HospodaUBobra
             LoadMestoVesnice();
             LoadDruhVlastnika();
 
+            LoadDruhVlastnikaAudit();
+            LoadMestaAudit();
+            LoadPivovarAudit();
+
             dgvOwners.AutoGenerateColumns = true;
         }
 
@@ -38,6 +42,7 @@ namespace HospodaUBobra
             cbDruhVlastnika.DisplayMember = "Item2"; // Display FO/PO
             cbDruhVlastnika.ValueMember = "Item1";  // Use FO/PO as the actual value
             cbDruhVlastnika.SelectedIndex = -1;
+
         }
 
         private void LoadMestoVesnice()
@@ -329,88 +334,174 @@ namespace HospodaUBobra
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string ownerType = null;
-            int? cityId = 20;
-            int? breweryId = null;
-
-            // Call the method to load the data into the DataGridView
-            LoadOwnershipAudit(ownerType, cityId, breweryId);
-        }
-
-        private void LoadOwnershipAudit(string ownerType, int? cityId, int? breweryId)
-        {
-            string logFilePath = "debug_log.txt";
-
             try
             {
-                using (OracleConnection conn = new OracleConnection(connectionString))
+                // Get selected values from the comboboxes
+                string ownerType = cbDruhVlastnikaAudit.SelectedValue?.ToString();
+                int? cityId = cbMestaAudit.SelectedValue as int?;
+                int? breweryId = cbPivovarAudit.SelectedValue as int?;
+
+                using (var connection = new OracleConnection(connectionString))
                 {
-                    conn.Open();
+                    connection.Open();
 
-                    using (OracleCommand cmd = new OracleCommand("AuditBreweryOwnership", conn))
+                    using (var command = new OracleCommand("AuditBreweryOwnership", connection))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                        command.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_owner_type", OracleDbType.Varchar2).Value = string.IsNullOrEmpty(ownerType) ? DBNull.Value : ownerType;
-                        cmd.Parameters.Add("p_city_id", OracleDbType.Int32).Value = cityId.HasValue ? (object)cityId.Value : DBNull.Value;
-                        cmd.Parameters.Add("p_brewery_id", OracleDbType.Int32).Value = breweryId.HasValue ? (object)breweryId.Value : DBNull.Value;
+                        // Define the procedure parameters with selected combobox values
+                        command.Parameters.Add("p_owner_type", OracleDbType.Varchar2).Value = (object)ownerType ?? DBNull.Value;
+                        command.Parameters.Add("p_city_id", OracleDbType.Int32).Value = (object)cityId ?? DBNull.Value;
+                        command.Parameters.Add("p_brewery_id", OracleDbType.Int32).Value = (object)breweryId ?? DBNull.Value;
 
-                        cmd.Parameters.Add("p_results", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
-
-                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        // Define the output parameter for the ref cursor
+                        var resultsParam = new OracleParameter("p_results", OracleDbType.RefCursor)
                         {
-                            DataTable dataTable = new DataTable();
-                            adapter.Fill(dataTable);
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(resultsParam);
 
-                            // Debug log for all rows
-                            using (StreamWriter writer = new StreamWriter(logFilePath, true))
-                            {
-                                writer.WriteLine("=== DEBUG LOG ===");
-                                writer.WriteLine($"Timestamp: {DateTime.Now}");
+                        // Execute the procedure and retrieve the results
+                        using (var reader = command.ExecuteReader())
+                        {
+                            // Load results into a DataTable
+                            var dataTable = new DataTable();
+                            dataTable.Load(reader);
 
-                                foreach (DataRow row in dataTable.Rows)
-                                {
-                                    writer.WriteLine("Row: " + string.Join(", ", row.ItemArray.Select(item => item ?? "NULL")));
-                                }
-
-                                writer.WriteLine("=== END OF LOG ===");
-                            }
-
-                            // Bind the DataTable to the DataGridView
-                            dgvOwners.DataSource = null; // Clear previous binding
-                            dgvOwners.Rows.Clear();
-                            dgvOwners.Columns.Clear();
-
-                            dgvOwners.DataSource = dataTable;
-                            dgvOwners.AutoGenerateColumns = true;
-                            dgvOwners.Refresh();
-
-                            // Debug DataGridView rows
-                            Console.WriteLine($"Rows in DataGridView: {dgvOwners.Rows.Count}");
-                            foreach (DataGridViewRow row in dgvOwners.Rows)
-                            {
-                                if (!row.IsNewRow) // Exclude empty new row
-                                {
-                                    Console.WriteLine($"Row: {row.Cells["Owner_ID"].Value}, {row.Cells["First_Name"].Value}, {row.Cells["Last_Name"].Value}");
-                                }
-                            }
+                            // Display results in a DataGridView inside a popup window
+                            DisplayResultsInPopup(dataTable);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                using (StreamWriter writer = new StreamWriter(logFilePath, true))
-                {
-                    writer.WriteLine("=== ERROR LOG ===");
-                    writer.WriteLine($"Timestamp: {DateTime.Now}");
-                    writer.WriteLine($"Error: {ex.Message}");
-                    writer.WriteLine("=== END OF ERROR LOG ===");
-                }
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-                MessageBox.Show($"An error occurred: {ex.Message}");
+        }
+
+        private void DisplayResultsInPopup(DataTable dataTable)
+        {
+            // Create a new form for displaying results
+            var form = new Form
+            {
+                Text = "Audit Brewery Ownership Results",
+                Width = 800,
+                Height = 600
+            };
+
+            // Create a DataGridView to display the data
+            var dataGridView = new DataGridView
+            {
+                DataSource = dataTable,
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ReadOnly = true
+            };
+
+            // Add the DataGridView to the form
+            form.Controls.Add(dataGridView);
+
+            // Show the form as a modal dialog
+            form.ShowDialog();
+        }
+
+        private void LoadDruhVlastnikaAudit()
+        {
+            // Define a list of values including a blank option for unfiltered searches
+            var druhVlastnikaAudit = new List<Tuple<string, string>>()
+    {
+        new Tuple<string, string>("", "All (No Filter)"), // Blank option
+        new Tuple<string, string>("FO", "Physical Person"), // Option for FO
+        new Tuple<string, string>("PO", "Legal Person") // Option for PO
+    };
+
+            // Bind the list to the ComboBox
+            cbDruhVlastnikaAudit.DataSource = druhVlastnikaAudit;
+            cbDruhVlastnikaAudit.DisplayMember = "Item2"; // Display text (e.g., "All (No Filter)")
+            cbDruhVlastnikaAudit.ValueMember = "Item1"; // Actual value (e.g., "", "FO", "PO")
+            cbDruhVlastnikaAudit.SelectedIndex = 0; // Default selection to "All (No Filter)"
+        }
+
+        private void LoadMestaAudit()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT ID_MES_VES, NAZEV FROM MESTA_VESNICE";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    using (OracleDataReader reader = cmd.ExecuteReader())
+                    {
+                        var mestaList = new List<Tuple<int?, string>>();
+
+                        // Add a blank option for no filter
+                        mestaList.Add(new Tuple<int?, string>(null, "All (No Filter)"));
+
+                        // Add the rest of the cities from the database
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            string name = reader.GetString(1);
+                            mestaList.Add(new Tuple<int?, string>(id, name));
+                        }
+
+                        // Bind the list to the ComboBox
+                        cbMestaAudit.DataSource = mestaList;
+                        cbMestaAudit.DisplayMember = "Item2"; // Display the city name
+                        cbMestaAudit.ValueMember = "Item1";   // Use the city ID as the value
+                        cbMestaAudit.SelectedIndex = 0;      // Default to "All (No Filter)"
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading cities: " + ex.Message);
+                }
             }
         }
+
+        private void LoadPivovarAudit()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT ID_PIVOVARU, NAZEV FROM PIVOVARY";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    using (OracleDataReader reader = cmd.ExecuteReader())
+                    {
+                        var pivovarList = new List<Tuple<int?, string>>();
+
+                        // Add a blank option for no filter
+                        pivovarList.Add(new Tuple<int?, string>(null, "All (No Filter)"));
+
+                        // Add the rest of the breweries from the database
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            string name = reader.GetString(1);
+                            pivovarList.Add(new Tuple<int?, string>(id, name));
+                        }
+
+                        // Bind the list to the ComboBox
+                        cbPivovarAudit.DataSource = pivovarList;
+                        cbPivovarAudit.DisplayMember = "Item2"; // Display the brewery name
+                        cbPivovarAudit.ValueMember = "Item1";   // Use the brewery ID as the value
+                        cbPivovarAudit.SelectedIndex = 0;      // Default to "All (No Filter)"
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading breweries: " + ex.Message);
+                }
+            }
+        }
+
 
     }
 }

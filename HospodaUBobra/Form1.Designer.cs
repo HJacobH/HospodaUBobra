@@ -56,6 +56,8 @@
             objednavkyToolStripMenuItem1 = new ToolStripMenuItem();
             spravaPivovaruToolStripMenuItem = new ToolStripMenuItem();
             vlastniciToolStripMenuItem = new ToolStripMenuItem();
+            spravaToolStripMenuItem = new ToolStripMenuItem();
+            vlastniciSVicePivovaryToolStripMenuItem = new ToolStripMenuItem();
             hierarchiePracovnikuToolStripMenuItem = new ToolStripMenuItem();
             objednavkyToolStripMenuItem = new ToolStripMenuItem();
             nesplneneObjednavkyToolStripMenuItem = new ToolStripMenuItem();
@@ -66,7 +68,6 @@
             spravaMestVesnicToolStripMenuItem = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
-            auditToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -274,11 +275,24 @@
             // 
             // vlastniciToolStripMenuItem
             // 
-            vlastniciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { auditToolStripMenuItem });
+            vlastniciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { spravaToolStripMenuItem, vlastniciSVicePivovaryToolStripMenuItem });
             vlastniciToolStripMenuItem.Name = "vlastniciToolStripMenuItem";
             vlastniciToolStripMenuItem.Size = new Size(190, 22);
             vlastniciToolStripMenuItem.Text = "Vlastníci";
-            vlastniciToolStripMenuItem.Click += vlastniciToolStripMenuItem_Click;
+            // 
+            // spravaToolStripMenuItem
+            // 
+            spravaToolStripMenuItem.Name = "spravaToolStripMenuItem";
+            spravaToolStripMenuItem.Size = new Size(198, 22);
+            spravaToolStripMenuItem.Text = "Správa";
+            spravaToolStripMenuItem.Click += spravaToolStripMenuItem_Click;
+            // 
+            // vlastniciSVicePivovaryToolStripMenuItem
+            // 
+            vlastniciSVicePivovaryToolStripMenuItem.Name = "vlastniciSVicePivovaryToolStripMenuItem";
+            vlastniciSVicePivovaryToolStripMenuItem.Size = new Size(198, 22);
+            vlastniciSVicePivovaryToolStripMenuItem.Text = "Vlastníci s více pivovary";
+            vlastniciSVicePivovaryToolStripMenuItem.Click += vlastniciSVicePivovaryToolStripMenuItem_Click;
             // 
             // hierarchiePracovnikuToolStripMenuItem
             // 
@@ -354,13 +368,6 @@
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
             // 
-            // auditToolStripMenuItem
-            // 
-            auditToolStripMenuItem.Name = "auditToolStripMenuItem";
-            auditToolStripMenuItem.Size = new Size(180, 22);
-            auditToolStripMenuItem.Text = "Audit";
-            auditToolStripMenuItem.Click += auditToolStripMenuItem_Click;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -423,6 +430,7 @@
         private ToolStripMenuItem nahratToolStripMenuItem;
         private ToolStripMenuItem odstranitToolStripMenuItem;
         private ToolStripMenuItem hierarchiePracovnikuToolStripMenuItem;
-        private ToolStripMenuItem auditToolStripMenuItem;
+        private ToolStripMenuItem spravaToolStripMenuItem;
+        private ToolStripMenuItem vlastniciSVicePivovaryToolStripMenuItem;
     }
 }

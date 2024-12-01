@@ -671,7 +671,7 @@ namespace HospodaUBobra
                     }
                 }
 
-                Console.WriteLine($"Profile picture successfully {(profilePictureId != null ? "updated" : "uploaded")} for {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
+                MessageBox.Show($"Profile picture successfully {(profilePictureId != null ? "updated" : "uploaded")} for {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
             }
         }
 
@@ -901,11 +901,6 @@ namespace HospodaUBobra
             spravaPivovaru.ShowDialog();
         }
 
-        private void vlastniciToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SpravaVlastnikuPivovaru spravaVlastnikuPivovaru = new SpravaVlastnikuPivovaru();
-            spravaVlastnikuPivovaru.ShowDialog();
-        }
 
         private void spravaKlientuToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -953,85 +948,96 @@ namespace HospodaUBobra
         {
             if (UserSession.Role != "Anonymous")
             {
-                bool isClient;
-                if (UserSession.Role == "Klient")
-                {
-                    isClient = true;
-                }
-                else
-                {
-                    isClient = false;
-                }
+                bool isClient = UserSession.Role == "Klient";
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
                     connection.Open();
 
-                    int? profilePictureId = null;
-                    string tableName = isClient ? "KLIENTI" : "UZIVATELE";
-                    string idColumn = isClient ? "ID_KLIENTA" : "ID_UZIVATELE";
-
-                    // Step 1: Retrieve the PROFILE_OBRAZEK_ID from the appropriate table
-                    string selectQuery = $"SELECT PROFILE_OBRAZKY_ID FROM {tableName} WHERE {idColumn} = :id";
-                    using (OracleCommand cmdFetchProfile = new OracleCommand(selectQuery, connection))
+                    // Begin a transaction
+                    using (OracleTransaction transaction = connection.BeginTransaction())
                     {
-                        cmdFetchProfile.CommandType = CommandType.Text;
-                        cmdFetchProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
-
-                        using (OracleDataReader reader = cmdFetchProfile.ExecuteReader())
+                        try
                         {
-                            if (reader.Read())
+                            int? profilePictureId = null;
+                            string tableName = isClient ? "KLIENTI" : "UZIVATELE";
+                            string idColumn = isClient ? "ID_KLIENTA" : "ID_UZIVATELE";
+
+                            // Step 1: Retrieve the PROFILE_OBRAZEK_ID
+                            string selectQuery = $"SELECT PROFILE_OBRAZKY_ID FROM {tableName} WHERE {idColumn} = :id";
+                            using (OracleCommand cmdFetchProfile = new OracleCommand(selectQuery, connection))
                             {
-                                profilePictureId = reader["PROFILE_OBRAZKY_ID"] == DBNull.Value
-                                    ? (int?)null
-                                    : Convert.ToInt32(reader["PROFILE_OBRAZKY_ID"]);
+                                cmdFetchProfile.Transaction = transaction; // Set the transaction explicitly
+                                cmdFetchProfile.CommandType = CommandType.Text;
+                                cmdFetchProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
+
+                                using (OracleDataReader reader = cmdFetchProfile.ExecuteReader())
+                                {
+                                    if (reader.Read())
+                                    {
+                                        profilePictureId = reader["PROFILE_OBRAZKY_ID"] == DBNull.Value
+                                            ? (int?)null
+                                            : Convert.ToInt32(reader["PROFILE_OBRAZKY_ID"]);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"{tableName} entry not found.");
+                                    }
+                                }
                             }
-                            else
+
+
+                            // Step 2: Check if there is an associated profile picture
+                            if (profilePictureId == null)
                             {
-                                throw new Exception($"{tableName} entry not found.");
+                                MessageBox.Show($"{tableName} entity does not have a profile picture to delete.");
+                                transaction.Rollback();
+                                return;
                             }
+
+                            // Step 3: Set the PROFILE_OBRAZKY_ID to NULL
+                            string updateQuery = $"UPDATE {tableName} SET PROFILE_OBRAZKY_ID = NULL WHERE {idColumn} = :id";
+                            using (OracleCommand cmdUpdateProfile = new OracleCommand(updateQuery, connection))
+                            {
+                                cmdUpdateProfile.CommandType = CommandType.Text;
+                                cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.Role; //OVER HERE
+
+                                cmdUpdateProfile.ExecuteNonQuery();
+                                MessageBox.Show($"{tableName} profile picture ID set to NULL.");
+                            }
+
+                            // Step 4: Delete the profile picture from the PROFILOVE_OBRAZKY table
+                            string deleteQuery = "DELETE FROM PROFILOVE_OBRAZKY WHERE ID_PICTURE = :profilePictureId";
+                            using (OracleCommand cmdDeletePicture = new OracleCommand(deleteQuery, connection))
+                            {
+                                cmdDeletePicture.CommandType = CommandType.Text;
+                                cmdDeletePicture.Parameters.Add(new OracleParameter("profilePictureId", OracleDbType.Int32)).Value = profilePictureId.Value;
+
+                                int rowsAffected = cmdDeletePicture.ExecuteNonQuery();
+                                if (rowsAffected > 0)
+                                {
+                                    MessageBox.Show("Profile picture deleted successfully.");
+                                }
+                                else
+                                {
+                                    throw new Exception("No profile picture found with the given ID.");
+                                }
+                            }
+
+
+
+                            // Commit the transaction
+                            transaction.Commit();
+                            UpdateProfilePictureAsync(UserSession.UserID); // This should be outside the transaction
+                            MessageBox.Show($"{tableName} profile picture deleted successfully.");
                         }
-                    }
-
-                    // Step 2: Check if there is an associated profile picture
-                    if (profilePictureId == null)
-                    {
-                        Console.WriteLine($"{tableName} entity does not have a profile picture to delete.");
-                        return;
-                    }
-
-                    // Step 3: Set the PROFILE_OBRAZEK_ID to NULL in the appropriate table
-                    string updateQuery = $"UPDATE {tableName} SET PROFILE_OBRAZKY_ID = NULL WHERE {idColumn} = :id";
-                    using (OracleCommand cmdUpdateProfile = new OracleCommand(updateQuery, connection))
-                    {
-                        cmdUpdateProfile.CommandType = CommandType.Text;
-                        cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
-
-                        cmdUpdateProfile.ExecuteNonQuery();
-                        Console.WriteLine($"{tableName} profile picture ID set to NULL.");
-                    }
-
-                    // Step 4: Delete the profile picture from the PROFILOVE_OBRAZKY table
-                    string deleteQuery = "DELETE FROM PROFILOVE_OBRAZKY WHERE ID_PICTURE = :profilePictureId";
-                    using (OracleCommand cmdDeletePicture = new OracleCommand(deleteQuery, connection))
-                    {
-                        cmdDeletePicture.CommandType = CommandType.Text;
-                        cmdDeletePicture.Parameters.Add(new OracleParameter("profilePictureId", OracleDbType.Int32)).Value = profilePictureId.Value;
-
-                        int rowsAffected = cmdDeletePicture.ExecuteNonQuery();
-                        if (rowsAffected > 0)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Profile picture deleted successfully.");
-                        }
-                        else
-                        {
-                            Console.WriteLine("No profile picture found with the given ID.");
+                            // Rollback the transaction on error
+                            transaction.Rollback();
+                            MessageBox.Show($"An error occurred: {ex.Message}");
                         }
                     }
-
-                    UpdateProfilePictureAsync(UserSession.UserID);
-
-                    Console.WriteLine($"{tableName} profile picture deleted successfully.");
                 }
             }
         }
@@ -1042,62 +1048,46 @@ namespace HospodaUBobra
             hierarchie.ShowDialog();
         }
 
-        private void auditToolStripMenuItem_Click(object sender, EventArgs e)
+        private void spravaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string plsqlBlock = @"
-        DECLARE
-            multiple_brewery_owners_cursor SYS_REFCURSOR;
-        BEGIN
-            OPEN multiple_brewery_owners_cursor FOR
-                SELECT 
-                    VP.ID_VLASTNIKA AS OWNER_ID,
-                    NVL(VP.JMENO_NAZEV, '') || ' ' || NVL(VP.PRIJMENI, '') AS OWNER_NAME,
-                    COUNT(V.PIVOVAR_ID_PIVOVARU) AS BREWERY_COUNT
-                FROM 
-                    VLASTNICI_PIVOVARU VP
-                JOIN 
-                    VLASTNICTVI V ON VP.ID_VLASTNIKA = V.VLASTNIK_PIVOVARU_ID_VLASTNIKA
-                GROUP BY 
-                    VP.ID_VLASTNIKA, VP.JMENO_NAZEV, VP.PRIJMENI
-                HAVING 
-                    COUNT(V.PIVOVAR_ID_PIVOVARU) > 1;
+            SpravaVlastnikuPivovaru spravaVlastnikuPivovaru = new SpravaVlastnikuPivovaru();
+            spravaVlastnikuPivovaru.ShowDialog();
+        }
 
-            :cursor_out := multiple_brewery_owners_cursor;
-        END;";
-
+        private void vlastniciSVicePivovaryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 try
                 {
-                    // Open the connection
                     conn.Open();
 
-                    // Create the OracleCommand
-                    OracleCommand cmd = new OracleCommand(plsqlBlock, conn)
+                    // Create a command to call the stored procedure
+                    using (OracleCommand cmd = new OracleCommand("GetMultipleBreweryOwnersWithBreweries", conn))
                     {
-                        CommandType = CommandType.Text
-                    };
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Add the REF CURSOR output parameter
-                    OracleParameter cursorOutParam = new OracleParameter("cursor_out", OracleDbType.RefCursor)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-                    cmd.Parameters.Add(cursorOutParam);
+                        // Define the OUT parameter for the cursor
+                        cmd.Parameters.Add("result_cursor", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
 
-                    // Execute the command
-                    OracleDataReader reader = cmd.ExecuteReader();
+                        // Execute the command and load the cursor data into a DataTable
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            DataTable dataTable = new DataTable();
+                            dataTable.Load(reader);
 
-                    // Load the data into a DataTable
-                    DataTable dataTable = new DataTable();
-                    dataTable.Load(reader);
-
-                    // Bind the DataTable to the DataGridView
-                    dataGridView1.DataSource = dataTable;
+                            // Bind the DataTable to the DataGridView
+                            dataGridView1.DataSource = dataTable;
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show($"Oracle error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message);
+                    MessageBox.Show($"General error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

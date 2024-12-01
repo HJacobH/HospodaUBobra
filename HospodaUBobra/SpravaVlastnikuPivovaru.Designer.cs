@@ -51,6 +51,9 @@
             btnAdd = new Button();
             btnClear = new Button();
             button1 = new Button();
+            cbMestaAudit = new ComboBox();
+            cbDruhVlastnikaAudit = new ComboBox();
+            cbPivovarAudit = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)dgvOwners).BeginInit();
             SuspendLayout();
             // 
@@ -253,11 +256,38 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // cbMestaAudit
+            // 
+            cbMestaAudit.FormattingEnabled = true;
+            cbMestaAudit.Location = new Point(363, 50);
+            cbMestaAudit.Name = "cbMestaAudit";
+            cbMestaAudit.Size = new Size(100, 23);
+            cbMestaAudit.TabIndex = 35;
+            // 
+            // cbDruhVlastnikaAudit
+            // 
+            cbDruhVlastnikaAudit.FormattingEnabled = true;
+            cbDruhVlastnikaAudit.Location = new Point(363, 21);
+            cbDruhVlastnikaAudit.Name = "cbDruhVlastnikaAudit";
+            cbDruhVlastnikaAudit.Size = new Size(100, 23);
+            cbDruhVlastnikaAudit.TabIndex = 36;
+            // 
+            // cbPivovarAudit
+            // 
+            cbPivovarAudit.FormattingEnabled = true;
+            cbPivovarAudit.Location = new Point(363, 79);
+            cbPivovarAudit.Name = "cbPivovarAudit";
+            cbPivovarAudit.Size = new Size(100, 23);
+            cbPivovarAudit.TabIndex = 37;
+            // 
             // SpravaVlastnikuPivovaru
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(626, 601);
+            Controls.Add(cbPivovarAudit);
+            Controls.Add(cbDruhVlastnikaAudit);
+            Controls.Add(cbMestaAudit);
             Controls.Add(button1);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
@@ -313,5 +343,8 @@
         private Button btnAdd;
         private Button btnClear;
         private Button button1;
+        private ComboBox cbMestaAudit;
+        private ComboBox cbDruhVlastnikaAudit;
+        private ComboBox cbPivovarAudit;
     }
 }
