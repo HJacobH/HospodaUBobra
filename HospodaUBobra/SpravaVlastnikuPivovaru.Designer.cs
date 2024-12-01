@@ -54,6 +54,9 @@
             cbMestaAudit = new ComboBox();
             cbDruhVlastnikaAudit = new ComboBox();
             cbPivovarAudit = new ComboBox();
+            label9 = new Label();
+            label10 = new Label();
+            label11 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvOwners).BeginInit();
             SuspendLayout();
             // 
@@ -238,7 +241,7 @@
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(537, 10);
+            btnClear.Location = new Point(226, 10);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(75, 43);
             btnClear.TabIndex = 33;
@@ -248,18 +251,18 @@
             // 
             // button1
             // 
-            button1.Location = new Point(537, 74);
+            button1.Location = new Point(512, 67);
             button1.Name = "button1";
-            button1.Size = new Size(75, 23);
+            button1.Size = new Size(100, 34);
             button1.TabIndex = 34;
-            button1.Text = "button1";
+            button1.Text = "Filtrovat";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
             // cbMestaAudit
             // 
             cbMestaAudit.FormattingEnabled = true;
-            cbMestaAudit.Location = new Point(363, 50);
+            cbMestaAudit.Location = new Point(406, 74);
             cbMestaAudit.Name = "cbMestaAudit";
             cbMestaAudit.Size = new Size(100, 23);
             cbMestaAudit.TabIndex = 35;
@@ -267,7 +270,7 @@
             // cbDruhVlastnikaAudit
             // 
             cbDruhVlastnikaAudit.FormattingEnabled = true;
-            cbDruhVlastnikaAudit.Location = new Point(363, 21);
+            cbDruhVlastnikaAudit.Location = new Point(406, 45);
             cbDruhVlastnikaAudit.Name = "cbDruhVlastnikaAudit";
             cbDruhVlastnikaAudit.Size = new Size(100, 23);
             cbDruhVlastnikaAudit.TabIndex = 36;
@@ -275,16 +278,46 @@
             // cbPivovarAudit
             // 
             cbPivovarAudit.FormattingEnabled = true;
-            cbPivovarAudit.Location = new Point(363, 79);
+            cbPivovarAudit.Location = new Point(406, 103);
             cbPivovarAudit.Name = "cbPivovarAudit";
             cbPivovarAudit.Size = new Size(100, 23);
             cbPivovarAudit.TabIndex = 37;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(315, 48);
+            label9.Name = "label9";
+            label9.Size = new Size(85, 15);
+            label9.TabIndex = 38;
+            label9.Text = "Druh vlastníka:";
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new Point(315, 77);
+            label10.Name = "label10";
+            label10.Size = new Size(87, 15);
+            label10.TabIndex = 39;
+            label10.Text = "Město/Vesnice:";
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new Point(315, 106);
+            label11.Name = "label11";
+            label11.Size = new Size(49, 15);
+            label11.TabIndex = 40;
+            label11.Text = "Pivovar:";
             // 
             // SpravaVlastnikuPivovaru
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(626, 601);
+            Controls.Add(label11);
+            Controls.Add(label10);
+            Controls.Add(label9);
             Controls.Add(cbPivovarAudit);
             Controls.Add(cbDruhVlastnikaAudit);
             Controls.Add(cbMestaAudit);
@@ -346,5 +379,8 @@
         private ComboBox cbMestaAudit;
         private ComboBox cbDruhVlastnikaAudit;
         private ComboBox cbPivovarAudit;
+        private Label label9;
+        private Label label10;
+        private Label label11;
     }
 }

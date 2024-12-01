@@ -1091,5 +1091,43 @@ namespace HospodaUBobra
                 }
             }
         }
+
+        private void topMestaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("GetTopCitiesWithMostBreweries", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Add the output parameter for the cursor
+                        OracleParameter cursorOutParam = new OracleParameter("cursor_out", OracleDbType.RefCursor)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        cmd.Parameters.Add(cursorOutParam);
+
+                        // Execute the procedure and retrieve the cursor
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            // Load data into a DataTable
+                            DataTable dataTable = new DataTable();
+                            dataTable.Load(reader);
+
+                            // Bind the DataTable to the DataGridView
+                            dataGridView1.DataSource = dataTable;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message);
+                }
+            }
+        }
     }
 }

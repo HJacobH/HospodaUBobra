@@ -59,6 +59,7 @@
             spravaToolStripMenuItem = new ToolStripMenuItem();
             vlastniciSVicePivovaryToolStripMenuItem = new ToolStripMenuItem();
             hierarchiePracovnikuToolStripMenuItem = new ToolStripMenuItem();
+            topMestaToolStripMenuItem = new ToolStripMenuItem();
             objednavkyToolStripMenuItem = new ToolStripMenuItem();
             nesplneneObjednavkyToolStripMenuItem = new ToolStripMenuItem();
             evidenceToolStripMenuItem = new ToolStripMenuItem();
@@ -218,7 +219,7 @@
             // 
             // pivovaryToolStripMenuItem
             // 
-            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem, vyrobkyToolStripMenuItem, objednavkyToolStripMenuItem1, spravaPivovaruToolStripMenuItem, vlastniciToolStripMenuItem, hierarchiePracovnikuToolStripMenuItem });
+            pivovaryToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lokaceToolStripMenuItem, zamestnanciToolStripMenuItem, vyrobkyToolStripMenuItem, objednavkyToolStripMenuItem1, spravaPivovaruToolStripMenuItem, vlastniciToolStripMenuItem, hierarchiePracovnikuToolStripMenuItem, topMestaToolStripMenuItem });
             pivovaryToolStripMenuItem.Name = "pivovaryToolStripMenuItem";
             pivovaryToolStripMenuItem.Size = new Size(64, 20);
             pivovaryToolStripMenuItem.Text = "Pivovary";
@@ -300,6 +301,13 @@
             hierarchiePracovnikuToolStripMenuItem.Size = new Size(190, 22);
             hierarchiePracovnikuToolStripMenuItem.Text = "Hierarchie pracovníků";
             hierarchiePracovnikuToolStripMenuItem.Click += hierarchiePracovnikuToolStripMenuItem_Click;
+            // 
+            // topMestaToolStripMenuItem
+            // 
+            topMestaToolStripMenuItem.Name = "topMestaToolStripMenuItem";
+            topMestaToolStripMenuItem.Size = new Size(190, 22);
+            topMestaToolStripMenuItem.Text = "Top města";
+            topMestaToolStripMenuItem.Click += topMestaToolStripMenuItem_Click;
             // 
             // objednavkyToolStripMenuItem
             // 
@@ -432,5 +440,6 @@
         private ToolStripMenuItem hierarchiePracovnikuToolStripMenuItem;
         private ToolStripMenuItem spravaToolStripMenuItem;
         private ToolStripMenuItem vlastniciSVicePivovaryToolStripMenuItem;
+        private ToolStripMenuItem topMestaToolStripMenuItem;
     }
 }
