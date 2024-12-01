@@ -1042,6 +1042,64 @@ namespace HospodaUBobra
             hierarchie.ShowDialog();
         }
 
-       
+        private void auditToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string plsqlBlock = @"
+        DECLARE
+            multiple_brewery_owners_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN multiple_brewery_owners_cursor FOR
+                SELECT 
+                    VP.ID_VLASTNIKA AS OWNER_ID,
+                    NVL(VP.JMENO_NAZEV, '') || ' ' || NVL(VP.PRIJMENI, '') AS OWNER_NAME,
+                    COUNT(V.PIVOVAR_ID_PIVOVARU) AS BREWERY_COUNT
+                FROM 
+                    VLASTNICI_PIVOVARU VP
+                JOIN 
+                    VLASTNICTVI V ON VP.ID_VLASTNIKA = V.VLASTNIK_PIVOVARU_ID_VLASTNIKA
+                GROUP BY 
+                    VP.ID_VLASTNIKA, VP.JMENO_NAZEV, VP.PRIJMENI
+                HAVING 
+                    COUNT(V.PIVOVAR_ID_PIVOVARU) > 1;
+
+            :cursor_out := multiple_brewery_owners_cursor;
+        END;";
+
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    // Open the connection
+                    conn.Open();
+
+                    // Create the OracleCommand
+                    OracleCommand cmd = new OracleCommand(plsqlBlock, conn)
+                    {
+                        CommandType = CommandType.Text
+                    };
+
+                    // Add the REF CURSOR output parameter
+                    OracleParameter cursorOutParam = new OracleParameter("cursor_out", OracleDbType.RefCursor)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(cursorOutParam);
+
+                    // Execute the command
+                    OracleDataReader reader = cmd.ExecuteReader();
+
+                    // Load the data into a DataTable
+                    DataTable dataTable = new DataTable();
+                    dataTable.Load(reader);
+
+                    // Bind the DataTable to the DataGridView
+                    dataGridView1.DataSource = dataTable;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message);
+                }
+            }
+        }
     }
 }

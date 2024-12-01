@@ -164,15 +164,15 @@ namespace HospodaUBobra
                 new Tuple<int, string>(2, "Ne")
             };
 
-                    // Bind options to both "Provoz Prohlidek" and "Provoz Akci"
-                    cbProvozProhlidek.DataSource = new List<Tuple<int, string>>(yesNoOptions);
-                    cbProvozProhlidek.DisplayMember = "Item2"; // Display "Ano" or "Ne"
-                    cbProvozProhlidek.ValueMember = "Item1";  // Use 1 or 2 as the value
+            // Bind options to both "Provoz Prohlidek" and "Provoz Akci"
+            cbProvozProhlidek.DataSource = new List<Tuple<int, string>>(yesNoOptions);
+            cbProvozProhlidek.DisplayMember = "Item2"; // Display "Ano" or "Ne"
+            cbProvozProhlidek.ValueMember = "Item1";  // Use 1 or 2 as the value
 
-                    cbProvozAkci.DataSource = new List<Tuple<int, string>>(yesNoOptions);
-                    cbProvozAkci.DisplayMember = "Item2"; // Display "Ano" or "Ne"
-                    cbProvozAkci.ValueMember = "Item1";  // Use 1 or 2 as the value
-                }
+            cbProvozAkci.DataSource = new List<Tuple<int, string>>(yesNoOptions);
+            cbProvozAkci.DisplayMember = "Item2"; // Display "Ano" or "Ne"
+            cbProvozAkci.ValueMember = "Item1";  // Use 1 or 2 as the value
+        }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {

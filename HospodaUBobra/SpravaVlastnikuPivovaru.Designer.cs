@@ -50,6 +50,7 @@
             btnUpdate = new Button();
             btnAdd = new Button();
             btnClear = new Button();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvOwners).BeginInit();
             SuspendLayout();
             // 
@@ -242,11 +243,22 @@
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
+            // button1
+            // 
+            button1.Location = new Point(537, 74);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 34;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // SpravaVlastnikuPivovaru
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(626, 601);
+            Controls.Add(button1);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
@@ -300,5 +312,6 @@
         private Button btnUpdate;
         private Button btnAdd;
         private Button btnClear;
+        private Button button1;
     }
 }

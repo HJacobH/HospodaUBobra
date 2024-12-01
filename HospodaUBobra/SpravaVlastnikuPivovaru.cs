@@ -22,6 +22,8 @@ namespace HospodaUBobra
             LoadOwners();
             LoadMestoVesnice();
             LoadDruhVlastnika();
+
+            dgvOwners.AutoGenerateColumns = true;
         }
 
         private void LoadDruhVlastnika()
@@ -324,5 +326,91 @@ namespace HospodaUBobra
         {
             ClearFields();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string ownerType = null;
+            int? cityId = 20;
+            int? breweryId = null;
+
+            // Call the method to load the data into the DataGridView
+            LoadOwnershipAudit(ownerType, cityId, breweryId);
+        }
+
+        private void LoadOwnershipAudit(string ownerType, int? cityId, int? breweryId)
+        {
+            string logFilePath = "debug_log.txt";
+
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("AuditBreweryOwnership", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_owner_type", OracleDbType.Varchar2).Value = string.IsNullOrEmpty(ownerType) ? DBNull.Value : ownerType;
+                        cmd.Parameters.Add("p_city_id", OracleDbType.Int32).Value = cityId.HasValue ? (object)cityId.Value : DBNull.Value;
+                        cmd.Parameters.Add("p_brewery_id", OracleDbType.Int32).Value = breweryId.HasValue ? (object)breweryId.Value : DBNull.Value;
+
+                        cmd.Parameters.Add("p_results", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            // Debug log for all rows
+                            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+                            {
+                                writer.WriteLine("=== DEBUG LOG ===");
+                                writer.WriteLine($"Timestamp: {DateTime.Now}");
+
+                                foreach (DataRow row in dataTable.Rows)
+                                {
+                                    writer.WriteLine("Row: " + string.Join(", ", row.ItemArray.Select(item => item ?? "NULL")));
+                                }
+
+                                writer.WriteLine("=== END OF LOG ===");
+                            }
+
+                            // Bind the DataTable to the DataGridView
+                            dgvOwners.DataSource = null; // Clear previous binding
+                            dgvOwners.Rows.Clear();
+                            dgvOwners.Columns.Clear();
+
+                            dgvOwners.DataSource = dataTable;
+                            dgvOwners.AutoGenerateColumns = true;
+                            dgvOwners.Refresh();
+
+                            // Debug DataGridView rows
+                            Console.WriteLine($"Rows in DataGridView: {dgvOwners.Rows.Count}");
+                            foreach (DataGridViewRow row in dgvOwners.Rows)
+                            {
+                                if (!row.IsNewRow) // Exclude empty new row
+                                {
+                                    Console.WriteLine($"Row: {row.Cells["Owner_ID"].Value}, {row.Cells["First_Name"].Value}, {row.Cells["Last_Name"].Value}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                using (StreamWriter writer = new StreamWriter(logFilePath, true))
+                {
+                    writer.WriteLine("=== ERROR LOG ===");
+                    writer.WriteLine($"Timestamp: {DateTime.Now}");
+                    writer.WriteLine($"Error: {ex.Message}");
+                    writer.WriteLine("=== END OF ERROR LOG ===");
+                }
+
+                MessageBox.Show($"An error occurred: {ex.Message}");
+            }
+        }
+
     }
 }

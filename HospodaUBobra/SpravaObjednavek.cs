@@ -31,7 +31,8 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    // Updated query for DataGridView
+
+                    // Query to fetch orders
                     string query = @"
                 SELECT 
                     O.ID_OBJEDNAVKY AS OrderID, 
@@ -46,19 +47,33 @@ namespace HospodaUBobra
                 LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
                 LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
 
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
-                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                    // Modify the query for non-admins
+                    if (UserSession.Role != "Admin")
                     {
-                        DataTable ordersTable = new DataTable();
-                        adapter.Fill(ordersTable);
+                        query += " WHERE K.ID_KLIENTA = :loggedInClientId";
+                    }
 
-                        dgvOrders.DataSource = ordersTable;
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        if (UserSession.Role != "Admin")
+                        {
+                            // Pass the logged-in user's client ID for non-admins
+                            cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
+                        }
 
-                        dgvOrders.Columns["OrderID"].HeaderText = "Order ID";
-                        dgvOrders.Columns["ClientName"].HeaderText = "Client Name";
-                        dgvOrders.Columns["OrderStatus"].HeaderText = "Order Status";
-                        dgvOrders.Columns["OrderDate"].HeaderText = "Order Date";
-                        dgvOrders.Columns["DeliveryDate"].HeaderText = "Delivery Date";
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable ordersTable = new DataTable();
+                            adapter.Fill(ordersTable);
+
+                            dgvOrders.DataSource = ordersTable;
+
+                            dgvOrders.Columns["OrderID"].HeaderText = "Order ID";
+                            dgvOrders.Columns["ClientName"].HeaderText = "Client Name";
+                            dgvOrders.Columns["OrderStatus"].HeaderText = "Order Status";
+                            dgvOrders.Columns["OrderDate"].HeaderText = "Order Date";
+                            dgvOrders.Columns["DeliveryDate"].HeaderText = "Delivery Date";
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -75,29 +90,45 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    // Updated query for client names
-                    string query = @"SELECT 
-                                ID_KLIENTA, 
-                                CASE 
-                                    WHEN JMENO IS NOT NULL AND PRIJMENI IS NOT NULL THEN JMENO || ' ' || PRIJMENI
-                                    ELSE NAZEV 
-                                END AS CLIENT_NAME
-                             FROM KLIENTI";
+
+                    // Query to fetch clients
+                    string query = @"
+                SELECT 
+                    ID_KLIENTA, 
+                    CASE 
+                        WHEN JMENO IS NOT NULL AND PRIJMENI IS NOT NULL THEN JMENO || ' ' || PRIJMENI
+                        ELSE NAZEV 
+                    END AS CLIENT_NAME
+                FROM KLIENTI";
+
+                    // Modify the query for non-admins
+                    if (UserSession.Role != "Admin")
+                    {
+                        query += " WHERE ID_KLIENTA = :loggedInClientId";
+                    }
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
-                    using (OracleDataReader reader = cmd.ExecuteReader())
                     {
-                        List<Tuple<int, string>> clients = new List<Tuple<int, string>>();
-                        while (reader.Read())
+                        if (UserSession.Role != "Admin")
                         {
-                            int id = reader.GetInt32(0);
-                            string name = reader.GetString(1);
-                            clients.Add(new Tuple<int, string>(id, name));
+                            // Pass the logged-in user's client ID for non-admins
+                            cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
                         }
 
-                        cbClients.DataSource = clients;
-                        cbClients.DisplayMember = "Item2"; // Display client name
-                        cbClients.ValueMember = "Item1";  // Use client ID as the value
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            List<Tuple<int, string>> clients = new List<Tuple<int, string>>();
+                            while (reader.Read())
+                            {
+                                int id = reader.GetInt32(0);
+                                string name = reader.GetString(1);
+                                clients.Add(new Tuple<int, string>(id, name));
+                            }
+
+                            cbClients.DataSource = clients;
+                            cbClients.DisplayMember = "Item2"; // Display client name
+                            cbClients.ValueMember = "Item1";  // Use client ID as the value
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -106,6 +137,8 @@ namespace HospodaUBobra
                 }
             }
         }
+
+
 
         private void LoadOrderStatuses()
         {
