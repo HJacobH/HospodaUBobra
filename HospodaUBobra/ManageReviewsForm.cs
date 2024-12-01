@@ -36,7 +36,7 @@ namespace HospodaUBobra
                 btnDeleteReview.Enabled = false;
             }
 
-            pocetRecenziLabel.Text = $"Počet recenzí uživatele  je {GetReviewCountByEmail(0)}.";
+            pocetRecenziLabel.Text = GetReviewCountByEmail(0);
 
             txtReviewDetails.WordWrap = true;
             txtReviewDetails.ReadOnly = true;
@@ -382,28 +382,34 @@ namespace HospodaUBobra
             }
         }
 
-        public int GetReviewCountByEmail(int id)
+        public string GetReviewCountByEmail(int id)
         {
-            int reviewCount = 0;
+            string reviewInfo = String.Empty;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT GetReviewCountByUsername(:id) FROM DUAL";
+
+                // Query to call the Oracle function
+                string query = "SELECT GetReviewCountById(:userId) FROM DUAL";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
-                    cmd.Parameters.Add(new OracleParameter("id", id));
+                    // Bind the input parameter (userId)
+                    cmd.Parameters.Add(new OracleParameter("userId", id));
 
+                    // Execute the function and fetch the result
                     object result = cmd.ExecuteScalar();
+
+                    // Convert the result to string if it's not null or DBNull
                     if (result != null && result != DBNull.Value)
                     {
-                        reviewCount = Convert.ToInt32(result);
+                        reviewInfo = result.ToString();
                     }
                 }
             }
 
-            return reviewCount;
+            return reviewInfo;
         }
 
         public void DisplayUserReviews(int id)
@@ -440,7 +446,7 @@ namespace HospodaUBobra
             {
                 DisplayUserReviews(userId);
 
-                pocetRecenziLabel.Text = $"Počet recenzí uživatele  je {GetReviewCountByEmail(userId)}.";
+                pocetRecenziLabel.Text = GetReviewCountByEmail(userId);
             }
         }
 
