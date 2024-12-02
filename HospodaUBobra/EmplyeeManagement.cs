@@ -31,7 +31,24 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT * FROM ZAMESTNANCI";
+
+                // Modify the query to join ZAMESTNANCI and POZICE_PRACOVNIKA
+                string query = @"
+            SELECT 
+                Z.ID_ZAMESTNANCE,
+                Z.JMENO,
+                Z.PRIJMENI,
+                Z.DATUM_NAROZENI,
+                Z.PLAT,
+                Z.DATUM_NASTUPU,
+                Z.OBLIBENA_PIVA,
+                P.NAZEV_POZICE AS POZICE
+            FROM 
+                ZAMESTNANCI Z
+            INNER JOIN 
+                POZICE_PRACOVNIKA P 
+            ON 
+                Z.POZICE = P.ID_POZICE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -43,7 +60,14 @@ namespace HospodaUBobra
                     }
                 }
             }
+
+            // Optionally hide the ID_ZAMESTNANCE column
+            if (dgvZamestnanci.Columns.Contains("ID_ZAMESTNANCE"))
+            {
+                dgvZamestnanci.Columns["ID_ZAMESTNANCE"].Visible = false;
+            }
         }
+
 
         private void LoadPositions()
         {
@@ -258,14 +282,17 @@ namespace HospodaUBobra
         {
             if (dgvZamestnanci.CurrentRow != null)
             {
-                selectedZamestnanecId = Convert.ToInt32(dgvZamestnanci.CurrentRow.Cells["id_zamestnance"].Value);
+                selectedZamestnanecId = Convert.ToInt32(dgvZamestnanci.CurrentRow.Cells["ID_ZAMESTNANCE"].Value);
                 txtJmeno.Text = dgvZamestnanci.CurrentRow.Cells["JMENO"].Value.ToString();
                 txtPrijmeni.Text = dgvZamestnanci.CurrentRow.Cells["PRIJMENI"].Value.ToString();
                 dateTimePickerNarozeni.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NAROZENI"].Value);
-                cbPozice.SelectedValue = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value;
                 txtVyplata.Text = dgvZamestnanci.CurrentRow.Cells["PLAT"].Value.ToString();
                 dateTimePickerStartWorking.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value);
                 txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value.ToString();
+
+                // Map the position name to its ID in the ComboBox
+                string positionName = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value.ToString();
+                cbPozice.SelectedIndex = cbPozice.FindStringExact(positionName);
             }
         }
 

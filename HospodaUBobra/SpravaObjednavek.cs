@@ -34,18 +34,18 @@ namespace HospodaUBobra
 
                     // Query to fetch orders
                     string query = @"
-                SELECT 
-                    O.ID_OBJEDNAVKY AS OrderID, 
-                    CASE 
-                        WHEN K.JMENO IS NOT NULL AND K.PRIJMENI IS NOT NULL THEN K.JMENO || ' ' || K.PRIJMENI
-                        ELSE K.NAZEV 
-                    END AS ClientName, 
-                    S.STAV AS OrderStatus, 
-                    O.DATUM_OBJ AS OrderDate, 
-                    O.DATUM_DOD AS DeliveryDate
-                FROM OBJEDNAVKY O
-                LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
-                LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
+            SELECT 
+                O.ID_OBJEDNAVKY AS OrderID, 
+                CASE 
+                    WHEN K.JMENO IS NOT NULL AND K.PRIJMENI IS NOT NULL THEN K.JMENO || ' ' || K.PRIJMENI
+                    ELSE K.NAZEV 
+                END AS ClientName, 
+                S.STAV AS OrderStatus, 
+                O.DATUM_OBJ AS OrderDate, 
+                O.DATUM_DOD AS DeliveryDate
+            FROM OBJEDNAVKY O
+            LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
+            LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
 
                     // Modify the query for non-admins
                     if (UserSession.Role != "Admin")
@@ -68,11 +68,15 @@ namespace HospodaUBobra
 
                             dgvOrders.DataSource = ordersTable;
 
+                            // Set column headers
                             dgvOrders.Columns["OrderID"].HeaderText = "Order ID";
                             dgvOrders.Columns["ClientName"].HeaderText = "Client Name";
                             dgvOrders.Columns["OrderStatus"].HeaderText = "Order Status";
                             dgvOrders.Columns["OrderDate"].HeaderText = "Order Date";
                             dgvOrders.Columns["DeliveryDate"].HeaderText = "Delivery Date";
+
+                            // Hide the OrderID column
+                            dgvOrders.Columns["OrderID"].Visible = false;
                         }
                     }
                 }
@@ -82,6 +86,7 @@ namespace HospodaUBobra
                 }
             }
         }
+
 
         private void LoadClients()
         {

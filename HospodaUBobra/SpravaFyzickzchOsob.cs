@@ -60,15 +60,36 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_FYZICKE_OSOBY, ID, DATUM_NAROZENI, RODNE_CISLO FROM FYZICKE_OSOBY";
+
+                    // Updated query to include a join with VLASTNICI_PIVOVARU
+                    string query = @"
+                SELECT 
+                    f.ID_FYZICKE_OSOBY,
+                    v.JMENO_NAZEV AS JMENO_A_PRIJMENI,
+                    f.DATUM_NAROZENI,
+                    f.RODNE_CISLO
+                FROM 
+                    FYZICKE_OSOBY f
+                LEFT JOIN 
+                    VLASTNICI_PIVOVARU v ON f.ID = v.ID_VLASTNIKA";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                     {
-                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        dgvFyzickeOsoby.DataSource = dt;
+
+                        // Rename column headers for clarity
+                        dgvFyzickeOsoby.Columns["JMENO_A_PRIJMENI"].HeaderText = "Name and Surname";
+                        dgvFyzickeOsoby.Columns["DATUM_NAROZENI"].HeaderText = "Date of Birth";
+                        dgvFyzickeOsoby.Columns["RODNE_CISLO"].HeaderText = "Personal ID";
+
+                        // Hide the ID_FYZICKE_OSOBY column
+                        if (dgvFyzickeOsoby.Columns.Contains("ID_FYZICKE_OSOBY"))
                         {
-                            DataTable dt = new DataTable();
-                            adapter.Fill(dt);
-                            dgvFyzickeOsoby.DataSource = dt;
+                            dgvFyzickeOsoby.Columns["ID_FYZICKE_OSOBY"].Visible = false;
                         }
                     }
                 }
@@ -78,6 +99,7 @@ namespace HospodaUBobra
                 }
             }
         }
+
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
@@ -190,7 +212,11 @@ namespace HospodaUBobra
         {
             if (dgvFyzickeOsoby.CurrentRow != null)
             {
-                comboBoxVlastnikPivovaru.SelectedValue = dgvFyzickeOsoby.CurrentRow.Cells["ID"].Value;
+                // Use the hidden ID_FYZICKE_OSOBY column programmatically
+                int fyzickaOsobaId = Convert.ToInt32(dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value);
+
+                // Display related fields in the UI
+                comboBoxVlastnikPivovaru.SelectedValue = fyzickaOsobaId;
                 dateTimePickerDatumNarozeni.Value = Convert.ToDateTime(dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value);
                 textBoxRodneCislo.Text = dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value.ToString();
             }

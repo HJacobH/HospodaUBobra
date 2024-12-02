@@ -44,12 +44,12 @@ namespace HospodaUBobra
 
         private void SetButtonVisibility()
         {
-            if (currentRole != "Admin")
+            /*if (currentRole != "Admin")
             {
                 zamestnanciToolStripMenuItem.Visible = false;
                 pridatPivoToolStripMenuItem.Visible = false;
                 SpravaCiselnikuToolStrip.Visible = false;
-            }
+            }*/
         }
 
         private void PopulateTableList()
@@ -98,7 +98,7 @@ namespace HospodaUBobra
         private bool CanAccessTable(string tableName)
         {
 
-            if (UserSession.Role == "Admin")
+            /*if (UserSession.Role == "Admin")
             {
                 return true;
             }
@@ -106,9 +106,9 @@ namespace HospodaUBobra
             if (roleTables.ContainsKey(UserSession.Role) && roleTables[UserSession.Role] != null)
             {
                 return roleTables[UserSession.Role].Contains(tableName);
-            }
+            }*/
 
-            return false;
+            return true; //pak zmenit zpatky na false
         }
 
         private void comboBoxTables_SelectedIndexChanged(object sender, EventArgs e)
@@ -189,7 +189,7 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            zamestnanciToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            /*zamestnanciToolStripMenuItem.Visible = UserSession.Role == "Admin";
             pridatPivoToolStripMenuItem.Visible = UserSession.Role == "Admin";
             vytvoritUzivateleToolStripMenuItem.Visible = UserSession.Role == "Admin";
             SpravaCiselnikuToolStrip.Visible = UserSession.Role == "Admin";
@@ -197,7 +197,7 @@ namespace HospodaUBobra
             objednavkyToolStripMenuItem1.Visible = UserSession.Role == "Admin";
             nizkyPocetPivToolStripMenuItem.Visible = UserSession.Role == "Admin";
             nesplneneObjednavkyToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            evidenceToolStripMenuItem.Visible = UserSession.Role == "Admin";
+            evidenceToolStripMenuItem.Visible = UserSession.Role == "Admin";*/
 
             PopulateTableList();
         }

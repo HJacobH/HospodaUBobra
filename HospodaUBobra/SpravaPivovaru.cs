@@ -34,18 +34,26 @@ namespace HospodaUBobra
                 {
                     conn.Open();
                     string query = @"
-                SELECT 
-                    P.ID_PIVOVARU, 
-                    P.NAZEV, 
-                    P.ROK_ZALOZENI, 
-                    P.PROVOZ_PROHLIDEK, 
-                    P.PROVOZ_AKCI, 
-                    P.POPIS_AKCI, 
-                    DP.DRUH_PODNIKU AS DRUH_PODNIKU, 
-                    MV.NAZEV AS MESTO_VESNICE
-                FROM PIVOVARY P
-                LEFT JOIN DRUHY_PODNIKU DP ON P.DRUH_PODNIKU_ID_DRUHU = DP.ID_DRUHU
-                LEFT JOIN MESTA_VESNICE MV ON P.MESTO_VESNICE_ID_MES_VES = MV.ID_MES_VES";
+            SELECT 
+                P.ID_PIVOVARU, 
+                P.NAZEV, 
+                P.ROK_ZALOZENI, 
+                CASE 
+                    WHEN P.PROVOZ_PROHLIDEK = 1 THEN 'Ano' 
+                    WHEN P.PROVOZ_PROHLIDEK = 2 THEN 'Ne' 
+                    ELSE 'Neznámé'
+                END AS PROVOZ_PROHLIDEK, 
+                CASE 
+                    WHEN P.PROVOZ_AKCI = 1 THEN 'Ano' 
+                    WHEN P.PROVOZ_AKCI = 2 THEN 'Ne' 
+                    ELSE 'Neznámé'
+                END AS PROVOZ_AKCI, 
+                P.POPIS_AKCI, 
+                DP.DRUH_PODNIKU AS DRUH_PODNIKU, 
+                MV.NAZEV AS MESTO_VESNICE
+            FROM PIVOVARY P
+            LEFT JOIN DRUHY_PODNIKU DP ON P.DRUH_PODNIKU_ID_DRUHU = DP.ID_DRUHU
+            LEFT JOIN MESTA_VESNICE MV ON P.MESTO_VESNICE_ID_MES_VES = MV.ID_MES_VES";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -55,6 +63,7 @@ namespace HospodaUBobra
 
                         dgvBreweries.DataSource = breweriesTable;
 
+                        // Set column headers
                         dgvBreweries.Columns["ID_PIVOVARU"].HeaderText = "Brewery ID";
                         dgvBreweries.Columns["NAZEV"].HeaderText = "Name";
                         dgvBreweries.Columns["ROK_ZALOZENI"].HeaderText = "Year Established";
@@ -63,6 +72,9 @@ namespace HospodaUBobra
                         dgvBreweries.Columns["POPIS_AKCI"].HeaderText = "Event Description";
                         dgvBreweries.Columns["DRUH_PODNIKU"].HeaderText = "Type";
                         dgvBreweries.Columns["MESTO_VESNICE"].HeaderText = "City/Village";
+
+                        // Hide the ID_PIVOVARU column
+                        dgvBreweries.Columns["ID_PIVOVARU"].Visible = false;
                     }
                 }
                 catch (Exception ex)
@@ -71,6 +83,7 @@ namespace HospodaUBobra
                 }
             }
         }
+
 
 
 
@@ -297,24 +310,28 @@ namespace HospodaUBobra
         {
             if (dgvBreweries.CurrentRow != null)
             {
+                // Get the selected brewery ID (hidden but used internally)
                 selectedBreweryId = Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ID_PIVOVARU"].Value);
+
+                // Set Brewery Name
                 txtNazev.Text = dgvBreweries.CurrentRow.Cells["NAZEV"].Value.ToString();
 
-                // Set year in the "Rok Zalozeni" combo box
+                // Set Year in the "Rok Zalozeni" ComboBox
                 int selectedYear = Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ROK_ZALOZENI"].Value);
                 cbRokZalozeni.SelectedItem = selectedYear;
 
-                // Set "Ano"/"Ne" values for "Provoz Prohlidek"
-                int prohlidekValue = dgvBreweries.CurrentRow.Cells["PROVOZ_PROHLIDEK"].Value == DBNull.Value ? 2 : Convert.ToInt32(dgvBreweries.CurrentRow.Cells["PROVOZ_PROHLIDEK"].Value);
-                cbProvozProhlidek.SelectedValue = prohlidekValue;
+                // Set "Provoz Prohlidek" ComboBox (map "Ano"/"Ne" to 1/2)
+                string prohlidekValue = dgvBreweries.CurrentRow.Cells["PROVOZ_PROHLIDEK"].Value.ToString();
+                cbProvozProhlidek.SelectedValue = prohlidekValue == "Ano" ? 1 : 2;
 
-                // Set "Ano"/"Ne" values for "Provoz Akci"
-                int akciValue = dgvBreweries.CurrentRow.Cells["PROVOZ_AKCI"].Value == DBNull.Value ? 2 : Convert.ToInt32(dgvBreweries.CurrentRow.Cells["PROVOZ_AKCI"].Value);
-                cbProvozAkci.SelectedValue = akciValue;
+                // Set "Provoz Akci" ComboBox (map "Ano"/"Ne" to 1/2)
+                string akciValue = dgvBreweries.CurrentRow.Cells["PROVOZ_AKCI"].Value.ToString();
+                cbProvozAkci.SelectedValue = akciValue == "Ano" ? 1 : 2;
 
+                // Set Event Description
                 txtPopisAkci.Text = dgvBreweries.CurrentRow.Cells["POPIS_AKCI"].Value?.ToString();
 
-                // Set "Druh Podniku" combo box
+                // Set "Druh Podniku" ComboBox
                 string druhPodnikuName = dgvBreweries.CurrentRow.Cells["DRUH_PODNIKU"].Value.ToString();
                 var druhPodnikuItem = ((List<Tuple<int, string>>)cbDruhPodniku.DataSource)
                     .FirstOrDefault(item => item.Item2 == druhPodnikuName);
@@ -323,7 +340,7 @@ namespace HospodaUBobra
                     cbDruhPodniku.SelectedValue = druhPodnikuItem.Item1;
                 }
 
-                // Set "Mesto/Vesnice" combo box
+                // Set "Mesto/Vesnice" ComboBox
                 string mestoVesniceName = dgvBreweries.CurrentRow.Cells["MESTO_VESNICE"].Value.ToString();
                 var mestoVesniceItem = ((List<Tuple<int, string>>)cbMestoVesnice.DataSource)
                     .FirstOrDefault(item => item.Item2 == mestoVesniceName);

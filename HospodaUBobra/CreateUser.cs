@@ -49,7 +49,20 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT ID_UZIVATELE, UZIVATELSKE_JMENO, EMAIL, TELEFON, DATUM_REGISTRACE, ROLE_ID FROM UZIVATELE";
+
+                // Update the query to join the ROLE table and fetch the role name
+                string query = @"
+            SELECT 
+                U.ID_UZIVATELE, 
+                U.UZIVATELSKE_JMENO, 
+                U.EMAIL, 
+                U.TELEFON, 
+                U.DATUM_REGISTRACE, 
+                R.ROLE_NAME AS ROLE_NAME
+            FROM 
+                UZIVATELE U
+            INNER JOIN 
+                ROLE R ON U.ROLE_ID = R.ROLE_ID";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -61,7 +74,15 @@ namespace HospodaUBobra
                     }
                 }
             }
+
+            // Hide the ID_UZIVATELE column to prevent showing sensitive information
+            if (dataGridViewUsers.Columns.Contains("ID_UZIVATELE"))
+            {
+                dataGridViewUsers.Columns["ID_UZIVATELE"].Visible = false;
+            }
         }
+
+
 
         private void btnCreate_Click(object sender, EventArgs e)
         {
@@ -146,18 +167,21 @@ namespace HospodaUBobra
 
         private int GetRoleId(string roleName)
         {
-            switch (roleName.ToLower())
+            using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                case "admin":
-                    return 1;
-                case "klient":
-                    return 2;
-                case "user":
-                    return 3;
-                default:
-                    throw new ArgumentException("Neplatná role: " + roleName);
+                conn.Open();
+                string query = "SELECT ROLE_ID FROM ROLE WHERE ROLE_NAME = :roleName";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("roleName", OracleDbType.Varchar2)).Value = roleName;
+
+                    object result = cmd.ExecuteScalar();
+                    return result != null ? Convert.ToInt32(result) : -1;
+                }
             }
         }
+
 
         private void btnBack_Click(object sender, EventArgs e)
         {
@@ -351,7 +375,13 @@ namespace HospodaUBobra
                 txtUsername.Text = dataGridViewUsers.CurrentRow.Cells["UZIVATELSKE_JMENO"].Value.ToString();
                 txtEmail.Text = dataGridViewUsers.CurrentRow.Cells["EMAIL"].Value.ToString();
                 txtTelefon.Text = dataGridViewUsers.CurrentRow.Cells["TELEFON"].Value.ToString();
-                comboBoxRole.SelectedIndex = Convert.ToInt32(dataGridViewUsers.CurrentRow.Cells["ROLE_ID"].Value) - 1;
+
+                // Get the displayed role name
+                string roleName = dataGridViewUsers.CurrentRow.Cells["ROLE_NAME"].Value.ToString();
+
+                // Find the corresponding role in the combo box
+                int roleIndex = comboBoxRole.Items.IndexOf(roleName);
+                comboBoxRole.SelectedIndex = roleIndex;
             }
         }
 

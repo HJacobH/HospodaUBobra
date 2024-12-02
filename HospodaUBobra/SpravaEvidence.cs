@@ -96,7 +96,27 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT * FROM EVIDENCE";
+
+                    // Updated query to include joins for Beer name, Unit name, and Client email
+                    string query = @"
+                SELECT 
+                    e.ID_EVIDENCE,
+                    e.MNOZSTVI,
+                    e.DATUM_OBJEDNAVKY,
+                    p.NAZEV AS BEER_NAME,
+                    u.NAZEV AS UNIT_NAME,
+                    e.CENA_OBJEDNAVKY,
+                    k.EMAIL AS CLIENT_EMAIL
+                FROM 
+                    EVIDENCE e
+                LEFT JOIN 
+                    PIVA p ON e.PIVO_ID_PIVA = p.ID_PIVA
+                LEFT JOIN 
+                    JEDNOTKY_OBJ u ON e.JEDNOTKA_OBJ_ID_JEDN_OBJ = u.ID_JEDN_OBJ
+                LEFT JOIN 
+                    OBJEDNAVKY o ON e.OBJEDNAVKA_ID_OBJEDNAVKY1 = o.ID_OBJEDNAVKY
+                LEFT JOIN 
+                    KLIENTI k ON o.KLIENT_ID = k.ID_KLIENTA";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -105,13 +125,21 @@ namespace HospodaUBobra
                         adapter.Fill(dataTable);
 
                         dgvEvidence.DataSource = dataTable;
+
+                        // Rename column headers for clarity
                         dgvEvidence.Columns["ID_EVIDENCE"].HeaderText = "Evidence ID";
                         dgvEvidence.Columns["MNOZSTVI"].HeaderText = "Quantity";
                         dgvEvidence.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Order Date";
-                        dgvEvidence.Columns["PIVO_ID_PIVA"].HeaderText = "Beer ID";
-                        dgvEvidence.Columns["JEDNOTKA_OBJ_ID_JEDN_OBJ"].HeaderText = "Unit ID";
+                        dgvEvidence.Columns["BEER_NAME"].HeaderText = "Beer Name";
+                        dgvEvidence.Columns["UNIT_NAME"].HeaderText = "Unit Name";
                         dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Order Price";
-                        dgvEvidence.Columns["OBJEDNAVKA_ID_OBJEDNAVKY1"].HeaderText = "Order ID";
+                        dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Client Email";
+
+                        // Hide the Evidence ID column
+                        if (dgvEvidence.Columns.Contains("ID_EVIDENCE"))
+                        {
+                            dgvEvidence.Columns["ID_EVIDENCE"].Visible = false;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -120,6 +148,8 @@ namespace HospodaUBobra
                 }
             }
         }
+
+
         private void CalculateOrderPrice()
         {
             if (cbBeer.SelectedItem is Tuple<int, string, decimal> selectedBeer && int.TryParse(txtQuantity.Text, out int quantity))
@@ -141,10 +171,19 @@ namespace HospodaUBobra
                 selectedEvidenceId = Convert.ToInt32(dgvEvidence.CurrentRow.Cells["ID_EVIDENCE"].Value);
                 txtQuantity.Text = dgvEvidence.CurrentRow.Cells["MNOZSTVI"].Value.ToString();
                 dtpOrderDate.Value = Convert.ToDateTime(dgvEvidence.CurrentRow.Cells["DATUM_OBJEDNAVKY"].Value);
-                cbBeer.SelectedValue = Convert.ToInt32(dgvEvidence.CurrentRow.Cells["PIVO_ID_PIVA"].Value);
-                cbUnit.SelectedValue = Convert.ToInt32(dgvEvidence.CurrentRow.Cells["JEDNOTKA_OBJ_ID_JEDN_OBJ"].Value);
+
+                // Find and select the Beer in the ComboBox
+                string beerName = dgvEvidence.CurrentRow.Cells["BEER_NAME"].Value?.ToString();
+                cbBeer.SelectedIndex = cbBeer.FindStringExact(beerName);
+
+                // Find and select the Unit in the ComboBox
+                string unitName = dgvEvidence.CurrentRow.Cells["UNIT_NAME"].Value?.ToString();
+                cbUnit.SelectedIndex = cbUnit.FindStringExact(unitName);
+
                 txtOrderPrice.Text = dgvEvidence.CurrentRow.Cells["CENA_OBJEDNAVKY"].Value.ToString();
-                txtOrderId.Text = dgvEvidence.CurrentRow.Cells["OBJEDNAVKA_ID_OBJEDNAVKY1"].Value.ToString();
+
+                // Display the Client's Email
+                txtOrderId.Text = dgvEvidence.CurrentRow.Cells["CLIENT_EMAIL"].Value.ToString();
             }
         }
 

@@ -32,7 +32,19 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT * FROM MESTA_VESNICE";
+
+                    // Query to join tables and get meaningful names
+                    string query = @"
+                SELECT 
+                    mv.ID_MES_VES AS Town_ID, 
+                    mv.NAZEV AS Name, 
+                    mv.POCET_OBYVATEL AS Population, 
+                    mv.PSC AS Postal_Code, 
+                    o.NAZEV AS District, 
+                    k.NAZEV AS Region
+                FROM MESTA_VESNICE mv
+                LEFT JOIN OKRESY o ON mv.OKRES_ID_OKRESU = o.ID_OKRESU
+                LEFT JOIN KRAJE k ON mv.KRAJ_ID_KRAJE = k.ID_KRAJE";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -41,20 +53,28 @@ namespace HospodaUBobra
                         adapter.Fill(dataTable);
 
                         dgvMestaVesnice.DataSource = dataTable;
-                        dgvMestaVesnice.Columns["ID_MES_VES"].HeaderText = "ID";
-                        dgvMestaVesnice.Columns["NAZEV"].HeaderText = "Name";
-                        dgvMestaVesnice.Columns["POCET_OBYVATEL"].HeaderText = "Population";
-                        dgvMestaVesnice.Columns["PSC"].HeaderText = "Postal Code";
-                        dgvMestaVesnice.Columns["OKRES_ID_OKRESU"].HeaderText = "District ID";
-                        dgvMestaVesnice.Columns["KRAJ_ID_KRAJE"].HeaderText = "Region ID";
+
+                        // Hide the Town_ID column
+                        if (dgvMestaVesnice.Columns.Contains("Town_ID"))
+                        {
+                            dgvMestaVesnice.Columns["Town_ID"].Visible = false;
+                        }
+
+                        // Set user-friendly column headers
+                        dgvMestaVesnice.Columns["Name"].HeaderText = "Town Name";
+                        dgvMestaVesnice.Columns["Population"].HeaderText = "Population";
+                        dgvMestaVesnice.Columns["Postal_Code"].HeaderText = "Postal Code";
+                        dgvMestaVesnice.Columns["District"].HeaderText = "District";
+                        dgvMestaVesnice.Columns["Region"].HeaderText = "Region";
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading data: " + ex.Message);
+                    MessageBox.Show("Error loading towns and villages: " + ex.Message);
                 }
             }
         }
+
         private void LoadKraje()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -213,12 +233,17 @@ namespace HospodaUBobra
         {
             if (dgvMestaVesnice.CurrentRow != null)
             {
-                selectedMestoId = Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["ID_MES_VES"].Value);
-                txtNazev.Text = dgvMestaVesnice.CurrentRow.Cells["NAZEV"].Value.ToString();
-                txtPocetObyvatel.Text = dgvMestaVesnice.CurrentRow.Cells["POCET_OBYVATEL"].Value.ToString();
-                txtPSC.Text = dgvMestaVesnice.CurrentRow.Cells["PSC"].Value.ToString();
-                cbOkresy.SelectedValue = Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["OKRES_ID_OKRESU"].Value);
-                cbKraje.SelectedValue = Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["KRAJ_ID_KRAJE"].Value);
+                // Use the hidden Town_ID value
+                selectedMestoId = Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["Town_ID"].Value);
+
+                // Populate other fields in the form
+                txtNazev.Text = dgvMestaVesnice.CurrentRow.Cells["Name"].Value?.ToString() ?? string.Empty;
+                txtPocetObyvatel.Text = dgvMestaVesnice.CurrentRow.Cells["Population"].Value?.ToString() ?? string.Empty;
+                txtPSC.Text = dgvMestaVesnice.CurrentRow.Cells["Postal_Code"].Value?.ToString() ?? string.Empty;
+
+                // Set the selected district and region based on the displayed names
+                cbOkresy.SelectedIndex = cbOkresy.FindStringExact(dgvMestaVesnice.CurrentRow.Cells["District"].Value?.ToString() ?? string.Empty);
+                cbKraje.SelectedIndex = cbKraje.FindStringExact(dgvMestaVesnice.CurrentRow.Cells["Region"].Value?.ToString() ?? string.Empty);
             }
         }
 

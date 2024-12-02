@@ -78,6 +78,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
+                    // Query to retrieve data
                     string query = @"
                 SELECT 
                     k.ID_KLIENTA, 
@@ -98,7 +99,24 @@ namespace HospodaUBobra
                         DataTable klientiTable = new DataTable();
                         adapter.Fill(klientiTable);
 
+                        // Bind data to DataGridView
                         dgvKlienti.DataSource = klientiTable;
+
+                        // Hide the ID_KLIENTA column
+                        if (dgvKlienti.Columns.Contains("ID_KLIENTA"))
+                        {
+                            dgvKlienti.Columns["ID_KLIENTA"].Visible = false;
+                        }
+
+                        // Optional: Set more user-friendly column headers
+                        dgvKlienti.Columns["JMENO"].HeaderText = "First Name";
+                        dgvKlienti.Columns["PRIJMENI"].HeaderText = "Last Name";
+                        dgvKlienti.Columns["NAZEV"].HeaderText = "Business Name";
+                        dgvKlienti.Columns["EMAIL"].HeaderText = "Email";
+                        dgvKlienti.Columns["TELEFON"].HeaderText = "Phone";
+                        dgvKlienti.Columns["DATUM_REGISTRACE"].HeaderText = "Registration Date";
+                        dgvKlienti.Columns["DRUH_PODNIKU"].HeaderText = "Business Type";
+                        dgvKlienti.Columns["ROLE_NAME"].HeaderText = "Role";
                     }
                 }
                 catch (OracleException ex)
@@ -111,6 +129,7 @@ namespace HospodaUBobra
                 }
             }
         }
+
 
 
 
@@ -350,17 +369,18 @@ namespace HospodaUBobra
         {
             if (dgvKlienti.CurrentRow != null)
             {
+                // Use the hidden ID_KLIENTA value programmatically
                 selectedKlientId = Convert.ToInt32(dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value);
-                txtUsername.Text = dgvKlienti.CurrentRow.Cells["JMENO"].Value.ToString();
-                txtPrijmeni.Text = dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value.ToString();
-                txtNazev.Text = dgvKlienti.CurrentRow.Cells["NAZEV"].Value.ToString();
-                txtEmail.Text = dgvKlienti.CurrentRow.Cells["EMAIL"].Value.ToString();
-                txtTelefon.Text = dgvKlienti.CurrentRow.Cells["TELEFON"].Value.ToString();
+
+                // Populate other fields in the form
+                txtUsername.Text = dgvKlienti.CurrentRow.Cells["JMENO"].Value?.ToString() ?? string.Empty;
+                txtPrijmeni.Text = dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value?.ToString() ?? string.Empty;
+                txtNazev.Text = dgvKlienti.CurrentRow.Cells["NAZEV"].Value?.ToString() ?? string.Empty;
+                txtEmail.Text = dgvKlienti.CurrentRow.Cells["EMAIL"].Value?.ToString() ?? string.Empty;
+                txtTelefon.Text = dgvKlienti.CurrentRow.Cells["TELEFON"].Value?.ToString() ?? string.Empty;
                 dtpDatumRegistrace.Value = Convert.ToDateTime(dgvKlienti.CurrentRow.Cells["DATUM_REGISTRACE"].Value);
 
-                cbDruhPodniku.SelectedIndex = cbDruhPodniku.FindStringExact(dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value.ToString());
-                //cbRole.SelectedIndex = cbRole.FindStringExact(dgvKlienti.CurrentRow.Cells["ROLE_NAME"].Value.ToString());
-                //cbProfilovyObrazek.SelectedIndex = cbProfilovyObrazek.FindStringExact(dgvKlienti.CurrentRow.Cells["PROFILOVY_OBRAZEK"].Value.ToString());
+                cbDruhPodniku.SelectedIndex = cbDruhPodniku.FindStringExact(dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value?.ToString() ?? string.Empty);
             }
         }
 

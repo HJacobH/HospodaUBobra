@@ -34,7 +34,24 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT * FROM PIVA"; 
+
+                    // Updated query to include joins with BALENI_PIV and JEDNOTKY_PIV
+                    string query = @"
+                SELECT 
+                    p.ID_PIVA, 
+                    p.NAZEV, 
+                    p.OBSAH_ALKOHOLU, 
+                    p.OBJEM, 
+                    p.CENA, 
+                    p.POCET_KS_SKLADEM, 
+                    b.BALENI AS PACKAGING,
+                    j.JEDNOTKA AS UNIT
+                FROM 
+                    PIVA p
+                LEFT JOIN 
+                    BALENI_PIV b ON p.BALENI_PIVA_ID_BALENI = b.ID_BALENI
+                LEFT JOIN 
+                    JEDNOTKY_PIV j ON p.JEDNOTKA_PIVA_ID_JEDN = j.ID_JEDN";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -44,14 +61,21 @@ namespace HospodaUBobra
 
                         dgvPiva.DataSource = dataTable;
 
+                        // Rename column headers for clarity
                         dgvPiva.Columns["ID_PIVA"].HeaderText = "Beer ID";
                         dgvPiva.Columns["NAZEV"].HeaderText = "Name";
                         dgvPiva.Columns["OBSAH_ALKOHOLU"].HeaderText = "Alcohol Content (%)";
                         dgvPiva.Columns["OBJEM"].HeaderText = "Volume (ml)";
                         dgvPiva.Columns["CENA"].HeaderText = "Price (CZK)";
                         dgvPiva.Columns["POCET_KS_SKLADEM"].HeaderText = "Stock Quantity";
-                        dgvPiva.Columns["BALENI_PIVA_ID_BALENI"].HeaderText = "Packaging";
-                        dgvPiva.Columns["JEDNOTKA_PIVA_ID_JEDN"].HeaderText = "Unit";
+                        dgvPiva.Columns["PACKAGING"].HeaderText = "Packaging";
+                        dgvPiva.Columns["UNIT"].HeaderText = "Unit";
+
+                        // Hide the ID_PIVA column
+                        if (dgvPiva.Columns.Contains("ID_PIVA"))
+                        {
+                            dgvPiva.Columns["ID_PIVA"].Visible = false;
+                        }
                     }
                 }
                 catch (OracleException ex)
@@ -64,6 +88,8 @@ namespace HospodaUBobra
                 }
             }
         }
+
+
 
 
         private void LoadPackagingOptions()
@@ -255,15 +281,21 @@ namespace HospodaUBobra
         {
             if (dgvPiva.CurrentRow != null)
             {
-                selectedBeerId = Convert.ToInt32(dgvPiva.CurrentRow.Cells["id_piva"].Value);
+                selectedBeerId = Convert.ToInt32(dgvPiva.CurrentRow.Cells["ID_PIVA"].Value);
 
-                txtBeerName.Text = dgvPiva.CurrentRow.Cells["nazev"].Value.ToString();
-                txtAlcoholContent.Text = dgvPiva.CurrentRow.Cells["obsah_alkoholu"].Value.ToString();
-                txtVolume.Text = dgvPiva.CurrentRow.Cells["objem"].Value.ToString();
-                txtPrice.Text = dgvPiva.CurrentRow.Cells["cena"].Value.ToString();
-                txtStockQuantity.Text = dgvPiva.CurrentRow.Cells["pocet_ks_skladem"].Value.ToString();
-                comboBoxPackaging.SelectedValue = Convert.ToInt32(dgvPiva.CurrentRow.Cells["baleni_piva_id_baleni"].Value);
-                comboBoxUnit.SelectedValue = Convert.ToInt32(dgvPiva.CurrentRow.Cells["jednotka_piva_id_jedn"].Value);
+                txtBeerName.Text = dgvPiva.CurrentRow.Cells["NAZEV"].Value.ToString();
+                txtAlcoholContent.Text = dgvPiva.CurrentRow.Cells["OBSAH_ALKOHOLU"].Value.ToString();
+                txtVolume.Text = dgvPiva.CurrentRow.Cells["OBJEM"].Value.ToString();
+                txtPrice.Text = dgvPiva.CurrentRow.Cells["CENA"].Value.ToString();
+                txtStockQuantity.Text = dgvPiva.CurrentRow.Cells["POCET_KS_SKLADEM"].Value.ToString();
+
+                // Find and select the corresponding packaging in the ComboBox
+                string packagingName = dgvPiva.CurrentRow.Cells["PACKAGING"].Value.ToString();
+                comboBoxPackaging.SelectedIndex = comboBoxPackaging.FindStringExact(packagingName);
+
+                // Find and select the corresponding unit in the ComboBox
+                string unitName = dgvPiva.CurrentRow.Cells["UNIT"].Value.ToString();
+                comboBoxUnit.SelectedIndex = comboBoxUnit.FindStringExact(unitName);
             }
         }
     }

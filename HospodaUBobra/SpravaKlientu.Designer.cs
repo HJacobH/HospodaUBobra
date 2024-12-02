@@ -104,14 +104,14 @@
             // 
             txtTelefon.Location = new Point(114, 183);
             txtTelefon.Name = "txtTelefon";
-            txtTelefon.Size = new Size(122, 23);
+            txtTelefon.Size = new Size(170, 23);
             txtTelefon.TabIndex = 24;
             // 
             // txtEmail
             // 
             txtEmail.Location = new Point(114, 154);
             txtEmail.Name = "txtEmail";
-            txtEmail.Size = new Size(122, 23);
+            txtEmail.Size = new Size(170, 23);
             txtEmail.TabIndex = 23;
             // 
             // btnBack
@@ -139,7 +139,7 @@
             txtPassword.Location = new Point(114, 241);
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '*';
-            txtPassword.Size = new Size(122, 23);
+            txtPassword.Size = new Size(170, 23);
             txtPassword.TabIndex = 18;
             // 
             // label2
@@ -155,7 +155,7 @@
             // 
             txtUsername.Location = new Point(114, 36);
             txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(122, 23);
+            txtUsername.Size = new Size(170, 23);
             txtUsername.TabIndex = 16;
             // 
             // label1
@@ -189,7 +189,7 @@
             // 
             txtPrijmeni.Location = new Point(114, 66);
             txtPrijmeni.Name = "txtPrijmeni";
-            txtPrijmeni.Size = new Size(122, 23);
+            txtPrijmeni.Size = new Size(170, 23);
             txtPrijmeni.TabIndex = 32;
             // 
             // cbDruhPodniku
@@ -197,7 +197,7 @@
             cbDruhPodniku.FormattingEnabled = true;
             cbDruhPodniku.Location = new Point(114, 125);
             cbDruhPodniku.Name = "cbDruhPodniku";
-            cbDruhPodniku.Size = new Size(122, 23);
+            cbDruhPodniku.Size = new Size(170, 23);
             cbDruhPodniku.TabIndex = 33;
             // 
             // label7
@@ -213,14 +213,14 @@
             // 
             txtNazev.Location = new Point(114, 96);
             txtNazev.Name = "txtNazev";
-            txtNazev.Size = new Size(122, 23);
+            txtNazev.Size = new Size(170, 23);
             txtNazev.TabIndex = 35;
             // 
             // dtpDatumRegistrace
             // 
             dtpDatumRegistrace.Location = new Point(114, 212);
             dtpDatumRegistrace.Name = "dtpDatumRegistrace";
-            dtpDatumRegistrace.Size = new Size(122, 23);
+            dtpDatumRegistrace.Size = new Size(170, 23);
             dtpDatumRegistrace.TabIndex = 36;
             // 
             // label8

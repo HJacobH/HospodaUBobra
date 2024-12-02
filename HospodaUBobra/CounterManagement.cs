@@ -72,7 +72,22 @@ namespace HospodaUBobra
             }
 
             lblStatus.Text = $"Aktuální číselník: {tableName}";
+
+            // Hide the ID column based on the table name
+            HideIdColumn(tableName);
         }
+
+        private void HideIdColumn(string tableName)
+        {
+            string primaryKeyColumn = GetPrimaryKeyColumnForTable(tableName);
+
+            // Check if the column exists in the DataGridView and hide it
+            if (dgvTableData.Columns.Contains(primaryKeyColumn))
+            {
+                dgvTableData.Columns[primaryKeyColumn].Visible = false;
+            }
+        }
+
 
         private void btnAdd_Click(object sender, EventArgs e)
         {

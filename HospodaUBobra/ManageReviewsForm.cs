@@ -125,7 +125,26 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_recenze, titulek, text_recenze, pivovar_id_pivovaru, pivo_id_piva, pocet_hvezdicek, id_uzivatele FROM RECENZE";
+
+                // Updated query to include LEFT JOINs and fetch uzivatelske_jmeno
+                string query = @"
+            SELECT 
+                r.id_recenze, 
+                r.titulek, 
+                r.text_recenze, 
+                pivo.nazev AS pivo_name, 
+                pivovar.nazev AS pivovar_name, 
+                r.pocet_hvezdicek, 
+                r.id_uzivatele,
+                u.uzivatelske_jmeno AS uzivatelske_jmeno
+            FROM 
+                RECENZE r
+            LEFT JOIN 
+                PIVOVARY pivovar ON r.pivovar_id_pivovaru = pivovar.id_pivovaru
+            LEFT JOIN 
+                PIVA pivo ON r.pivo_id_piva = pivo.id_piva
+            LEFT JOIN 
+                UZIVATELE u ON r.id_uzivatele = u.id_uzivatele";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -133,14 +152,25 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+
+                        // Bind the data to the DataGridView
                         dataGridViewReviews.DataSource = dt;
 
-                        dataGridViewReviews.Columns["id_uzivatele"].Visible = false;
-                        dataGridViewReviews.Columns["id_recenze"].Visible = false;
+                        // Optionally hide the IDs if they are not needed
+                        if (dataGridViewReviews.Columns.Contains("id_recenze"))
+                        {
+                            dataGridViewReviews.Columns["id_recenze"].Visible = false;
+                        }
+                        if (dataGridViewReviews.Columns.Contains("id_uzivatele"))
+                        {
+                            dataGridViewReviews.Columns["id_uzivatele"].Visible = false;
+                        }
                     }
                 }
             }
         }
+
+
 
         private void btnAddReview_Click(object sender, EventArgs e)
         {
@@ -320,11 +350,24 @@ namespace HospodaUBobra
             if (dataGridViewReviews.CurrentRow != null)
             {
                 selectedReviewId = Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["id_recenze"].Value);
-                txtTitle.Text = dataGridViewReviews.CurrentRow.Cells["titulek"].Value.ToString();
-                txtReviewText.Text = dataGridViewReviews.CurrentRow.Cells["text_recenze"].Value.ToString();
-                comboBoxBreweries.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivovar_id_pivovaru"].Value;
-                comboBoxBeers.SelectedValue = dataGridViewReviews.CurrentRow.Cells["pivo_id_piva"].Value;
-                cbHodnoceni.SelectedItem = Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value);
+                txtTitle.Text = dataGridViewReviews.CurrentRow.Cells["titulek"].Value?.ToString() ?? string.Empty;
+                txtReviewText.Text = dataGridViewReviews.CurrentRow.Cells["text_recenze"].Value?.ToString() ?? string.Empty;
+
+                string pivovarName = dataGridViewReviews.CurrentRow.Cells["pivovar_name"].Value?.ToString();
+                string pivoName = dataGridViewReviews.CurrentRow.Cells["pivo_name"].Value?.ToString();
+
+                comboBoxBreweries.SelectedIndex = !string.IsNullOrEmpty(pivovarName)
+                    ? comboBoxBreweries.FindStringExact(pivovarName)
+                    : -1;
+
+                comboBoxBeers.SelectedIndex = !string.IsNullOrEmpty(pivoName)
+                    ? comboBoxBeers.FindStringExact(pivoName)
+                    : -1;
+
+                cbHodnoceni.SelectedItem = dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value != DBNull.Value
+                    ? Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value)
+                    : 1;
+
             }
         }
 
@@ -412,20 +455,36 @@ namespace HospodaUBobra
             return reviewInfo;
         }
 
-        public void DisplayUserReviews(int id)
+        public void DisplayUserReviews(int userId)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                using (OracleCommand cmd = new OracleCommand("GetUserReviewsProcedure", conn))
+                // Updated query to fetch related names with LEFT JOIN
+                string query = @"
+            SELECT 
+                r.id_recenze,
+                r.titulek,
+                r.text_recenze,
+                pivo.nazev AS pivo_name,
+                pivovar.nazev AS pivovar_name,
+                r.pocet_hvezdicek,
+                r.id_uzivatele,
+                u.uzivatelske_jmeno AS uzivatelske_jmeno
+            FROM 
+                RECENZE r
+            LEFT JOIN 
+                PIVOVARY pivovar ON r.pivovar_id_pivovaru = pivovar.id_pivovaru
+            LEFT JOIN 
+                PIVA pivo ON r.pivo_id_piva = pivo.id_piva
+            LEFT JOIN 
+                UZIVATELE u ON r.id_uzivatele = u.id_uzivatele
+            WHERE 
+                r.id_uzivatele = :userId";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    // Pass the user ID to the procedure
-                    cmd.Parameters.Add("p_user_id", OracleDbType.Int32).Value = id;
-
-                    // Define the output parameter as a REF CURSOR
-                    cmd.Parameters.Add("p_reviews", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("userId", OracleDbType.Int32).Value = userId;
 
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                     {
@@ -438,6 +497,7 @@ namespace HospodaUBobra
                 }
             }
         }
+
 
 
         private void comboBoxUsers_SelectedIndexChanged(object sender, EventArgs e)

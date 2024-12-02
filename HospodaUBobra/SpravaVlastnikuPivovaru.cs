@@ -86,18 +86,18 @@ namespace HospodaUBobra
                 {
                     conn.Open();
                     string query = @"
-                SELECT 
-                    V.ID_VLASTNIKA, 
-                    V.JMENO_NAZEV, 
-                    V.PRIJMENI, 
-                    V.ULICE, 
-                    V.CISLO_POPISNE, 
-                    V.ICO, 
-                    V.DIC, 
-                    MV.NAZEV AS MESTO_VESNICE, 
-                    V.DRUH_VLASTNIKA
-                FROM VLASTNICI_PIVOVARU V
-                LEFT JOIN MESTA_VESNICE MV ON V.MESTO_VESNICE_ID_MES_VES = MV.ID_MES_VES";
+            SELECT 
+                V.ID_VLASTNIKA, 
+                V.JMENO_NAZEV, 
+                V.PRIJMENI, 
+                V.ULICE, 
+                V.CISLO_POPISNE, 
+                V.ICO, 
+                V.DIC, 
+                MV.NAZEV AS MESTO_VESNICE, 
+                V.DRUH_VLASTNIKA
+            FROM VLASTNICI_PIVOVARU V
+            LEFT JOIN MESTA_VESNICE MV ON V.MESTO_VESNICE_ID_MES_VES = MV.ID_MES_VES";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -107,6 +107,7 @@ namespace HospodaUBobra
 
                         dgvOwners.DataSource = ownersTable;
 
+                        // Set column headers
                         dgvOwners.Columns["ID_VLASTNIKA"].HeaderText = "Owner ID";
                         dgvOwners.Columns["JMENO_NAZEV"].HeaderText = "Name/Company";
                         dgvOwners.Columns["PRIJMENI"].HeaderText = "Surname";
@@ -116,6 +117,9 @@ namespace HospodaUBobra
                         dgvOwners.Columns["DIC"].HeaderText = "DIC";
                         dgvOwners.Columns["MESTO_VESNICE"].HeaderText = "City/Village";
                         dgvOwners.Columns["DRUH_VLASTNIKA"].HeaderText = "Owner Type";
+
+                        // Hide the Owner ID column
+                        dgvOwners.Columns["ID_VLASTNIKA"].Visible = false;
                     }
                 }
                 catch (Exception ex)
@@ -124,6 +128,7 @@ namespace HospodaUBobra
                 }
             }
         }
+
 
 
         private void dgvOwners_SelectionChanged(object sender, EventArgs e)
@@ -403,9 +408,20 @@ namespace HospodaUBobra
             // Add the DataGridView to the form
             form.Controls.Add(dataGridView);
 
+            // Hide the ID_VLASTNIKA column after adding the DataGridView to the form
+            form.Shown += (s, e) =>
+            {
+                if (dataGridView.Columns.Contains("ID_VLASTNIKA"))
+                {
+                    dataGridView.Columns["ID_VLASTNIKA"].Visible = false;
+                }
+            };
+
             // Show the form as a modal dialog
             form.ShowDialog();
         }
+
+
 
         private void LoadDruhVlastnikaAudit()
         {

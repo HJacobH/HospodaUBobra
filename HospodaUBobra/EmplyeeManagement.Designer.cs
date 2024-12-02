@@ -228,7 +228,7 @@
             btnIncrease.Name = "btnIncrease";
             btnIncrease.Size = new Size(75, 23);
             btnIncrease.TabIndex = 21;
-            btnIncrease.Text = "Zvětšit plat";
+            btnIncrease.Text = "Zvýšit plat";
             btnIncrease.UseVisualStyleBackColor = true;
             btnIncrease.Click += btnIncrease_Click;
             // 
