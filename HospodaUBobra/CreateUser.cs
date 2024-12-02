@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,6 +20,11 @@ namespace HospodaUBobra
         {
             InitializeComponent();
             this.connectionString = connectionString;
+
+            dataGridViewUsers.ReadOnly = true;
+            comboBoxRole.DropDownStyle = ComboBoxStyle.DropDownList;
+
+
             LoadRoles();
             LoadUsers();
         }
@@ -29,7 +35,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT ROLE_NAME FROM ROLE WHERE ROLE_NAME != 'Anonymous'";
+                string query = "SELECT ROLE_NAME FROM ROLE WHERE ROLE_NAME != 'Anonymous' AND ROLE_NAME != 'Klient'";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -50,7 +56,6 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                // Update the query to join the ROLE table and fetch the role name
                 string query = @"
             SELECT 
                 U.ID_UZIVATELE, 
@@ -75,7 +80,6 @@ namespace HospodaUBobra
                 }
             }
 
-            // Hide the ID_UZIVATELE column to prevent showing sensitive information
             if (dataGridViewUsers.Columns.Contains("ID_UZIVATELE"))
             {
                 dataGridViewUsers.Columns["ID_UZIVATELE"].Visible = false;
@@ -92,9 +96,8 @@ namespace HospodaUBobra
             string password = txtPassword.Text;
             string role = comboBoxRole.SelectedItem?.ToString();
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(telefon) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(role))
+            if (!ValidateInputs(username, email, telefon, password, role))
             {
-                MessageBox.Show("Vyplňte všechna pole.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -134,6 +137,41 @@ namespace HospodaUBobra
                     }
                 }
             }
+        }
+
+        private bool ValidateInputs(string username, string email, string telefon, string password, string role)
+        {
+            if (string.IsNullOrWhiteSpace(username) || username.Length > 50 || !Regex.IsMatch(username, @"^[a-zA-Z0-9]+$"))
+            {
+                MessageBox.Show("Uživatelské jméno musí být alfanumerické a kratší než 50 znaků.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                MessageBox.Show("Zadejte platnou e-mailovou adresu.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(telefon) || telefon.Length > 15 || !Regex.IsMatch(telefon, @"^\d+$"))
+            {
+                MessageBox.Show("Telefonní číslo musí obsahovat pouze čísla a být kratší než 15 znaků.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8 || password.Length > 50)
+            {
+                MessageBox.Show("Heslo musí být mezi 8 a 50 znaky.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(role))
+            {
+                MessageBox.Show("Vyberte roli uživatele.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
         }
 
         private int GetNextUserId()
@@ -182,7 +220,6 @@ namespace HospodaUBobra
             }
         }
 
-
         private void btnBack_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -198,17 +235,25 @@ namespace HospodaUBobra
 
             int userId = Convert.ToInt32(dataGridViewUsers.CurrentRow.Cells["ID_UZIVATELE"].Value);
 
-            // Fetch existing user data from the database to preserve missing fields
             string currentPassword = null;
             string currentSalt = null;
             DateTime? currentRegistrationDate = null;
-
-            byte[] currentProfilePicture = null; // Ensure currentProfilePicture is defined
+            int currentProfilePicture = 0;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
                 string query = "SELECT PASSWORD, SALT, DATUM_REGISTRACE FROM UZIVATELE WHERE ID_UZIVATELE = :userId";
+                string pictureQuery = @"
+                    SELECT 
+                        P.ID_PICTURE
+                    FROM 
+                        PROFILOVE_OBRAZKY P
+                    WHERE 
+                        P.ID_PICTURE = (SELECT U.PROFILE_OBRAZKY_ID FROM UZIVATELE U WHERE U.ID_UZIVATELE = :userId)";
+
+
+
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -224,11 +269,7 @@ namespace HospodaUBobra
                         }
                     }
                 }
-
-                // Load profile picture from the PROFILOVE_OBRAZKY table
-                query = "SELECT PICTURE FROM PROFILOVE_OBRAZKY WHERE ID_UZIVATELE = :userId";
-
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                using (OracleCommand cmd = new OracleCommand(pictureQuery, conn))
                 {
                     cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
 
@@ -236,31 +277,29 @@ namespace HospodaUBobra
                     {
                         if (reader.Read())
                         {
-                            currentProfilePicture = reader["PICTURE"] as byte[];
+                            currentProfilePicture = Convert.ToInt32(reader["ID_PICTURE"]);
                         }
                     }
                 }
             }
 
-            // Collect updated data from the UI
             string username = txtUsername.Text.Trim();
             string email = txtEmail.Text.Trim();
             string telefon = txtTelefon.Text.Trim();
-            string password = txtPassword.Text; // Optional: leave blank if not updating
-            int roleId = GetRoleId(comboBoxRole.SelectedItem?.ToString());
+            string password = txtPassword.Text;
+            string role = comboBoxRole.SelectedItem?.ToString();
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(telefon))
+            if (!ValidateInputs(username, email, telefon, password, role))
             {
-                MessageBox.Show("Vyplňte všechna pole.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Use the provided password or keep the current password and salt
             string salt = string.IsNullOrEmpty(password) ? currentSalt : PasswordHelper.GenerateSalt();
             string hashedPassword = string.IsNullOrEmpty(password) ? currentPassword : PasswordHelper.HashPassword(password, salt);
 
-            // Preserve existing registration date
             DateTime registrationDate = currentRegistrationDate ?? DateTime.Now;
+
+            int roleId = GetRoleId(role);
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -269,43 +308,22 @@ namespace HospodaUBobra
 
                 try
                 {
-                    // Call sprava_uzivatele procedure
                     using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1;
                         cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
-                        cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username;
-                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
-                        cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon;
+                        cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon ?? (object)DBNull.Value;
                         cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
-                        cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
-                        cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
+                        cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt ?? (object)DBNull.Value;
                         cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
-                        cmd.Parameters.Add("p_profile_picture", OracleDbType.Int32).Value = DBNull.Value; // Profile picture handled separately
+                        cmd.Parameters.Add("p_profile_obrazky_id", OracleDbType.Int32).Value = currentProfilePicture;
 
                         cmd.ExecuteNonQuery();
-                    }
-
-                    // Handle profile picture update using sprava_profilove_obrazky
-                    if (currentProfilePicture != null)
-                    {
-                        using (OracleCommand profileCmd = new OracleCommand("sprava_profilove_obrazky", conn))
-                        {
-                            profileCmd.CommandType = CommandType.StoredProcedure;
-
-                            profileCmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
-                            profileCmd.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = userId; // Assuming profile picture ID matches user ID
-                            profileCmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
-                            profileCmd.Parameters.Add("p_picture", OracleDbType.Blob).Value = currentProfilePicture;
-                            profileCmd.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = "profile_pic.jpg"; // Example
-                            profileCmd.Parameters.Add("p_file_type", OracleDbType.Varchar2).Value = "image/jpeg"; // Example
-                            profileCmd.Parameters.Add("p_file_extension", OracleDbType.Varchar2).Value = ".jpg"; // Example
-                            profileCmd.Parameters.Add("p_upload_date", OracleDbType.Date).Value = DateTime.Now;
-
-                            profileCmd.ExecuteNonQuery();
-                        }
                     }
 
                     transaction.Commit();
@@ -318,6 +336,7 @@ namespace HospodaUBobra
                     MessageBox.Show("Chyba při aktualizaci uživatele: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -376,18 +395,11 @@ namespace HospodaUBobra
                 txtEmail.Text = dataGridViewUsers.CurrentRow.Cells["EMAIL"].Value.ToString();
                 txtTelefon.Text = dataGridViewUsers.CurrentRow.Cells["TELEFON"].Value.ToString();
 
-                // Get the displayed role name
                 string roleName = dataGridViewUsers.CurrentRow.Cells["ROLE_NAME"].Value.ToString();
 
-                // Find the corresponding role in the combo box
                 int roleIndex = comboBoxRole.Items.IndexOf(roleName);
                 comboBoxRole.SelectedIndex = roleIndex;
             }
-        }
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }

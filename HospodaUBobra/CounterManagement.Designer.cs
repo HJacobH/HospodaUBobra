@@ -49,9 +49,9 @@
             label1.Location = new Point(205, 5);
             label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
-            label1.Size = new Size(134, 21);
+            label1.Size = new Size(142, 21);
             label1.TabIndex = 0;
-            label1.Text = "Správa číselníků";
+            label1.Text = "Správce číselníků";
             // 
             // cbTables
             // 
@@ -168,7 +168,7 @@
             Controls.Add(label1);
             Margin = new Padding(2);
             Name = "CounterManagement";
-            Text = "CounterManagement";
+            Text = "Správce Číselníků";
             ((System.ComponentModel.ISupportInitialize)dgvTableData).EndInit();
             ResumeLayout(false);
             PerformLayout();

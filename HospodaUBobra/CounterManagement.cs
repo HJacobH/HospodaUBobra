@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -20,23 +21,26 @@ namespace HospodaUBobra
         {
             InitializeComponent();
 
+            dgvTableData.ReadOnly = true;
+            cbTables.DropDownStyle = ComboBoxStyle.DropDownList;
+
             LoadTableNames();
         }
 
         private void LoadTableNames()
         {
             List<string> tables = new List<string>
-    {
-        "BALENI_PIV",
-        "DRUHY_PODNIKU",
-        "JEDNOTKY_OBJ",
-        "JEDNOTKY_PIV",
-        "KRAJE",
-        "OKRESY",
-        "PRAVNICKE_OSOBY",
-        "ROLE",
-        "STAVY_OBJEDNAVEK"
-    };
+            {
+                "BALENI_PIV",
+                "DRUHY_PODNIKU",
+                "JEDNOTKY_OBJ",
+                "JEDNOTKY_PIV",
+                "KRAJE",
+                "OKRESY",
+                "PRAVNICKE_OSOBY",
+                "ROLE",
+                "STAVY_OBJEDNAVEK"
+            };
 
             cbTables.DataSource = tables;
         }
@@ -73,7 +77,6 @@ namespace HospodaUBobra
 
             lblStatus.Text = $"Aktuální číselník: {tableName}";
 
-            // Hide the ID column based on the table name
             HideIdColumn(tableName);
         }
 
@@ -81,7 +84,6 @@ namespace HospodaUBobra
         {
             string primaryKeyColumn = GetPrimaryKeyColumnForTable(tableName);
 
-            // Check if the column exists in the DataGridView and hide it
             if (dgvTableData.Columns.Contains(primaryKeyColumn))
             {
                 dgvTableData.Columns[primaryKeyColumn].Visible = false;
@@ -91,9 +93,9 @@ namespace HospodaUBobra
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtAktualni.Text))
+            if (!ValidateInput(txtAktualni.Text))
             {
-                MessageBox.Show("Vyplňte hodnotu pro přidání.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Neplatný vstup.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -119,9 +121,9 @@ namespace HospodaUBobra
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (dgvTableData.CurrentRow == null || string.IsNullOrEmpty(txtAktualni.Text))
+            if (dgvTableData.CurrentRow == null || !ValidateInput(txtAktualni.Text))
             {
-                MessageBox.Show("Vyberte řádek k aktualizaci a vyplňte hodnotu.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Neplatný vstup.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -191,7 +193,7 @@ namespace HospodaUBobra
                 return tablePrimaryKeyMap[tableName];
             }
 
-            throw new ArgumentException($"Primary key column not defined for table: {tableName}");
+            throw new ArgumentException($"Primární klíč není definován pro tuto tabulku: {tableName}");
         }
 
 
@@ -248,6 +250,29 @@ namespace HospodaUBobra
                     MessageBox.Show($"Chyba při mazání řádku: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private bool ValidateInput(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                MessageBox.Show("Hodnota nesmí být prázdná.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (input.Length > 50)
+            {
+                MessageBox.Show("Hodnota nesmí být delší než 50 znaků.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!Regex.IsMatch(input, @"^[a-zA-Z0-9\s]+$"))
+            {
+                MessageBox.Show("Hodnota může obsahovat pouze písmena, číslice a mezery.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
         }
 
         private void dgvTableData_SelectionChanged(object sender, EventArgs e)

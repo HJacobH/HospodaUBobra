@@ -43,6 +43,7 @@
             dataGridViewUsers = new DataGridView();
             btnUpdate = new Button();
             btnDelete = new Button();
+            label6 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).BeginInit();
             SuspendLayout();
             // 
@@ -177,11 +178,22 @@
             btnDelete.UseVisualStyleBackColor = true;
             btnDelete.Click += btnDelete_Click;
             // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label6.Location = new Point(12, 9);
+            label6.Name = "label6";
+            label6.Size = new Size(145, 21);
+            label6.TabIndex = 15;
+            label6.Text = "Správce uživatelů";
+            // 
             // CreateUser
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(573, 522);
+            Controls.Add(label6);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
             Controls.Add(dataGridViewUsers);
@@ -198,7 +210,7 @@
             Controls.Add(txtUsername);
             Controls.Add(label1);
             Name = "CreateUser";
-            Text = "Správa uživatelů";
+            Text = "Správce Uživatelů";
             ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -221,5 +233,6 @@
         private DataGridView dataGridViewUsers;
         private Button btnUpdate;
         private Button btnDelete;
+        private Label label6;
     }
 }
