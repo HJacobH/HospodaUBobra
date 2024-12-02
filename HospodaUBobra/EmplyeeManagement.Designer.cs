@@ -32,7 +32,6 @@
             txtJmeno = new TextBox();
             txtPrijmeni = new TextBox();
             dateTimePickerNarozeni = new DateTimePicker();
-            txtPozice = new TextBox();
             txtVyplata = new TextBox();
             dateTimePickerStartWorking = new DateTimePicker();
             txtFavBeer = new TextBox();
@@ -48,6 +47,8 @@
             btnDelete = new Button();
             btnBack = new Button();
             cbPozice = new ComboBox();
+            cbPoziceSalary = new ComboBox();
+            btnIncrease = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvZamestnanci).BeginInit();
             SuspendLayout();
             // 
@@ -80,13 +81,6 @@
             dateTimePickerNarozeni.Name = "dateTimePickerNarozeni";
             dateTimePickerNarozeni.Size = new Size(144, 23);
             dateTimePickerNarozeni.TabIndex = 3;
-            // 
-            // txtPozice
-            // 
-            txtPozice.Location = new Point(111, 119);
-            txtPozice.Name = "txtPozice";
-            txtPozice.Size = new Size(100, 23);
-            txtPozice.TabIndex = 4;
             // 
             // txtVyplata
             // 
@@ -215,16 +209,36 @@
             // cbPozice
             // 
             cbPozice.FormattingEnabled = true;
-            cbPozice.Location = new Point(217, 119);
+            cbPozice.Location = new Point(111, 119);
             cbPozice.Name = "cbPozice";
             cbPozice.Size = new Size(121, 23);
             cbPozice.TabIndex = 19;
+            // 
+            // cbPoziceSalary
+            // 
+            cbPoziceSalary.FormattingEnabled = true;
+            cbPoziceSalary.Location = new Point(385, 56);
+            cbPoziceSalary.Name = "cbPoziceSalary";
+            cbPoziceSalary.Size = new Size(121, 23);
+            cbPoziceSalary.TabIndex = 20;
+            // 
+            // btnIncrease
+            // 
+            btnIncrease.Location = new Point(519, 55);
+            btnIncrease.Name = "btnIncrease";
+            btnIncrease.Size = new Size(75, 23);
+            btnIncrease.TabIndex = 21;
+            btnIncrease.Text = "Zvětšit plat";
+            btnIncrease.UseVisualStyleBackColor = true;
+            btnIncrease.Click += btnIncrease_Click;
             // 
             // EmplyeeManagement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(606, 575);
+            Controls.Add(btnIncrease);
+            Controls.Add(cbPoziceSalary);
             Controls.Add(cbPozice);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
@@ -240,7 +254,6 @@
             Controls.Add(txtFavBeer);
             Controls.Add(dateTimePickerStartWorking);
             Controls.Add(txtVyplata);
-            Controls.Add(txtPozice);
             Controls.Add(dateTimePickerNarozeni);
             Controls.Add(txtPrijmeni);
             Controls.Add(txtJmeno);
@@ -258,7 +271,6 @@
         private TextBox txtJmeno;
         private TextBox txtPrijmeni;
         private DateTimePicker dateTimePickerNarozeni;
-        private TextBox txtPozice;
         private TextBox txtVyplata;
         private DateTimePicker dateTimePickerStartWorking;
         private TextBox txtFavBeer;
@@ -274,5 +286,7 @@
         private Button btnDelete;
         private Button btnBack;
         private ComboBox cbPozice;
+        private ComboBox cbPoziceSalary;
+        private Button btnIncrease;
     }
 }

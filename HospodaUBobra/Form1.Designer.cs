@@ -67,8 +67,10 @@
             SpravaCiselnikuToolStrip = new ToolStripMenuItem();
             zobrazitSpravuCiselnikuToolStripMenuItem = new ToolStripMenuItem();
             spravaMestVesnicToolStripMenuItem = new ToolStripMenuItem();
+            spravaPriraazeníToolStripMenuItem = new ToolStripMenuItem();
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
+            spravaFyzickychOsobToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -339,7 +341,7 @@
             // 
             // SpravaCiselnikuToolStrip
             // 
-            SpravaCiselnikuToolStrip.DropDownItems.AddRange(new ToolStripItem[] { zobrazitSpravuCiselnikuToolStripMenuItem, spravaMestVesnicToolStripMenuItem });
+            SpravaCiselnikuToolStrip.DropDownItems.AddRange(new ToolStripItem[] { zobrazitSpravuCiselnikuToolStripMenuItem, spravaMestVesnicToolStripMenuItem, spravaPriraazeníToolStripMenuItem, spravaFyzickychOsobToolStripMenuItem });
             SpravaCiselnikuToolStrip.Name = "SpravaCiselnikuToolStrip";
             SpravaCiselnikuToolStrip.Size = new Size(103, 20);
             SpravaCiselnikuToolStrip.Text = "Správa číselníků";
@@ -347,16 +349,23 @@
             // zobrazitSpravuCiselnikuToolStripMenuItem
             // 
             zobrazitSpravuCiselnikuToolStripMenuItem.Name = "zobrazitSpravuCiselnikuToolStripMenuItem";
-            zobrazitSpravuCiselnikuToolStripMenuItem.Size = new Size(183, 22);
+            zobrazitSpravuCiselnikuToolStripMenuItem.Size = new Size(193, 22);
             zobrazitSpravuCiselnikuToolStripMenuItem.Text = "Zobrazit";
             zobrazitSpravuCiselnikuToolStripMenuItem.Click += zobrazitSpravuCiselnikuToolStripMenuItem_Click;
             // 
             // spravaMestVesnicToolStripMenuItem
             // 
             spravaMestVesnicToolStripMenuItem.Name = "spravaMestVesnicToolStripMenuItem";
-            spravaMestVesnicToolStripMenuItem.Size = new Size(183, 22);
+            spravaMestVesnicToolStripMenuItem.Size = new Size(193, 22);
             spravaMestVesnicToolStripMenuItem.Text = "Správa měst a vesnic";
             spravaMestVesnicToolStripMenuItem.Click += spravaMestVesnicToolStripMenuItem_Click;
+            // 
+            // spravaPriraazeníToolStripMenuItem
+            // 
+            spravaPriraazeníToolStripMenuItem.Name = "spravaPriraazeníToolStripMenuItem";
+            spravaPriraazeníToolStripMenuItem.Size = new Size(193, 22);
+            spravaPriraazeníToolStripMenuItem.Text = "Správa přiřazení";
+            spravaPriraazeníToolStripMenuItem.Click += spravaPriraazeníToolStripMenuItem_Click;
             // 
             // btnLogout
             // 
@@ -375,6 +384,13 @@
             profilePictureBox.Size = new Size(64, 62);
             profilePictureBox.TabIndex = 11;
             profilePictureBox.TabStop = false;
+            // 
+            // spravaFyzickychOsobToolStripMenuItem
+            // 
+            spravaFyzickychOsobToolStripMenuItem.Name = "spravaFyzickychOsobToolStripMenuItem";
+            spravaFyzickychOsobToolStripMenuItem.Size = new Size(193, 22);
+            spravaFyzickychOsobToolStripMenuItem.Text = "Správa  fyzických osob";
+            spravaFyzickychOsobToolStripMenuItem.Click += spravaFyzickychOsobToolStripMenuItem_Click;
             // 
             // Form1
             // 
@@ -441,5 +457,7 @@
         private ToolStripMenuItem spravaToolStripMenuItem;
         private ToolStripMenuItem vlastniciSVicePivovaryToolStripMenuItem;
         private ToolStripMenuItem topMestaToolStripMenuItem;
+        private ToolStripMenuItem spravaPriraazeníToolStripMenuItem;
+        private ToolStripMenuItem spravaFyzickychOsobToolStripMenuItem;
     }
 }

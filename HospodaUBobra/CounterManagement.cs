@@ -33,7 +33,6 @@ namespace HospodaUBobra
         "JEDNOTKY_PIV",
         "KRAJE",
         "OKRESY",
-        "POZICE_PRACOVNIKA",
         "PRAVNICKE_OSOBY",
         "ROLE",
         "STAVY_OBJEDNAVEK"

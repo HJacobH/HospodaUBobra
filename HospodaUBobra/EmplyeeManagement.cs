@@ -22,6 +22,8 @@ namespace HospodaUBobra
             this.connectionString = connectionString;
             LoadEmployees();
             LoadPositions();
+
+            LoadPositionsSalary();
         }
 
         private void LoadEmployees()
@@ -61,6 +63,29 @@ namespace HospodaUBobra
                         cbPozice.DisplayMember = "NAZEV_POZICE";
                         cbPozice.ValueMember = "ID_POZICE";
                         cbPozice.SelectedIndex = -1; // Clear selection
+                    }
+                }
+            }
+        }
+
+        private void LoadPositionsSalary()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT ID_POZICE, NAZEV_POZICE FROM POZICE_PRACOVNIKA";
+
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        cbPoziceSalary.DataSource = dt;
+                        cbPoziceSalary.DisplayMember = "NAZEV_POZICE";
+                        cbPoziceSalary.ValueMember = "ID_POZICE";
+                        cbPoziceSalary.SelectedIndex = -1; // Clear selection
                     }
                 }
             }
@@ -241,6 +266,53 @@ namespace HospodaUBobra
                 txtVyplata.Text = dgvZamestnanci.CurrentRow.Cells["PLAT"].Value.ToString();
                 dateTimePickerStartWorking.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value);
                 txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value.ToString();
+            }
+        }
+
+        private void btnIncrease_Click(object sender, EventArgs e)
+        {
+            if (cbPoziceSalary.SelectedIndex == -1)
+            {
+                MessageBox.Show("Please select a position before updating salaries.", "No Position Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Get the selected position ID from the ComboBox
+            int selectedPositionId = Convert.ToInt32(cbPoziceSalary.SelectedValue);
+
+            // Execute the procedure with the selected position ID
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("IncreasePayBasedOnTenureAndPosition", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Add the position ID parameter
+                        OracleParameter roleIdParam = new OracleParameter("p_role_id", OracleDbType.Int32);
+                        roleIdParam.Value = selectedPositionId;
+                        cmd.Parameters.Add(roleIdParam);
+
+                        // Execute the procedure
+                        cmd.ExecuteNonQuery();
+
+                        MessageBox.Show("Salary update completed successfully for the selected position.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoadEmployees();
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    // Handle Oracle exceptions
+                    MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    // Handle general exceptions
+                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

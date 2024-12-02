@@ -1129,5 +1129,17 @@ namespace HospodaUBobra
                 }
             }
         }
+
+        private void spravaPriraazeníToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaSpojeni spravaSpojeni = new SpravaSpojeni();
+            spravaSpojeni.ShowDialog();
+        }
+
+        private void spravaFyzickychOsobToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaFyzickzchOsob sp = new SpravaFyzickzchOsob();
+            sp.ShowDialog();
+        }
     }
 }
