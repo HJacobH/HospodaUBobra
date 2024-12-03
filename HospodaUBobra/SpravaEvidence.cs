@@ -23,6 +23,10 @@ namespace HospodaUBobra
             LoadBeers();
             LoadUnits();
             LoadEvidenceData();
+
+            dgvEvidence.ReadOnly = true;
+            cbBeer.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbUnit.DropDownStyle = ComboBoxStyle.DropDownList;
         }
         private void LoadBeers()
         {
@@ -46,8 +50,8 @@ namespace HospodaUBobra
                         }
 
                         cbBeer.DataSource = beers;
-                        cbBeer.DisplayMember = "Item2"; // Display beer name
-                        cbBeer.ValueMember = "Item1"; // Use beer ID as value
+                        cbBeer.DisplayMember = "Item2";
+                        cbBeer.ValueMember = "Item1"; 
                     }
                 }
                 catch (Exception ex)
@@ -78,8 +82,8 @@ namespace HospodaUBobra
                         }
 
                         cbUnit.DataSource = units;
-                        cbUnit.DisplayMember = "Item2"; // Display unit name
-                        cbUnit.ValueMember = "Item1"; // Use unit ID as value
+                        cbUnit.DisplayMember = "Item2"; 
+                        cbUnit.ValueMember = "Item1"; 
                     }
                 }
                 catch (Exception ex)
@@ -97,7 +101,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Updated query to include joins for Beer name, Unit name, and Client email
                     string query = @"
                 SELECT 
                     e.ID_EVIDENCE,
@@ -126,7 +129,6 @@ namespace HospodaUBobra
 
                         dgvEvidence.DataSource = dataTable;
 
-                        // Rename column headers for clarity
                         dgvEvidence.Columns["ID_EVIDENCE"].HeaderText = "Evidence ID";
                         dgvEvidence.Columns["MNOZSTVI"].HeaderText = "Quantity";
                         dgvEvidence.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Order Date";
@@ -135,7 +137,6 @@ namespace HospodaUBobra
                         dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Order Price";
                         dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Client Email";
 
-                        // Hide the Evidence ID column
                         if (dgvEvidence.Columns.Contains("ID_EVIDENCE"))
                         {
                             dgvEvidence.Columns["ID_EVIDENCE"].Visible = false;
@@ -154,14 +155,14 @@ namespace HospodaUBobra
         {
             if (cbBeer.SelectedItem is Tuple<int, string, decimal> selectedBeer && int.TryParse(txtQuantity.Text, out int quantity))
             {
-                decimal pricePerUnit = selectedBeer.Item3; // Get the price from the selected beer
-                txtOrderPrice.Text = (pricePerUnit * quantity).ToString("F2"); // Calculate total price
+                decimal pricePerUnit = selectedBeer.Item3;
+                txtOrderPrice.Text = (pricePerUnit * quantity).ToString("F2"); 
             }
         }
 
         private void txtQuantity_TextChanged(object sender, EventArgs e)
         {
-            CalculateOrderPrice(); // Recalculate order price when quantity changes
+            CalculateOrderPrice(); 
         }
 
         private void dgvEvidence_SelectionChanged(object sender, EventArgs e)
@@ -172,40 +173,33 @@ namespace HospodaUBobra
                 txtQuantity.Text = dgvEvidence.CurrentRow.Cells["MNOZSTVI"].Value.ToString();
                 dtpOrderDate.Value = Convert.ToDateTime(dgvEvidence.CurrentRow.Cells["DATUM_OBJEDNAVKY"].Value);
 
-                // Find and select the Beer in the ComboBox
                 string beerName = dgvEvidence.CurrentRow.Cells["BEER_NAME"].Value?.ToString();
                 cbBeer.SelectedIndex = cbBeer.FindStringExact(beerName);
 
-                // Find and select the Unit in the ComboBox
                 string unitName = dgvEvidence.CurrentRow.Cells["UNIT_NAME"].Value?.ToString();
                 cbUnit.SelectedIndex = cbUnit.FindStringExact(unitName);
 
                 txtOrderPrice.Text = dgvEvidence.CurrentRow.Cells["CENA_OBJEDNAVKY"].Value.ToString();
 
-                // Display the Client's Email
                 txtOrderId.Text = dgvEvidence.CurrentRow.Cells["CLIENT_EMAIL"].Value.ToString();
             }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (!int.TryParse(txtQuantity.Text, out int quantity) ||
-            cbBeer.SelectedItem == null ||
-            cbUnit.SelectedItem == null)
+            if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show("Please enter valid data.");
+                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Correctly cast SelectedItem for cbBeer and cbUnit
-            int beerId = ((Tuple<int, string, decimal>)cbBeer.SelectedItem).Item1; // Beer ID
-            int unitId = ((Tuple<int, string>)cbUnit.SelectedItem).Item1; // Unit ID
-
-            decimal orderPrice = decimal.Parse(txtOrderPrice.Text);
+            int quantity = int.Parse(txtQuantity.Text.Trim());
+            int beerId = ((Tuple<int, string, decimal>)cbBeer.SelectedItem).Item1;
+            int unitId = ((Tuple<int, string>)cbUnit.SelectedItem).Item1;
+            decimal orderPrice = decimal.Parse(txtOrderPrice.Text.Trim());
             DateTime orderDate = dtpOrderDate.Value;
-            int orderId = int.Parse(txtOrderId.Text);
+            int orderId = int.Parse(txtOrderId.Text.Trim());
 
-            // Call the ManageEvidence method
             ManageEvidence(null, quantity, orderDate, beerId, unitId, orderPrice, orderId);
         }
 
@@ -213,31 +207,24 @@ namespace HospodaUBobra
         {
             if (selectedEvidenceId == -1)
             {
-                MessageBox.Show("No evidence selected for update. Please select a record.");
+                MessageBox.Show("Není vybrán žádný záznam k aktualizaci.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            int quantity, beerId, unitId, orderId;
-            decimal orderPrice;
-            DateTime orderDate = dtpOrderDate.Value;
-
-            // Validate input
-            if (!int.TryParse(txtQuantity.Text, out quantity) ||
-                cbBeer.SelectedItem == null ||
-                cbUnit.SelectedItem == null ||
-                !decimal.TryParse(txtOrderPrice.Text, out orderPrice) ||
-                !int.TryParse(txtOrderId.Text, out orderId))
+            if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show("Please enter valid values for all fields.");
+                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            beerId = ((Tuple<int, string, decimal>)cbBeer.SelectedItem).Item1;
-            unitId = ((Tuple<int, string>)cbUnit.SelectedItem).Item1;
+            int quantity = int.Parse(txtQuantity.Text.Trim());
+            int beerId = ((Tuple<int, string, decimal>)cbBeer.SelectedItem).Item1;
+            int unitId = ((Tuple<int, string>)cbUnit.SelectedItem).Item1;
+            decimal orderPrice = decimal.Parse(txtOrderPrice.Text.Trim());
+            DateTime orderDate = dtpOrderDate.Value;
+            int orderId = int.Parse(txtOrderId.Text.Trim());
 
-            // Update the evidence
             ManageEvidence(selectedEvidenceId, quantity, orderDate, beerId, unitId, orderPrice, orderId);
-
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -266,7 +253,6 @@ namespace HospodaUBobra
 
                         using (OracleCommand cmd = new OracleCommand(query, conn))
                         {
-                            // Add parameter for ID_EVIDENCE
                             cmd.Parameters.Add(new OracleParameter(":id_evidence", OracleDbType.Int32)).Value = selectedEvidenceId;
 
                             int rowsAffected = cmd.ExecuteNonQuery();
@@ -274,9 +260,9 @@ namespace HospodaUBobra
                             if (rowsAffected > 0)
                             {
                                 MessageBox.Show("Evidence record deleted successfully!");
-                                LoadEvidenceData(); // Refresh the DataGridView
-                                selectedEvidenceId = -1; // Reset the selection
-                                ClearFormFields(); // Clear the form fields
+                                LoadEvidenceData();
+                                selectedEvidenceId = -1; 
+                                ClearFormFields(); 
                             }
                             else
                             {
@@ -362,19 +348,60 @@ namespace HospodaUBobra
 
         private void UpdateOrderPrice()
         {
-            // Ensure a beer is selected and the quantity is valid
             if (cbBeer.SelectedItem is Tuple<int, string, decimal> selectedBeer &&
                 int.TryParse(txtQuantity.Text, out int quantity))
             {
-                decimal pricePerUnit = selectedBeer.Item3; // Get the beer price
-                decimal totalPrice = pricePerUnit * quantity; // Calculate total price
-                txtOrderPrice.Text = totalPrice.ToString("F2"); // Format as 2 decimal places
+                decimal pricePerUnit = selectedBeer.Item3;
+                decimal totalPrice = pricePerUnit * quantity;
+                txtOrderPrice.Text = totalPrice.ToString("F2"); 
             }
             else
             {
-                // Clear the order price if input is invalid
                 txtOrderPrice.Text = string.Empty;
             }
+        }
+
+        private bool ValidateInputs(out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (!int.TryParse(txtQuantity.Text.Trim(), out int quantity) || quantity <= 0)
+            {
+                errorMessage = "Prosím, zadejte platné množství (celé číslo větší než nula).";
+                return false;
+            }
+
+            if (dtpOrderDate.Value > DateTime.Now)
+            {
+                errorMessage = "Datum objednávky nemůže být v budoucnosti.";
+                return false;
+            }
+
+            if (cbBeer.SelectedItem == null)
+            {
+                errorMessage = "Vyberte prosím pivo.";
+                return false;
+            }
+
+            if (cbUnit.SelectedItem == null)
+            {
+                errorMessage = "Vyberte prosím jednotku.";
+                return false;
+            }
+
+            if (!decimal.TryParse(txtOrderPrice.Text.Trim(), out decimal orderPrice) || orderPrice <= 0)
+            {
+                errorMessage = "Prosím, zadejte platnou cenu objednávky.";
+                return false;
+            }
+
+            if (!int.TryParse(txtOrderId.Text.Trim(), out int orderId) || orderId <= 0)
+            {
+                errorMessage = "Prosím, zadejte platné ID objednávky (celé číslo větší než nula).";
+                return false;
+            }
+
+            return true;
         }
     }
 }

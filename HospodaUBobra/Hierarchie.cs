@@ -19,6 +19,7 @@ namespace HospodaUBobra
         public Hierarchie()
         {
             InitializeComponent();
+            comboBoxPivovary.DropDownStyle = ComboBoxStyle.DropDownList;
             LoadPivovary();
         }
 
@@ -33,7 +34,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Query to fetch positions
                     string positionQuery = "SELECT ID_POZICE, NAZEV_POZICE, PARENT_ID FROM POZICE_PRACOVNIKA";
                     using (OracleCommand positionCmd = new OracleCommand(positionQuery, conn))
                     {
@@ -51,7 +51,6 @@ namespace HospodaUBobra
                         }
                     }
 
-                    // Query to fetch employees filtered by PIVOVAR
                     string employeeQuery = @"
                     SELECT Z.ID_ZAMESTNANCE, Z.JMENO, Z.PRIJMENI, Z.POZICE 
                     FROM ZAMESTNANCI Z 
@@ -77,7 +76,6 @@ namespace HospodaUBobra
                         }
                     }
 
-                    // Build the hierarchy in the TreeView
                     BuildTreeView(positions, employees);
                 }
                 catch (Exception ex)
@@ -90,7 +88,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
         public class Employee
         {
             public int ID { get; set; }
@@ -107,7 +104,12 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = "SELECT DISTINCT PIVOVAR_ID_PIVOVARU FROM PRACOVNICI";
+                    string query = @"
+                        SELECT P.ID_PIVOVARU, P.NAZEV 
+                        FROM PIVOVARY P
+                        WHERE EXISTS (
+                            SELECT 1 FROM PRACOVNICI PR WHERE PR.PIVOVAR_ID_PIVOVARU = P.ID_PIVOVARU
+                        )";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -115,15 +117,24 @@ namespace HospodaUBobra
                         {
                             comboBoxPivovary.Items.Clear();
 
+                            var pivovars = new Dictionary<int, string>();
+
                             while (reader.Read())
                             {
                                 int pivovarId = reader.GetInt32(0);
-                                comboBoxPivovary.Items.Add(pivovarId);
+                                string pivovarName = reader.GetString(1);
+
+                                pivovars.Add(pivovarId, pivovarName);
+
+                                comboBoxPivovary.Items.Add(new KeyValuePair<int, string>(pivovarId, pivovarName));
                             }
+
+                            comboBoxPivovary.DisplayMember = "Value"; 
+                            comboBoxPivovary.ValueMember = "Key";
 
                             if (comboBoxPivovary.Items.Count > 0)
                             {
-                                comboBoxPivovary.SelectedIndex = 0; // Select the first PIVOVAR by default
+                                comboBoxPivovary.SelectedIndex = 0;
                             }
                         }
                     }
@@ -143,19 +154,16 @@ namespace HospodaUBobra
         {
             treeView.Nodes.Clear();
 
-            // Create a dictionary for easy lookup
             var positionLookup = new Dictionary<int, Position>();
             foreach (var position in positions)
             {
                 positionLookup[position.ID] = position;
             }
 
-            // Build the tree for positions
             foreach (var position in positions)
             {
                 if (position.ParentID == null)
                 {
-                    // Top-level node
                     var rootNode = new TreeNode(position.Name);
                     rootNode.Tag = position;
                     treeView.Nodes.Add(rootNode);
@@ -166,7 +174,6 @@ namespace HospodaUBobra
 
         private void AddChildNodes(TreeNode parentNode, Position parentPosition, Dictionary<int, Position> positionLookup, List<Employee> employees)
         {
-            // Add child positions
             foreach (var childPosition in positionLookup.Values)
             {
                 if (childPosition.ParentID == parentPosition.ID)
@@ -178,7 +185,6 @@ namespace HospodaUBobra
                 }
             }
 
-            // Add employees under the current position
             foreach (var employee in employees)
             {
                 if (employee.PositionID == parentPosition.ID)
@@ -206,9 +212,10 @@ namespace HospodaUBobra
         {
             if (comboBoxPivovary.SelectedItem != null)
             {
-                int selectedPivovar = (int)comboBoxPivovary.SelectedItem;
-                
-                LoadHierarchyData(selectedPivovar);
+                var selectedPivovar = (KeyValuePair<int, string>)comboBoxPivovary.SelectedItem;
+                int pivovarId = selectedPivovar.Key;
+
+                LoadHierarchyData(pivovarId);
                 treeView.ExpandAll();
             }
         }

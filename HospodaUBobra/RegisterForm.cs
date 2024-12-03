@@ -38,32 +38,32 @@ namespace HospodaUBobra
 
         private void btnRegister_Click(object sender, EventArgs e)
         {
+            if (!ValidateInputs(out string errorMessage))
+            {
+                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string username = txtUsername.Text.Trim();
             string email = txtEmail.Text.Trim();
             string telefon = txtTelefon.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                MessageBox.Show("Vyplňte všechna pole.");
-                return;
-            }
-
             if (UsernameExists(email))
             {
-                MessageBox.Show("Uživatel s tímto emailem již existuje.");
+                MessageBox.Show("Uživatel s tímto emailem již existuje.", "Chyba registrace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (RegisterUser(username, email, telefon, password, UserRole.User.ToString()))
             {
-                MessageBox.Show("Registrace úspěšná!");
+                MessageBox.Show("Registrace úspěšná!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
                 Close();
             }
             else
             {
-                MessageBox.Show("Registrace selhala. Zkuste to znovu.");
+                MessageBox.Show("Registrace selhala. Zkuste to znovu.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -170,7 +170,37 @@ namespace HospodaUBobra
 
             return nextId;
         }
-    
+
+        private bool ValidateInputs(out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(txtUsername.Text))
+            {
+                errorMessage = "Zadejte prosím uživatelské jméno.";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || !txtEmail.Text.Contains("@"))
+            {
+                errorMessage = "Zadejte prosím platný email.";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtTelefon.Text) || txtTelefon.Text.Length < 9 || !txtTelefon.Text.All(char.IsDigit))
+            {
+                errorMessage = "Zadejte prosím platné telefonní číslo (minimálně 9 číslic).";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtPassword.Text) || txtPassword.Text.Length < 8)
+            {
+                errorMessage = "Zadejte prosím heslo (minimálně 8 znaků).";
+                return false;
+            }
+
+            return true;
+        }
 
         private void btnBack_Click(object sender, EventArgs e)
         {

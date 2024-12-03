@@ -25,6 +25,9 @@ namespace HospodaUBobra
             LoadPackagingOptions();
             LoadUnitOptions();
             LoadPivaData();
+            dgvPiva.ReadOnly = true;
+            comboBoxPackaging.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxUnit.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void LoadPivaData()
@@ -143,27 +146,22 @@ namespace HospodaUBobra
 
         private void btnAddPiwo_Click(object sender, EventArgs e)
         {
-            string nazev = txtBeerName.Text.Trim();
-            decimal obsahAlkoholu;
-            decimal objem;
-            decimal cena;
-            int pocetKsSkladem;
-            int baleniPivaId = ((Tuple<int, string>)comboBoxPackaging.SelectedItem).Item1;
-            int jednotkaPivaId = ((Tuple<int, string>)comboBoxUnit.SelectedItem).Item1;
-
-            // Validate input
-            if (string.IsNullOrEmpty(nazev) ||
-                !decimal.TryParse(txtAlcoholContent.Text, out obsahAlkoholu) ||
-                !decimal.TryParse(txtVolume.Text, out objem) ||
-                !decimal.TryParse(txtPrice.Text, out cena) ||
-                !int.TryParse(txtStockQuantity.Text, out pocetKsSkladem))
+            if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show("Prosím zadejte správné hodnoty.");
+                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            string nazev = txtBeerName.Text.Trim();
+            decimal obsahAlkoholu = decimal.Parse(txtAlcoholContent.Text);
+            decimal objem = decimal.Parse(txtVolume.Text);
+            decimal cena = decimal.Parse(txtPrice.Text);
+            int pocetKsSkladem = int.Parse(txtStockQuantity.Text);
+            int baleniPivaId = ((Tuple<int, string>)comboBoxPackaging.SelectedItem).Item1;
+            int jednotkaPivaId = ((Tuple<int, string>)comboBoxUnit.SelectedItem).Item1;
+
             ManageBeer(null, nazev, obsahAlkoholu, objem, cena, pocetKsSkladem, baleniPivaId, jednotkaPivaId);
-            
+
         }
 
         private void btnBack_Click(object sender, EventArgs e)
@@ -175,30 +173,25 @@ namespace HospodaUBobra
         {
             if (selectedBeerId == -1)
             {
-                MessageBox.Show("Nebylo vybráno žádné pivo.");
+                MessageBox.Show("Nebyla vybrána žádná položka piva k aktualizaci.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!ValidateInputs(out string errorMessage))
+            {
+                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string nazev = txtBeerName.Text.Trim();
-            decimal obsahAlkoholu;
-            decimal objem;
-            decimal cena;
-            int pocetKsSkladem;
+            decimal obsahAlkoholu = decimal.Parse(txtAlcoholContent.Text);
+            decimal objem = decimal.Parse(txtVolume.Text);
+            decimal cena = decimal.Parse(txtPrice.Text);
+            int pocetKsSkladem = int.Parse(txtStockQuantity.Text);
             int baleniPivaId = ((Tuple<int, string>)comboBoxPackaging.SelectedItem).Item1;
             int jednotkaPivaId = ((Tuple<int, string>)comboBoxUnit.SelectedItem).Item1;
 
-            if (string.IsNullOrEmpty(nazev) ||
-                !decimal.TryParse(txtAlcoholContent.Text, out obsahAlkoholu) ||
-                !decimal.TryParse(txtVolume.Text, out objem) ||
-                !decimal.TryParse(txtPrice.Text, out cena) ||
-                !int.TryParse(txtStockQuantity.Text, out pocetKsSkladem))
-            {
-                MessageBox.Show("Prosím zadejte správné hodnoty.");
-                return;
-            }
-
             ManageBeer(selectedBeerId, nazev, obsahAlkoholu, objem, cena, pocetKsSkladem, baleniPivaId, jednotkaPivaId);
-
         }
 
         private void ManageBeer(int? idPiva, string nazev, decimal obsahAlkoholu, decimal objem, decimal cena, int pocetKsSkladem, int baleniPivaId, int jednotkaPivaId)
@@ -279,24 +272,87 @@ namespace HospodaUBobra
 
         private void dgvPiva_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvPiva.CurrentRow != null)
+            if (dgvPiva.CurrentRow == null || dgvPiva.CurrentRow.Cells["ID_PIVA"].Value == DBNull.Value)
+            {
+                selectedBeerId = -1;
+                txtBeerName.Text = string.Empty;
+                txtAlcoholContent.Text = string.Empty;
+                txtVolume.Text = string.Empty;
+                txtPrice.Text = string.Empty;
+                txtStockQuantity.Text = string.Empty;
+                comboBoxPackaging.SelectedIndex = -1;
+                comboBoxUnit.SelectedIndex = -1;
+                return;
+            }
+
+            try
             {
                 selectedBeerId = Convert.ToInt32(dgvPiva.CurrentRow.Cells["ID_PIVA"].Value);
-
                 txtBeerName.Text = dgvPiva.CurrentRow.Cells["NAZEV"].Value.ToString();
                 txtAlcoholContent.Text = dgvPiva.CurrentRow.Cells["OBSAH_ALKOHOLU"].Value.ToString();
                 txtVolume.Text = dgvPiva.CurrentRow.Cells["OBJEM"].Value.ToString();
                 txtPrice.Text = dgvPiva.CurrentRow.Cells["CENA"].Value.ToString();
                 txtStockQuantity.Text = dgvPiva.CurrentRow.Cells["POCET_KS_SKLADEM"].Value.ToString();
 
-                // Find and select the corresponding packaging in the ComboBox
-                string packagingName = dgvPiva.CurrentRow.Cells["PACKAGING"].Value.ToString();
+                string packagingName = dgvPiva.CurrentRow.Cells["PACKAGING"].Value?.ToString() ?? string.Empty;
                 comboBoxPackaging.SelectedIndex = comboBoxPackaging.FindStringExact(packagingName);
 
-                // Find and select the corresponding unit in the ComboBox
-                string unitName = dgvPiva.CurrentRow.Cells["UNIT"].Value.ToString();
+                string unitName = dgvPiva.CurrentRow.Cells["UNIT"].Value?.ToString() ?? string.Empty;
                 comboBoxUnit.SelectedIndex = comboBoxUnit.FindStringExact(unitName);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Chyba při zpracování výběru: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private bool ValidateInputs(out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(txtBeerName.Text))
+            {
+                errorMessage = "Zadejte prosím platný název piva.";
+                return false;
+            }
+
+            if (!decimal.TryParse(txtAlcoholContent.Text, out decimal alcoholContent) || alcoholContent < 0 || alcoholContent > 100)
+            {
+                errorMessage = "Zadejte prosím platný obsah alkoholu (0–100 %).";
+                return false;
+            }
+
+            if (!decimal.TryParse(txtVolume.Text, out decimal volume) || volume <= 0)
+            {
+                errorMessage = "Zadejte prosím platný objem (větší než 0).";
+                return false;
+            }
+
+            if (!decimal.TryParse(txtPrice.Text, out decimal price) || price < 0)
+            {
+                errorMessage = "Zadejte prosím platnou cenu (0 nebo více).";
+                return false;
+            }
+
+            if (!int.TryParse(txtStockQuantity.Text, out int stockQuantity) || stockQuantity < 0)
+            {
+                errorMessage = "Zadejte prosím platné množství na skladě (0 nebo více).";
+                return false;
+            }
+
+            if (comboBoxPackaging.SelectedItem == null)
+            {
+                errorMessage = "Vyberte prosím platné balení.";
+                return false;
+            }
+
+            if (comboBoxUnit.SelectedItem == null)
+            {
+                errorMessage = "Vyberte prosím platnou jednotku.";
+                return false;
+            }
+
+            return true;
         }
     }
 }

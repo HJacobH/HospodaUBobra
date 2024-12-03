@@ -28,6 +28,11 @@ namespace HospodaUBobra
             PopulateRatings();
 
             dataGridViewReviews.ReadOnly = true;
+            cbHodnoceni.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxBeers.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxBreweries.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxUsers.DropDownStyle = ComboBoxStyle.DropDownList;
+
 
             if (UserSession.Role == "Anonymous")
             {
@@ -126,7 +131,6 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                // Updated query to include LEFT JOINs and fetch uzivatelske_jmeno
                 string query = @"
             SELECT 
                 r.id_recenze, 
@@ -153,10 +157,8 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
 
-                        // Bind the data to the DataGridView
                         dataGridViewReviews.DataSource = dt;
 
-                        // Optionally hide the IDs if they are not needed
                         if (dataGridViewReviews.Columns.Contains("id_recenze"))
                         {
                             dataGridViewReviews.Columns["id_recenze"].Visible = false;
@@ -170,11 +172,8 @@ namespace HospodaUBobra
             }
         }
 
-
-
         private void btnAddReview_Click(object sender, EventArgs e)
         {
-
             if (UserSession.Role == "Anonymous")
             {
                 MessageBox.Show("Musíte být přihlášeni, abyste mohli zanechat recenzi.");
@@ -183,46 +182,73 @@ namespace HospodaUBobra
 
             string title = txtTitle.Text.Trim();
             string reviewText = txtReviewText.Text.Trim();
-            int breweryId = Convert.ToInt32(comboBoxBreweries.SelectedValue);
-            int beerId = Convert.ToInt32(comboBoxBeers.SelectedValue);
-            int userId = UserSession.UserID;
+            int breweryId = comboBoxBreweries.SelectedValue != null ? Convert.ToInt32(comboBoxBreweries.SelectedValue) : -1;
+            int beerId = comboBoxBeers.SelectedValue != null ? Convert.ToInt32(comboBoxBeers.SelectedValue) : -1;
+            int rating = cbHodnoceni.SelectedItem != null ? Convert.ToInt32(cbHodnoceni.SelectedItem) : -1;
 
-            if (cbHodnoceni.SelectedItem == null)
+            if (!ValidateInputs(title, reviewText, breweryId, beerId, rating))
             {
-                MessageBox.Show("Vyberte hodnocení od 1 do 5.");
-                return;
-            }
-
-            int rating = Convert.ToInt32(cbHodnoceni.SelectedItem);
-
-            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(reviewText))
-            {
-                MessageBox.Show("Název a obsah recenze nesmí být prázdý.");
                 return;
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
+
+                // Add review via stored procedure
                 using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
-                    cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Value = DBNull.Value;
+                    // Parameters for inserting a new review
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Insert
+                    cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Direction = ParameterDirection.InputOutput; // New ID will be returned
+                    cmd.Parameters["p_id_recenze"].Value = DBNull.Value;
+
                     cmd.Parameters.Add("p_titulek", OracleDbType.Varchar2).Value = title;
                     cmd.Parameters.Add("p_text_recenze", OracleDbType.Clob).Value = reviewText;
                     cmd.Parameters.Add("p_pivovar_id_pivovaru", OracleDbType.Int32).Value = breweryId;
                     cmd.Parameters.Add("p_pivo_id_piva", OracleDbType.Int32).Value = beerId;
                     cmd.Parameters.Add("p_pocet_hvezdicek", OracleDbType.Int32).Value = rating;
-                    cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
+                    cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = UserSession.UserID;
 
-                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        // Execute the command
+                        cmd.ExecuteNonQuery();
+
+                        // Retrieve the generated review ID
+                        int newReviewId = ((Oracle.ManagedDataAccess.Types.OracleDecimal)cmd.Parameters["p_id_recenze"].Value).ToInt32();
+
+                        // Insert details into the PODROBNOSTI_RECENZE table
+                        using (OracleCommand detailCmd = new OracleCommand("sprava_podrobnosti_recenze", conn))
+                        {
+                            detailCmd.CommandType = CommandType.StoredProcedure;
+
+                            detailCmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Insert
+                            detailCmd.Parameters.Add("p_id", OracleDbType.Int32).Value = DBNull.Value; // No ID for insert
+                            detailCmd.Parameters.Add("p_recenze_id", OracleDbType.Int32).Value = newReviewId; // New review ID
+                            detailCmd.Parameters.Add("p_uzivatel_id", OracleDbType.Int32).Value = UserSession.UserID; // Current user
+                            detailCmd.Parameters.Add("p_datum_zverejneni", OracleDbType.Date).Value = DateTime.Now; // Current date
+
+                            detailCmd.ExecuteNonQuery();
+                        }
+
+                        MessageBox.Show("Recenze úspěšně přidána!");
+                        LoadReviews(); // Refresh the reviews list
+                    }
+                    catch (OracleException ex)
+                    {
+                        MessageBox.Show("Chyba při přidávání recenze: " + ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Obecná chyba: " + ex.Message);
+                    }
                 }
             }
 
-            LoadReviews();
-
+                LoadReviews();
             MessageBox.Show("Recenze přidána úspěšně!");
         }
 
@@ -230,59 +256,65 @@ namespace HospodaUBobra
         {
             if (UserSession.Role == "Anonymous")
             {
-                MessageBox.Show("Můžete aktualizovat pouze své recenze.");
+                MessageBox.Show("Nemáte oprávnění upravit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (selectedReviewId <= 0) return;
+            if (selectedReviewId <= 0)
+            {
+                MessageBox.Show("Vyberte recenzi k aktualizaci.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             int userId = UserSession.UserID;
+            int reviewOwnerId = -1;
 
-            // Check if the logged-in user is the owner of the review
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
+
                 string query = "SELECT ID_UZIVATELE FROM RECENZE WHERE ID_RECENZE = :id_recenze";
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
                     cmd.Parameters.Add("id_recenze", OracleDbType.Int32).Value = selectedReviewId;
 
                     object result = cmd.ExecuteScalar();
-                    if (result == null || Convert.ToInt32(result) != userId)
+                    if (result != null)
                     {
-                        MessageBox.Show("Nemáte oprávnění upravit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
+                        reviewOwnerId = Convert.ToInt32(result);
                     }
+                }
+
+
+                if (reviewOwnerId != userId)
+                {
+                    MessageBox.Show("Nemáte oprávnění upravit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
             }
 
             string title = txtTitle.Text.Trim();
             string reviewText = txtReviewText.Text.Trim();
-            int breweryId = Convert.ToInt32(comboBoxBreweries.SelectedValue);
-            int beerId = Convert.ToInt32(comboBoxBeers.SelectedValue);
+            int breweryId = comboBoxBreweries.SelectedValue != null ? Convert.ToInt32(comboBoxBreweries.SelectedValue) : -1;
+            int beerId = comboBoxBeers.SelectedValue != null ? Convert.ToInt32(comboBoxBeers.SelectedValue) : -1;
+            int rating = cbHodnoceni.SelectedItem != null ? Convert.ToInt32(cbHodnoceni.SelectedItem) : -1;
 
-            if (cbHodnoceni.SelectedItem == null)
+            MessageBox.Show($"DEBUG: Title: {title}, Brewery ID: {breweryId}, Beer ID: {beerId}, Rating: {rating}", "Debug Info");
+
+            if (!ValidateInputs(title, reviewText, breweryId, beerId, rating))
             {
-                MessageBox.Show("Vyberte hodnocení od 1 do 5.");
-                return;
-            }
-
-            int rating = Convert.ToInt32(cbHodnoceni.SelectedItem);
-
-            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(reviewText))
-            {
-                MessageBox.Show("Název a obsah recenze nesmí být prázdý.");
                 return;
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
+
                 using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Non-NULL for update
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1;
                     cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Value = selectedReviewId;
                     cmd.Parameters.Add("p_titulek", OracleDbType.Varchar2).Value = title;
                     cmd.Parameters.Add("p_text_recenze", OracleDbType.Clob).Value = reviewText;
@@ -304,13 +336,47 @@ namespace HospodaUBobra
         {
             if (UserSession.Role == "Anonymous")
             {
-                MessageBox.Show("Můžete odstranit pouze Vaše recenze.");
+                MessageBox.Show("Nemáte oprávnění odstranit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (selectedReviewId <= 0)
             {
-                MessageBox.Show("Vyberte recenzi ke smazání.");
+                MessageBox.Show("Vyberte recenzi ke smazání.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int userId = UserSession.UserID;
+            int reviewOwnerId = -1;
+
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "SELECT ID_UZIVATELE FROM RECENZE WHERE ID_RECENZE = :id_recenze";
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add("id_recenze", OracleDbType.Int32).Value = selectedReviewId;
+
+                    object result = cmd.ExecuteScalar();
+                    if (result != null)
+                    {
+                        reviewOwnerId = Convert.ToInt32(result);
+                    }
+                }
+
+                MessageBox.Show($"DEBUG: Logged-in User ID: {userId}, Review Owner ID: {reviewOwnerId}", "Debug Info");
+
+                if (reviewOwnerId != userId)
+                {
+                    MessageBox.Show("Nemáte oprávnění odstranit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            DialogResult confirmResult = MessageBox.Show("Opravdu chcete odstranit tuto recenzi?", "Potvrdit smazání", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (confirmResult != DialogResult.Yes)
+            {
                 return;
             }
 
@@ -319,7 +385,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string deleteQuery = "DELETE FROM RECENZE WHERE id_recenze = :reviewId";
+                    string deleteQuery = "DELETE FROM RECENZE WHERE ID_RECENZE = :reviewId";
                     using (OracleCommand cmd = new OracleCommand(deleteQuery, conn))
                     {
                         cmd.Parameters.Add(new OracleParameter("reviewId", selectedReviewId));
@@ -329,7 +395,6 @@ namespace HospodaUBobra
                         if (rowsAffected > 0)
                         {
                             LoadReviews();
-
                             MessageBox.Show("Recenze odstraněna úspěšně!");
                         }
                         else
@@ -347,7 +412,19 @@ namespace HospodaUBobra
 
         private void dataGridViewReviews_SelectionChanged(object sender, EventArgs e)
         {
-            if (dataGridViewReviews.CurrentRow != null)
+            if (dataGridViewReviews.CurrentRow == null || dataGridViewReviews.CurrentRow.Cells["id_recenze"].Value == DBNull.Value)
+            {
+                selectedReviewId = -1;
+                txtTitle.Text = string.Empty;
+                txtReviewText.Text = string.Empty;
+                comboBoxBreweries.SelectedIndex = -1;
+                comboBoxBeers.SelectedIndex = -1;
+                cbHodnoceni.SelectedIndex = -1;
+
+                return;
+            }
+
+            try
             {
                 selectedReviewId = Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["id_recenze"].Value);
                 txtTitle.Text = dataGridViewReviews.CurrentRow.Cells["titulek"].Value?.ToString() ?? string.Empty;
@@ -367,7 +444,10 @@ namespace HospodaUBobra
                 cbHodnoceni.SelectedItem = dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value != DBNull.Value
                     ? Convert.ToInt32(dataGridViewReviews.CurrentRow.Cells["pocet_hvezdicek"].Value)
                     : 1;
-
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error processing selection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -433,18 +513,14 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                // Query to call the Oracle function
                 string query = "SELECT GetReviewCountById(:userId) FROM DUAL";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
-                    // Bind the input parameter (userId)
                     cmd.Parameters.Add(new OracleParameter("userId", id));
 
-                    // Execute the function and fetch the result
                     object result = cmd.ExecuteScalar();
 
-                    // Convert the result to string if it's not null or DBNull
                     if (result != null && result != DBNull.Value)
                     {
                         reviewInfo = result.ToString();
@@ -460,7 +536,6 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                // Updated query to fetch related names with LEFT JOIN
                 string query = @"
             SELECT 
                 r.id_recenze,
@@ -491,15 +566,11 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
 
-                        // Populate the DataGridView with the user's reviews
                         dataGridViewReviews.DataSource = dt;
                     }
                 }
             }
         }
-
-
-
         private void comboBoxUsers_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBoxUsers.SelectedValue != null && int.TryParse(comboBoxUsers.SelectedValue.ToString(), out int userId))
@@ -513,6 +584,40 @@ namespace HospodaUBobra
         private void button1_Click(object sender, EventArgs e)
         {
             LoadReviews();
+        }
+        private bool ValidateInputs(string title, string reviewText, int breweryId, int beerId, int rating)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                MessageBox.Show("Název recenze nesmí být prázdný.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(reviewText))
+            {
+                MessageBox.Show("Obsah recenze nesmí být prázdný.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (breweryId <= 0)
+            {
+                MessageBox.Show($"Vyberte platný pivovar. Pivovar ID: {breweryId}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (beerId <= 0)
+            {
+                MessageBox.Show("Vyberte platné pivo.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (rating < 1 || rating > 5)
+            {
+                MessageBox.Show("Hodnocení musí být mezi 1 a 5 hvězdami.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
         }
     }
 }

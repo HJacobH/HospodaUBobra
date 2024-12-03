@@ -39,6 +39,7 @@
             btnUpdate = new Button();
             btnDelete = new Button();
             btnBack = new Button();
+            label4 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvFyzickeOsoby).BeginInit();
             SuspendLayout();
             // 
@@ -140,11 +141,22 @@
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label4.Location = new Point(12, 4);
+            label4.Name = "label4";
+            label4.Size = new Size(191, 21);
+            label4.TabIndex = 11;
+            label4.Text = "Správce Fyzických Osob";
+            // 
             // SpravaFyzickzchOsob
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(345, 374);
+            Controls.Add(label4);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
@@ -157,7 +169,7 @@
             Controls.Add(dateTimePickerDatumNarozeni);
             Controls.Add(comboBoxVlastnikPivovaru);
             Name = "SpravaFyzickzchOsob";
-            Text = "SpravaFyzickzchOsob";
+            Text = "Správce Fyzických Osob";
             ((System.ComponentModel.ISupportInitialize)dgvFyzickeOsoby).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -176,5 +188,6 @@
         private Button btnUpdate;
         private Button btnDelete;
         private Button btnBack;
+        private Label label4;
     }
 }

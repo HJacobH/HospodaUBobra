@@ -47,6 +47,7 @@
             btnUpdate = new Button();
             btnDelete = new Button();
             dgvPiva = new DataGridView();
+            label8 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvPiva).BeginInit();
             SuspendLayout();
             // 
@@ -213,11 +214,22 @@
             dgvPiva.TabIndex = 18;
             dgvPiva.SelectionChanged += dgvPiva_SelectionChanged;
             // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label8.Location = new Point(12, 4);
+            label8.Name = "label8";
+            label8.Size = new Size(98, 21);
+            label8.TabIndex = 19;
+            label8.Text = "Správce Piv";
+            // 
             // PiwoMangement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(544, 498);
+            Controls.Add(label8);
             Controls.Add(dgvPiva);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
@@ -238,7 +250,7 @@
             Controls.Add(txtBeerName);
             Controls.Add(label1);
             Name = "PiwoMangement";
-            Text = "Správa Piv";
+            Text = "Správce Piv";
             ((System.ComponentModel.ISupportInitialize)dgvPiva).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -265,5 +277,6 @@
         private Button btnUpdate;
         private Button btnDelete;
         private DataGridView dgvPiva;
+        private Label label8;
     }
 }

@@ -45,6 +45,7 @@
             btnDelete = new Button();
             btnBack = new Button();
             btnClear = new Button();
+            label6 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvEvidence).BeginInit();
             SuspendLayout();
             // 
@@ -200,11 +201,22 @@
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label6.Location = new Point(12, 4);
+            label6.Name = "label6";
+            label6.Size = new Size(143, 21);
+            label6.TabIndex = 18;
+            label6.Text = "Správce Evidence";
+            // 
             // SpravaEvidence
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(486, 531);
+            Controls.Add(label6);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
@@ -223,7 +235,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Name = "SpravaEvidence";
-            Text = "SpravaEvidence";
+            Text = "Správce Evidence";
             ((System.ComponentModel.ISupportInitialize)dgvEvidence).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -248,5 +260,6 @@
         private Button btnDelete;
         private Button btnBack;
         private Button btnClear;
+        private Label label6;
     }
 }

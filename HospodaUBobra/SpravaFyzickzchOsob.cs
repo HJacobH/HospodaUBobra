@@ -20,6 +20,9 @@ namespace HospodaUBobra
             InitializeComponent();
             LoadVlastniciPivovaru();
             LoadFyzickeOsoby();
+
+            dgvFyzickeOsoby.ReadOnly = true;
+            comboBoxVlastnikPivovaru.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void LoadVlastniciPivovaru()
@@ -41,7 +44,7 @@ namespace HospodaUBobra
                             comboBoxVlastnikPivovaru.DataSource = dt;
                             comboBoxVlastnikPivovaru.DisplayMember = "JMENO_NAZEV";
                             comboBoxVlastnikPivovaru.ValueMember = "ID_VLASTNIKA";
-                            comboBoxVlastnikPivovaru.SelectedIndex = -1; // Clear selection
+                            comboBoxVlastnikPivovaru.SelectedIndex = -1;
                         }
                     }
                 }
@@ -52,7 +55,6 @@ namespace HospodaUBobra
             }
         }
 
-        // Load FYZICKE_OSOBY into DataGridView
         private void LoadFyzickeOsoby()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -61,7 +63,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Updated query to include a join with VLASTNICI_PIVOVARU
                     string query = @"
                 SELECT 
                     f.ID_FYZICKE_OSOBY,
@@ -81,12 +82,10 @@ namespace HospodaUBobra
 
                         dgvFyzickeOsoby.DataSource = dt;
 
-                        // Rename column headers for clarity
                         dgvFyzickeOsoby.Columns["JMENO_A_PRIJMENI"].HeaderText = "Name and Surname";
                         dgvFyzickeOsoby.Columns["DATUM_NAROZENI"].HeaderText = "Date of Birth";
                         dgvFyzickeOsoby.Columns["RODNE_CISLO"].HeaderText = "Personal ID";
 
-                        // Hide the ID_FYZICKE_OSOBY column
                         if (dgvFyzickeOsoby.Columns.Contains("ID_FYZICKE_OSOBY"))
                         {
                             dgvFyzickeOsoby.Columns["ID_FYZICKE_OSOBY"].Visible = false;
@@ -103,6 +102,12 @@ namespace HospodaUBobra
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
+            if (!ValidateInputs(out string errorMessage))
+            {
+                MessageBox.Show(errorMessage, "Chyba ověření", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 try
@@ -112,7 +117,7 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Insert
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
                         cmd.Parameters.Add("p_id_fyzicke_osoby", OracleDbType.Int32).Value = DBNull.Value;
                         cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = comboBoxVlastnikPivovaru.SelectedValue;
                         cmd.Parameters.Add("p_datum_narozeni", OracleDbType.Date).Value = dateTimePickerDatumNarozeni.Value;
@@ -120,7 +125,7 @@ namespace HospodaUBobra
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Nová fyzická osoba byla přidána.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadFyzickeOsoby(); // Refresh the grid
+                        LoadFyzickeOsoby();
                     }
                 }
                 catch (Exception ex)
@@ -138,6 +143,12 @@ namespace HospodaUBobra
                 return;
             }
 
+            if (!ValidateInputs(out string errorMessage))
+            {
+                MessageBox.Show(errorMessage, "Chyba ověření", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 try
@@ -147,7 +158,7 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Update
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1;
                         cmd.Parameters.Add("p_id_fyzicke_osoby", OracleDbType.Int32).Value = dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value;
                         cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = comboBoxVlastnikPivovaru.SelectedValue;
                         cmd.Parameters.Add("p_datum_narozeni", OracleDbType.Date).Value = dateTimePickerDatumNarozeni.Value;
@@ -155,7 +166,7 @@ namespace HospodaUBobra
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Fyzická osoba byla aktualizována.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadFyzickeOsoby(); // Refresh the grid
+                        LoadFyzickeOsoby(); 
                     }
                 }
                 catch (Exception ex)
@@ -193,7 +204,7 @@ namespace HospodaUBobra
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Fyzická osoba byla odstraněna.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadFyzickeOsoby(); // Refresh the grid
+                        LoadFyzickeOsoby(); 
                     }
                 }
                 catch (Exception ex)
@@ -212,14 +223,43 @@ namespace HospodaUBobra
         {
             if (dgvFyzickeOsoby.CurrentRow != null)
             {
-                // Use the hidden ID_FYZICKE_OSOBY column programmatically
                 int fyzickaOsobaId = Convert.ToInt32(dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value);
 
-                // Display related fields in the UI
                 comboBoxVlastnikPivovaru.SelectedValue = fyzickaOsobaId;
                 dateTimePickerDatumNarozeni.Value = Convert.ToDateTime(dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value);
                 textBoxRodneCislo.Text = dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value.ToString();
             }
+        }
+
+        private bool ValidateInputs(out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(textBoxRodneCislo.Text))
+            {
+                errorMessage = "Prosím, zadejte rodné číslo.";
+                return false;
+            }
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(textBoxRodneCislo.Text, @"^\d{6}/\d{4}$"))
+            {
+                errorMessage = "Rodné číslo musí mít formát YYMMDD/XXXX.";
+                return false;
+            }
+
+            if (dateTimePickerDatumNarozeni.Value > DateTime.Now)
+            {
+                errorMessage = "Datum narození nemůže být v budoucnosti.";
+                return false;
+            }
+
+            if (comboBoxVlastnikPivovaru.SelectedItem == null)
+            {
+                errorMessage = "Vyberte vlastníka pivovaru.";
+                return false;
+            }
+
+            return true;
         }
     }
 }

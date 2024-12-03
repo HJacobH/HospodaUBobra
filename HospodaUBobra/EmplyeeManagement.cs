@@ -23,6 +23,10 @@ namespace HospodaUBobra
             LoadEmployees();
             LoadPositions();
 
+            dgvZamestnanci.ReadOnly = true;
+            cbPozice.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbPoziceSalary.DropDownStyle = ComboBoxStyle.DropDownList;
+
             LoadPositionsSalary();
         }
 
@@ -32,7 +36,6 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                // Modify the query to join ZAMESTNANCI and POZICE_PRACOVNIKA
                 string query = @"
             SELECT 
                 Z.ID_ZAMESTNANCE,
@@ -61,7 +64,6 @@ namespace HospodaUBobra
                 }
             }
 
-            // Optionally hide the ID_ZAMESTNANCE column
             if (dgvZamestnanci.Columns.Contains("ID_ZAMESTNANCE"))
             {
                 dgvZamestnanci.Columns["ID_ZAMESTNANCE"].Visible = false;
@@ -86,7 +88,7 @@ namespace HospodaUBobra
                         cbPozice.DataSource = dt;
                         cbPozice.DisplayMember = "NAZEV_POZICE";
                         cbPozice.ValueMember = "ID_POZICE";
-                        cbPozice.SelectedIndex = -1; // Clear selection
+                        cbPozice.SelectedIndex = -1;
                     }
                 }
             }
@@ -109,7 +111,7 @@ namespace HospodaUBobra
                         cbPoziceSalary.DataSource = dt;
                         cbPoziceSalary.DisplayMember = "NAZEV_POZICE";
                         cbPoziceSalary.ValueMember = "ID_POZICE";
-                        cbPoziceSalary.SelectedIndex = -1; // Clear selection
+                        cbPoziceSalary.SelectedIndex = -1;
                     }
                 }
             }
@@ -154,18 +156,10 @@ namespace HospodaUBobra
                 return;
             }
 
-            string firstName = txtJmeno.Text;
-            string lastName = txtPrijmeni.Text;
-            DateTime dob = dateTimePickerNarozeni.Value;
-            decimal salary;
-            if (!decimal.TryParse(txtVyplata.Text, out salary))
+            if (!ValidateInputs(out string firstName, out string lastName, out DateTime dob, out decimal salary, out DateTime startDate, out string favBeer, out int positionId))
             {
-                MessageBox.Show("Špatný formát výplaty.");
                 return;
             }
-            DateTime startDate = dateTimePickerStartWorking.Value;
-            string favBeer = txtFavBeer.Text;
-            int positionId = Convert.ToInt32(cbPozice.SelectedValue);
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -175,7 +169,7 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; // Non-NULL for update
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1;
                     cmd.Parameters.Add("p_id_zamestnance", OracleDbType.Int32).Value = selectedZamestnanecId;
                     cmd.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = firstName;
                     cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = lastName;
@@ -202,18 +196,10 @@ namespace HospodaUBobra
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            string firstName = txtJmeno.Text;
-            string lastName = txtPrijmeni.Text;
-            DateTime dob = dateTimePickerNarozeni.Value;
-            decimal salary;
-            if (!decimal.TryParse(txtVyplata.Text, out salary))
+            if (!ValidateInputs(out string firstName, out string lastName, out DateTime dob, out decimal salary, out DateTime startDate, out string favBeer, out int positionId))
             {
-                MessageBox.Show("Špatný formát výplaty.");
-                return;
+                return; // Validation failed
             }
-            DateTime startDate = dateTimePickerStartWorking.Value;
-            string favBeer = txtFavBeer.Text;
-            int positionId = Convert.ToInt32(cbPozice.SelectedValue);
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -223,7 +209,7 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // NULL for insert
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
                     cmd.Parameters.Add("p_id_zamestnance", OracleDbType.Int32).Value = GetNextEmployeeId();
                     cmd.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = firstName;
                     cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = lastName;
@@ -290,7 +276,6 @@ namespace HospodaUBobra
                 dateTimePickerStartWorking.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value);
                 txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value.ToString();
 
-                // Map the position name to its ID in the ComboBox
                 string positionName = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value.ToString();
                 cbPozice.SelectedIndex = cbPozice.FindStringExact(positionName);
             }
@@ -300,14 +285,12 @@ namespace HospodaUBobra
         {
             if (cbPoziceSalary.SelectedIndex == -1)
             {
-                MessageBox.Show("Please select a position before updating salaries.", "No Position Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vyberte pozici před zvýšením platu.", "Žádná pozice nebyla vybrána", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Get the selected position ID from the ComboBox
             int selectedPositionId = Convert.ToInt32(cbPoziceSalary.SelectedValue);
 
-            // Execute the procedure with the selected position ID
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 try
@@ -316,31 +299,62 @@ namespace HospodaUBobra
 
                     using (OracleCommand cmd = new OracleCommand("IncreasePayBasedOnTenureAndPosition", conn))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.CommandType = CommandType.Text;
 
-                        // Add the position ID parameter
+                        cmd.CommandText = $"SELECT IncreasePayBasedOnTenureAndPosition(:p_role_id) FROM DUAL";
+
                         OracleParameter roleIdParam = new OracleParameter("p_role_id", OracleDbType.Int32);
                         roleIdParam.Value = selectedPositionId;
                         cmd.Parameters.Add(roleIdParam);
 
-                        // Execute the procedure
-                        cmd.ExecuteNonQuery();
+                        int updatedCount = Convert.ToInt32(cmd.ExecuteScalar());
 
-                        MessageBox.Show("Salary update completed successfully for the selected position.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show($"Výplata byla zvýšena pro {updatedCount} pracovníky v dané pozici.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadEmployees();
                     }
                 }
                 catch (OracleException ex)
                 {
-                    // Handle Oracle exceptions
                     MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
-                    // Handle general exceptions
                     MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+        private bool ValidateInputs(out string firstName, out string lastName, out DateTime dob, out decimal salary, out DateTime startDate, out string favBeer, out int positionId)
+        {
+            firstName = txtJmeno.Text.Trim();
+            lastName = txtPrijmeni.Text.Trim();
+            favBeer = txtFavBeer.Text.Trim();
+            dob = dateTimePickerNarozeni.Value;
+            startDate = dateTimePickerStartWorking.Value;
+
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+            {
+                MessageBox.Show("Jméno a příjmení jsou povinná pole.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                positionId = 0;
+                salary = 0;
+                return false;
+            }
+
+            if (!decimal.TryParse(txtVyplata.Text.Trim(), out salary) || salary <= 0)
+            {
+                MessageBox.Show("Špatný formát výplaty.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                positionId = 0;
+                return false;
+            }
+
+            positionId = -1;
+            if (cbPozice.SelectedValue == null || !int.TryParse(cbPozice.SelectedValue.ToString(), out positionId))
+            {
+                MessageBox.Show("Vyberte platnou pozici.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
     }
 }

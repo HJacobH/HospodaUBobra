@@ -46,11 +46,16 @@ namespace HospodaUBobra
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
+            if (!ValidateInputs(username, password))
+            {
+                return;
+            }
+
             if (ValidateLogin(username, password, out string roleName, out int userId, out string tableName))
             {
                 UserSession.Role = roleName;
                 UserSession.UserID = userId;
-                UserSession.TableName = tableName; // Store whether the user is from UZIVATELE or KLIENTI
+                UserSession.TableName = tableName; 
 
                 this.Close();
             }
@@ -59,6 +64,43 @@ namespace HospodaUBobra
                 MessageBox.Show("Neplatné přihlašovací údaje.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private bool ValidateInputs(string username, string password)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                MessageBox.Show("Uživatelské jméno nesmí být prázdné.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                MessageBox.Show("Heslo nesmí být prázdné.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!IsValidEmail(username))
+            {
+                MessageBox.Show("Zadejte platnou e-mailovou adresu.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
 
         private bool ValidateLogin(string username, string password, out string roleName, out int userId, out string tableName)
         {
@@ -72,14 +114,12 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Try to log in as UZIVATELE
                     if (TryValidateLogin(conn, "UZIVATELE", username, password, out roleName, out userId))
                     {
                         tableName = "UZIVATELE";
                         return true;
                     }
 
-                    // Try to log in as KLIENTI
                     if (TryValidateLogin(conn, "KLIENTI", username, password, out roleName, out userId))
                     {
                         tableName = "KLIENTI";
@@ -106,9 +146,9 @@ namespace HospodaUBobra
             roleName = "Anonymous";
             userId = -1;
 
-            string idColumn = tableName == "UZIVATELE" ? "ID_UZIVATELE" : "ID_KLIENTA"; // Adjust the column name
-            string passwordColumn = tableName == "UZIVATELE" ? "PASSWORD" : "HESLO"; // Adjust password column
-            string saltColumn = tableName == "UZIVATELE" ? "SALT" : "SUL"; // Adjust salt column
+            string idColumn = tableName == "UZIVATELE" ? "ID_UZIVATELE" : "ID_KLIENTA"; 
+            string passwordColumn = tableName == "UZIVATELE" ? "PASSWORD" : "HESLO";
+            string saltColumn = tableName == "UZIVATELE" ? "SALT" : "SUL"; 
             bool isUzivatele = tableName == "UZIVATELE";
 
             string query = isUzivatele
