@@ -297,6 +297,8 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
+                    //FUNKCE 1 IncreasePayBasedOnTenureAndPosition
+
                     using (OracleCommand cmd = new OracleCommand("IncreasePayBasedOnTenureAndPosition", conn))
                     {
                         cmd.CommandType = CommandType.Text;

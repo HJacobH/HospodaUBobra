@@ -458,7 +458,7 @@ namespace HospodaUBobra
 
         private void lokaceToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //pivovar_mesto_kraj UKOL3 view 2
+            //pivovar_mesto_kraj UKOL3 view 2  pivovar_mesto_kraj
             try
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
