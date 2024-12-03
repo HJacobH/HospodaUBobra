@@ -30,23 +30,28 @@ namespace HospodaUBobra
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                conn.Open();
-                string query = "SELECT ID_DRUHU, DRUH_PODNIKU FROM DRUHY_PODNIKU";
-                using (OracleCommand cmd = new OracleCommand(query, conn))
-                using (OracleDataReader reader = cmd.ExecuteReader())
+                try
                 {
-                    while (reader.Read())
+                    conn.Open();
+                    string query = "SELECT ID_DRUHU, DRUH_PODNIKU FROM DRUHY_PODNIKU";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    using (OracleDataReader reader = cmd.ExecuteReader())
                     {
-                        cbDruhPodniku.Items.Add(new
-                        {
-                            ID = reader.GetInt32(0),
-                            Name = reader.GetString(1)
-                        });
+                        DataTable druhPodnikuTable = new DataTable();
+                        druhPodnikuTable.Load(reader);
+
+                        cbDruhPodniku.DataSource = druhPodnikuTable;
+                        cbDruhPodniku.DisplayMember = "DRUH_PODNIKU"; // Column to show in dropdown
+                        cbDruhPodniku.ValueMember = "ID_DRUHU";       // Column used as the value
+                        cbDruhPodniku.SelectedIndex = -1;            // Ensure no default selection
                     }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading Druh Podniku: {ex.Message}");
+                }
             }
-            cbDruhPodniku.DisplayMember = "Name";
-            cbDruhPodniku.ValueMember = "ID";
         }
 
         private void LoadKlienti()
@@ -58,19 +63,19 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = @"
-                SELECT 
-                    k.ID_KLIENTA, 
-                    k.JMENO, 
-                    k.PRIJMENI, 
-                    k.NAZEV, 
-                    k.EMAIL, 
-                    k.TELEFON, 
-                    k.DATUM_REGISTRACE, 
-                    dp.DRUH_PODNIKU, 
-                    r.ROLE_NAME
-                FROM KLIENTI k
-                LEFT JOIN DRUHY_PODNIKU dp ON k.DRUH_PODNIKU_ID_DRUHU = dp.ID_DRUHU
-                LEFT JOIN ROLE r ON k.ROLE_ID = r.ROLE_ID";
+            SELECT 
+                k.ID_KLIENTA, 
+                k.JMENO, 
+                k.PRIJMENI, 
+                k.NAZEV, 
+                k.EMAIL, 
+                k.TELEFON, 
+                k.DATUM_REGISTRACE, 
+                dp.DRUH_PODNIKU, 
+                r.ROLE_NAME
+            FROM KLIENTI k
+            LEFT JOIN DRUHY_PODNIKU dp ON k.DRUH_PODNIKU_ID_DRUHU = dp.ID_DRUHU
+            LEFT JOIN ROLE r ON k.ROLE_ID = r.ROLE_ID";
 
                     using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
                     {
@@ -117,7 +122,7 @@ namespace HospodaUBobra
             string nazev = txtNazev.Text.Trim();
             string email = txtEmail.Text.Trim();
             string telefon = txtTelefon.Text.Trim();
-            int? druhPodnikuId = cbDruhPodniku.SelectedValue as int?;
+            int druhPodnikuId = cbDruhPodniku.SelectedValue != null ? Convert.ToInt32(cbDruhPodniku.SelectedValue) : -1;
             int? profilovyObrazekId = null;
             DateTime datumRegistrace = DateTime.Now;
             int roleId = 2; 
@@ -183,20 +188,40 @@ namespace HospodaUBobra
             string nazev = txtNazev.Text.Trim();
             string email = txtEmail.Text.Trim();
             string telefon = txtTelefon.Text.Trim();
-            int? druhPodnikuId = cbDruhPodniku.SelectedValue as int?;
+            int druhPodnikuId = cbDruhPodniku.SelectedValue != null ? Convert.ToInt32(cbDruhPodniku.SelectedValue) : -1;
+            if (druhPodnikuId == null)
+            {
+                MessageBox.Show("Chyba: Druh Podniku není vybrán nebo je neplatný.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             int? profilovyObrazekId = null;
             DateTime datumRegistrace = DateTime.Now;
-            int roleId = 2; 
-            string newPassword = txtPassword.Text.Trim(); 
+            int roleId = 2; // Fixed role ID for clients (Klient role)
 
-            string hashedPassword = null;
-            string salt = null;
+            string currentPassword = null;
+            string currentSalt = null;
 
-            if (!string.IsNullOrEmpty(newPassword))
+            // Retrieve current password and salt from the database if the password field is empty
+            using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                salt = PasswordHelper.GenerateSalt();
-                hashedPassword = PasswordHelper.HashPassword(newPassword, salt);
+                conn.Open();
+                string query = "SELECT HESLO, SUL FROM KLIENTI WHERE ID_KLIENTA = :idKlienta";
+                using (OracleCommand cmd = new OracleCommand(query, conn))
+                {
+                    cmd.Parameters.Add(new OracleParameter("idKlienta", OracleDbType.Int32)).Value = selectedKlientId;
+                    using (OracleDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            currentPassword = reader["HESLO"] as string;
+                            currentSalt = reader["SUL"] as string;
+                        }
+                    }
+                }
             }
+
+            string newPassword = txtPassword.Text.Trim();
+            string hashedPassword = string.IsNullOrEmpty(newPassword) ? currentPassword : PasswordHelper.HashPassword(newPassword, PasswordHelper.GenerateSalt());
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -205,21 +230,21 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = @"
-                CALL sprava_klienti(
-                    :identifikator, 
-                    :idKlienta, 
-                    :jmeno, 
-                    :prijmeni, 
-                    :nazev, 
-                    :email, 
-                    :telefon, 
-                    :druhPodnikuId, 
-                    :datumRegistrace, 
-                    :heslo, 
-                    :sul, 
-                    :roleId, 
-                    :profilovyObrazekId
-                )";
+            CALL sprava_klienti(
+                :identifikator, 
+                :idKlienta, 
+                :jmeno, 
+                :prijmeni, 
+                :nazev, 
+                :email, 
+                :telefon, 
+                :druhPodnikuId, 
+                :datumRegistrace, 
+                :heslo, 
+                :sul, 
+                :roleId, 
+                :profilovyObrazekId
+            )";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -230,19 +255,11 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("nazev", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(nazev) ? DBNull.Value : nazev;
                         cmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = email;
                         cmd.Parameters.Add(new OracleParameter("telefon", OracleDbType.Varchar2)).Value = telefon;
-                        cmd.Parameters.Add(new OracleParameter("druhPodnikuId", OracleDbType.Int32)).Value = (object)druhPodnikuId ?? DBNull.Value;
+                        cmd.Parameters.Add(new OracleParameter("druhPodnikuId", OracleDbType.Int32)).Value = druhPodnikuId;
                         cmd.Parameters.Add(new OracleParameter("datumRegistrace", OracleDbType.Date)).Value = datumRegistrace;
 
-                        if (!string.IsNullOrEmpty(newPassword))
-                        {
-                            cmd.Parameters.Add(new OracleParameter("heslo", OracleDbType.Varchar2)).Value = hashedPassword;
-                            cmd.Parameters.Add(new OracleParameter("sul", OracleDbType.Varchar2)).Value = salt;
-                        }
-                        else
-                        {
-                            cmd.Parameters.Add(new OracleParameter("heslo", OracleDbType.Varchar2)).Value = DBNull.Value;
-                            cmd.Parameters.Add(new OracleParameter("sul", OracleDbType.Varchar2)).Value = DBNull.Value;
-                        }
+                        cmd.Parameters.Add(new OracleParameter("heslo", OracleDbType.Varchar2)).Value = hashedPassword ?? (object)DBNull.Value;
+                        cmd.Parameters.Add(new OracleParameter("sul", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(newPassword) ? currentSalt : PasswordHelper.GenerateSalt();
 
                         cmd.Parameters.Add(new OracleParameter("roleId", OracleDbType.Int32)).Value = roleId;
                         cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32)).Value = (object)profilovyObrazekId ?? DBNull.Value;
@@ -250,7 +267,7 @@ namespace HospodaUBobra
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Kleint úspěšně aktualizován!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadKlienti();
-                        ClearFields(); 
+                        ClearFields();
                     }
                 }
                 catch (OracleException ex)
