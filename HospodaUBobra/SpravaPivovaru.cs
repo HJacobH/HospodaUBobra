@@ -24,6 +24,13 @@ namespace HospodaUBobra
             LoadMestoVesnice();
             LoadYears();
             LoadYesNoOptions();
+
+            dgvBreweries.ReadOnly = true;
+            cbDruhPodniku.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbMestoVesnice.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbProvozAkci.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbProvozProhlidek.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbRokZalozeni.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void LoadBreweries()
@@ -63,7 +70,6 @@ namespace HospodaUBobra
 
                         dgvBreweries.DataSource = breweriesTable;
 
-                        // Set column headers
                         dgvBreweries.Columns["ID_PIVOVARU"].HeaderText = "Brewery ID";
                         dgvBreweries.Columns["NAZEV"].HeaderText = "Name";
                         dgvBreweries.Columns["ROK_ZALOZENI"].HeaderText = "Year Established";
@@ -73,7 +79,6 @@ namespace HospodaUBobra
                         dgvBreweries.Columns["DRUH_PODNIKU"].HeaderText = "Type";
                         dgvBreweries.Columns["MESTO_VESNICE"].HeaderText = "City/Village";
 
-                        // Hide the ID_PIVOVARU column
                         dgvBreweries.Columns["ID_PIVOVARU"].Visible = false;
                     }
                 }
@@ -83,9 +88,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
-
 
         private void LoadDruhPodniku()
         {
@@ -108,9 +110,9 @@ namespace HospodaUBobra
                         }
 
                         cbDruhPodniku.DataSource = druhPodniku;
-                        cbDruhPodniku.DisplayMember = "Item2"; // Display DRUH_PODNIKU
-                        cbDruhPodniku.ValueMember = "Item1";  // Use ID_DRUHU
-                        cbDruhPodniku.SelectedIndex = -1; // Ensure no item is selected initially
+                        cbDruhPodniku.DisplayMember = "Item2";
+                        cbDruhPodniku.ValueMember = "Item1";
+                        cbDruhPodniku.SelectedIndex = -1;
                     }
                 }
                 catch (Exception ex)
@@ -119,8 +121,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
 
         private void LoadMestoVesnice()
         {
@@ -143,9 +143,9 @@ namespace HospodaUBobra
                         }
 
                         cbMestoVesnice.DataSource = mestoVesnice;
-                        cbMestoVesnice.DisplayMember = "Item2"; // Display NAZEV
-                        cbMestoVesnice.ValueMember = "Item1";  // Use ID_MES_VES
-                        cbMestoVesnice.SelectedIndex = -1; // Ensure no item is selected initially
+                        cbMestoVesnice.DisplayMember = "Item2";
+                        cbMestoVesnice.ValueMember = "Item1";  
+                        cbMestoVesnice.SelectedIndex = -1;
                     }
                 }
                 catch (Exception ex)
@@ -161,39 +161,40 @@ namespace HospodaUBobra
         {
             List<int> years = new List<int>();
             int currentYear = DateTime.Now.Year;
-            for (int year = 1800; year <= currentYear; year++) // From 1800 to current year
+            for (int year = 1800; year <= currentYear; year++)
             {
                 years.Add(year);
             }
-            cbRokZalozeni.DataSource = years; // Bind list to ComboBox
+            cbRokZalozeni.DataSource = years;
         }
 
         private void LoadYesNoOptions()
         {
-            // Options for "Ano" (1) and "Ne" (2)
             var yesNoOptions = new List<Tuple<int, string>>()
             {
                 new Tuple<int, string>(1, "Ano"),
                 new Tuple<int, string>(2, "Ne")
             };
 
-            // Bind options to both "Provoz Prohlidek" and "Provoz Akci"
             cbProvozProhlidek.DataSource = new List<Tuple<int, string>>(yesNoOptions);
-            cbProvozProhlidek.DisplayMember = "Item2"; // Display "Ano" or "Ne"
-            cbProvozProhlidek.ValueMember = "Item1";  // Use 1 or 2 as the value
+            cbProvozProhlidek.DisplayMember = "Item2";
+            cbProvozProhlidek.ValueMember = "Item1";
 
             cbProvozAkci.DataSource = new List<Tuple<int, string>>(yesNoOptions);
-            cbProvozAkci.DisplayMember = "Item2"; // Display "Ano" or "Ne"
-            cbProvozAkci.ValueMember = "Item1";  // Use 1 or 2 as the value
+            cbProvozAkci.DisplayMember = "Item2";
+            cbProvozAkci.ValueMember = "Item1";
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
+            if (!ValidateInputs())
+                return;
+
             int druhPodnikuId = ((Tuple<int, string>)cbDruhPodniku.SelectedItem).Item1;
             int mestoVesniceId = ((Tuple<int, string>)cbMestoVesnice.SelectedItem).Item1;
-            int rokZalozeni = (int)cbRokZalozeni.SelectedItem; // Get year from ComboBox
-            int provozProhlidek = ((Tuple<int, string>)cbProvozProhlidek.SelectedItem).Item1; // Get "Ano" or "Ne"
-            int provozAkci = ((Tuple<int, string>)cbProvozAkci.SelectedItem).Item1; // Get "Ano" or "Ne"
+            int rokZalozeni = (int)cbRokZalozeni.SelectedItem;
+            int provozProhlidek = ((Tuple<int, string>)cbProvozProhlidek.SelectedItem).Item1;
+            int provozAkci = ((Tuple<int, string>)cbProvozAkci.SelectedItem).Item1;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -213,7 +214,7 @@ namespace HospodaUBobra
                     cmd.Parameters.Add(new OracleParameter("p_mesto_vesnice_id", OracleDbType.Int32)).Value = mestoVesniceId;
 
                     cmd.ExecuteNonQuery();
-                    MessageBox.Show("Brewery added successfully!");
+                    MessageBox.Show("Pivovar byl úspěšně přidán!");
                     LoadBreweries();
                 }
             }
@@ -223,15 +224,18 @@ namespace HospodaUBobra
         {
             if (selectedBreweryId == -1)
             {
-                MessageBox.Show("Please select a brewery to update.");
+                MessageBox.Show("Vyberte pivovar pro aktualizaci.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            if (!ValidateInputs())
+                return;
+
             int druhPodnikuId = ((Tuple<int, string>)cbDruhPodniku.SelectedItem).Item1;
             int mestoVesniceId = ((Tuple<int, string>)cbMestoVesnice.SelectedItem).Item1;
-            int rokZalozeni = (int)cbRokZalozeni.SelectedItem; // Get year from ComboBox
-            int provozProhlidek = ((Tuple<int, string>)cbProvozProhlidek.SelectedItem).Item1; // Get "Ano" or "Ne"
-            int provozAkci = ((Tuple<int, string>)cbProvozAkci.SelectedItem).Item1; // Get "Ano" or "Ne"
+            int rokZalozeni = (int)cbRokZalozeni.SelectedItem;
+            int provozProhlidek = ((Tuple<int, string>)cbProvozProhlidek.SelectedItem).Item1;
+            int provozAkci = ((Tuple<int, string>)cbProvozAkci.SelectedItem).Item1;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -251,7 +255,7 @@ namespace HospodaUBobra
                     cmd.Parameters.Add(new OracleParameter("p_mesto_vesnice_id", OracleDbType.Int32)).Value = mestoVesniceId;
 
                     cmd.ExecuteNonQuery();
-                    MessageBox.Show("Brewery updated successfully!");
+                    MessageBox.Show("Pivovar byl úspěšně aktualizován!");
                     LoadBreweries();
                 }
             }
@@ -261,11 +265,11 @@ namespace HospodaUBobra
         {
             if (selectedBreweryId == -1)
             {
-                MessageBox.Show("Please select a brewery to delete.");
+                MessageBox.Show("Vyberte pivovar pro odstranění.");
                 return;
             }
 
-            DialogResult result = MessageBox.Show("Are you sure you want to delete this brewery?", "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show("Opravdu chcete odstranit tento pivovar?", "Potvrdit odstranění", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
@@ -278,7 +282,7 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter(":id_pivovaru", OracleDbType.Int32)).Value = selectedBreweryId;
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Brewery deleted successfully!");
+                        MessageBox.Show("Pivovar úspěšně odstraněn!");
                         LoadBreweries();
                     }
                 }
@@ -295,14 +299,12 @@ namespace HospodaUBobra
             txtNazev.Clear();
             txtPopisAkci.Clear();
 
-            // Reset combo boxes
-            cbRokZalozeni.SelectedIndex = -1;  // Clear "Rok Zalozeni"
-            cbProvozProhlidek.SelectedIndex = -1;  // Clear "Provoz Prohlidek"
-            cbProvozAkci.SelectedIndex = -1;  // Clear "Provoz Akci"
-            cbDruhPodniku.SelectedIndex = -1;  // Clear "Druh Podniku"
-            cbMestoVesnice.SelectedIndex = -1;  // Clear "Mesto/Vesnice"
+            cbRokZalozeni.SelectedIndex = -1;
+            cbProvozProhlidek.SelectedIndex = -1; 
+            cbProvozAkci.SelectedIndex = -1;
+            cbDruhPodniku.SelectedIndex = -1;
+            cbMestoVesnice.SelectedIndex = -1;
 
-            // Reset the selected brewery ID
             selectedBreweryId = -1;
         }
 
@@ -310,28 +312,21 @@ namespace HospodaUBobra
         {
             if (dgvBreweries.CurrentRow != null)
             {
-                // Get the selected brewery ID (hidden but used internally)
                 selectedBreweryId = Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ID_PIVOVARU"].Value);
 
-                // Set Brewery Name
                 txtNazev.Text = dgvBreweries.CurrentRow.Cells["NAZEV"].Value.ToString();
 
-                // Set Year in the "Rok Zalozeni" ComboBox
                 int selectedYear = Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ROK_ZALOZENI"].Value);
                 cbRokZalozeni.SelectedItem = selectedYear;
 
-                // Set "Provoz Prohlidek" ComboBox (map "Ano"/"Ne" to 1/2)
                 string prohlidekValue = dgvBreweries.CurrentRow.Cells["PROVOZ_PROHLIDEK"].Value.ToString();
                 cbProvozProhlidek.SelectedValue = prohlidekValue == "Ano" ? 1 : 2;
 
-                // Set "Provoz Akci" ComboBox (map "Ano"/"Ne" to 1/2)
                 string akciValue = dgvBreweries.CurrentRow.Cells["PROVOZ_AKCI"].Value.ToString();
                 cbProvozAkci.SelectedValue = akciValue == "Ano" ? 1 : 2;
 
-                // Set Event Description
                 txtPopisAkci.Text = dgvBreweries.CurrentRow.Cells["POPIS_AKCI"].Value?.ToString();
 
-                // Set "Druh Podniku" ComboBox
                 string druhPodnikuName = dgvBreweries.CurrentRow.Cells["DRUH_PODNIKU"].Value.ToString();
                 var druhPodnikuItem = ((List<Tuple<int, string>>)cbDruhPodniku.DataSource)
                     .FirstOrDefault(item => item.Item2 == druhPodnikuName);
@@ -340,7 +335,6 @@ namespace HospodaUBobra
                     cbDruhPodniku.SelectedValue = druhPodnikuItem.Item1;
                 }
 
-                // Set "Mesto/Vesnice" ComboBox
                 string mestoVesniceName = dgvBreweries.CurrentRow.Cells["MESTO_VESNICE"].Value.ToString();
                 var mestoVesniceItem = ((List<Tuple<int, string>>)cbMestoVesnice.DataSource)
                     .FirstOrDefault(item => item.Item2 == mestoVesniceName);
@@ -349,6 +343,47 @@ namespace HospodaUBobra
                     cbMestoVesnice.SelectedValue = mestoVesniceItem.Item1;
                 }
             }
+        }
+
+        private bool ValidateInputs()
+        {
+            if (string.IsNullOrWhiteSpace(txtNazev.Text))
+            {
+                MessageBox.Show("Zadejte název pivovaru.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cbRokZalozeni.SelectedIndex == -1)
+            {
+                MessageBox.Show("Vyberte rok založení pivovaru.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cbProvozProhlidek.SelectedIndex == -1)
+            {
+                MessageBox.Show("Vyberte možnost, zda pivovar provozuje prohlídky.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cbProvozAkci.SelectedIndex == -1)
+            {
+                MessageBox.Show("Vyberte možnost, zda pivovar provozuje akce.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cbDruhPodniku.SelectedIndex == -1)
+            {
+                MessageBox.Show("Vyberte druh podniku.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cbMestoVesnice.SelectedIndex == -1)
+            {
+                MessageBox.Show("Vyberte město nebo vesnici.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
         }
     }
 }

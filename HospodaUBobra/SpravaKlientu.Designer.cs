@@ -50,6 +50,7 @@
             dtpDatumRegistrace = new DateTimePicker();
             label8 = new Label();
             btnClear = new Button();
+            label9 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvKlienti).BeginInit();
             SuspendLayout();
             // 
@@ -242,11 +243,22 @@
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label9.Location = new Point(12, 4);
+            label9.Name = "label9";
+            label9.Size = new Size(129, 21);
+            label9.TabIndex = 39;
+            label9.Text = "Správce Klientů";
+            // 
             // SpravaKlientu
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(571, 590);
+            Controls.Add(label9);
             Controls.Add(btnClear);
             Controls.Add(label8);
             Controls.Add(dtpDatumRegistrace);
@@ -270,7 +282,7 @@
             Controls.Add(txtUsername);
             Controls.Add(label1);
             Name = "SpravaKlientu";
-            Text = "SpravaKlientu";
+            Text = "Správce Klientů";
             ((System.ComponentModel.ISupportInitialize)dgvKlienti).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -300,5 +312,6 @@
         private DateTimePicker dtpDatumRegistrace;
         private Label label8;
         private Button btnClear;
+        private Label label9;
     }
 }

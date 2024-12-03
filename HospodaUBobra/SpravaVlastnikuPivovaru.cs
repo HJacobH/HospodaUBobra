@@ -28,6 +28,12 @@ namespace HospodaUBobra
             LoadPivovarAudit();
 
             dgvOwners.AutoGenerateColumns = true;
+            dgvOwners.ReadOnly = true;
+            cbDruhVlastnika.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbDruhVlastnikaAudit.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbMestaAudit.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbMestoVesnice.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbPivovarAudit.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void LoadDruhVlastnika()
@@ -157,7 +163,7 @@ namespace HospodaUBobra
         {
             if (!ValidateFields())
             {
-                return; // Stop if validation fails
+                return;
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -169,7 +175,7 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Add new
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
                         cmd.Parameters.Add("p_id_vlastnika", OracleDbType.Int32).Value = DBNull.Value;
                         cmd.Parameters.Add("p_jmeno_nazev", OracleDbType.Varchar2).Value = txtJmenoNazev.Text.Trim();
                         cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = txtPrijmeni.Text.Trim();
@@ -181,14 +187,14 @@ namespace HospodaUBobra
                         cmd.Parameters.Add("p_druh_vlastnika", OracleDbType.Varchar2).Value = cbDruhVlastnika.SelectedValue.ToString();
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Owner added successfully.");
+                        MessageBox.Show("Vlastník úspěšně přidán.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadOwners();
                         ClearFields();
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error adding owner: " + ex.Message);
+                    MessageBox.Show("Chyba při přidávání vlastníka: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -197,13 +203,13 @@ namespace HospodaUBobra
         {
             if (selectedOwnerId == -1)
             {
-                MessageBox.Show("No owner selected for update.");
+                MessageBox.Show("Není vybrán žádný vlastník k aktualizaci.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (!ValidateFields())
             {
-                return; // Stop if validation fails
+                return;
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -215,7 +221,7 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedOwnerId; // Update
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedOwnerId;
                         cmd.Parameters.Add("p_id_vlastnika", OracleDbType.Int32).Value = selectedOwnerId;
                         cmd.Parameters.Add("p_jmeno_nazev", OracleDbType.Varchar2).Value = txtJmenoNazev.Text.Trim();
                         cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = txtPrijmeni.Text.Trim();
@@ -227,14 +233,14 @@ namespace HospodaUBobra
                         cmd.Parameters.Add("p_druh_vlastnika", OracleDbType.Varchar2).Value = cbDruhVlastnika.SelectedValue.ToString();
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Owner updated successfully.");
+                        MessageBox.Show("Vlastník úspěšně aktualizován.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadOwners();
                         ClearFields();
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error updating owner: " + ex.Message);
+                    MessageBox.Show("Chyba při aktualizaci vlastníka: " + ex.Message);
                 }
             }
         }
@@ -243,14 +249,14 @@ namespace HospodaUBobra
         {
             if (selectedOwnerId == -1)
             {
-                MessageBox.Show("No owner selected for deletion.");
+                MessageBox.Show("Není vybrán žádný vlastník k odstranění.");
                 return;
             }
 
-            DialogResult confirmResult = MessageBox.Show("Are you sure you want to delete this owner?", "Confirm Delete", MessageBoxButtons.YesNo);
+            DialogResult confirmResult = MessageBox.Show("Opravdu chcete odstranit tohoto vlastníka?", "Potvrdit odstranění", MessageBoxButtons.YesNo);
             if (confirmResult != DialogResult.Yes)
             {
-                return; // Stop if user cancels
+                return;
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -263,14 +269,14 @@ namespace HospodaUBobra
                     {
                         cmd.Parameters.Add("id", OracleDbType.Int32).Value = selectedOwnerId;
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Owner deleted successfully.");
+                        MessageBox.Show("Vlastník úspěšně odstraněn.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadOwners();
                         ClearFields();
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error deleting owner: " + ex.Message);
+                    MessageBox.Show("Chyba při odstranění vlastníka: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -282,35 +288,39 @@ namespace HospodaUBobra
 
         private bool ValidateFields()
         {
-            // Check if required fields are filled
             if (string.IsNullOrWhiteSpace(txtJmenoNazev.Text))
             {
-                MessageBox.Show("Name/Company is required.");
+                MessageBox.Show("Pole 'Název/Jméno' je povinné.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtICO.Text) || txtICO.Text.Length != 8 || !long.TryParse(txtICO.Text, out _))
             {
-                MessageBox.Show("Valid ICO (8 digits) is required.");
+                MessageBox.Show("Pole 'ICO' musí obsahovat 8 čísel.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
             if (cbMestoVesnice.SelectedIndex == -1)
             {
-                MessageBox.Show("Please select a City/Village.");
+                MessageBox.Show("Vyberte město nebo vesnici.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
             if (cbDruhVlastnika.SelectedIndex == -1)
             {
-                MessageBox.Show("Please select an Owner Type.");
+                MessageBox.Show("Vyberte druh vlastníka.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
-            // Optional fields can be validated if needed (e.g., PRIJMENI, DIC)
             if (!string.IsNullOrWhiteSpace(txtDIC.Text) && txtDIC.Text.Length > 12)
             {
-                MessageBox.Show("DIC cannot exceed 12 characters.");
+                MessageBox.Show("Pole 'DIC' nemůže být delší než 12 znaků.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(txtCisloPopisne.Text) && !int.TryParse(txtCisloPopisne.Text, out _))
+            {
+                MessageBox.Show("Pole 'Číslo popisné' musí být číslo.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -328,9 +338,8 @@ namespace HospodaUBobra
             cbMestoVesnice.SelectedIndex = -1;
             cbDruhVlastnika.SelectedIndex = -1;
 
-            selectedOwnerId = -1; // Reset the selected owner ID
+            selectedOwnerId = -1; 
         }
-
 
         private void btnClear_Click(object sender, EventArgs e)
         {
@@ -341,7 +350,6 @@ namespace HospodaUBobra
         {
             try
             {
-                // Get selected values from the comboboxes
                 string ownerType = cbDruhVlastnikaAudit.SelectedValue?.ToString();
                 int? cityId = cbMestaAudit.SelectedValue as int?;
                 int? breweryId = cbPivovarAudit.SelectedValue as int?;
@@ -354,26 +362,21 @@ namespace HospodaUBobra
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
-                        // Define the procedure parameters with selected combobox values
                         command.Parameters.Add("p_owner_type", OracleDbType.Varchar2).Value = (object)ownerType ?? DBNull.Value;
                         command.Parameters.Add("p_city_id", OracleDbType.Int32).Value = (object)cityId ?? DBNull.Value;
                         command.Parameters.Add("p_brewery_id", OracleDbType.Int32).Value = (object)breweryId ?? DBNull.Value;
 
-                        // Define the output parameter for the ref cursor
                         var resultsParam = new OracleParameter("p_results", OracleDbType.RefCursor)
                         {
                             Direction = ParameterDirection.Output
                         };
                         command.Parameters.Add(resultsParam);
 
-                        // Execute the procedure and retrieve the results
                         using (var reader = command.ExecuteReader())
                         {
-                            // Load results into a DataTable
                             var dataTable = new DataTable();
                             dataTable.Load(reader);
 
-                            // Display results in a DataGridView inside a popup window
                             DisplayResultsInPopup(dataTable);
                         }
                     }
@@ -383,12 +386,10 @@ namespace HospodaUBobra
             {
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private void DisplayResultsInPopup(DataTable dataTable)
         {
-            // Create a new form for displaying results
             var form = new Form
             {
                 Text = "Audit Brewery Ownership Results",
@@ -396,7 +397,6 @@ namespace HospodaUBobra
                 Height = 600
             };
 
-            // Create a DataGridView to display the data
             var dataGridView = new DataGridView
             {
                 DataSource = dataTable,
@@ -405,10 +405,8 @@ namespace HospodaUBobra
                 ReadOnly = true
             };
 
-            // Add the DataGridView to the form
             form.Controls.Add(dataGridView);
 
-            // Hide the ID_VLASTNIKA column after adding the DataGridView to the form
             form.Shown += (s, e) =>
             {
                 if (dataGridView.Columns.Contains("ID_VLASTNIKA"))
@@ -417,29 +415,23 @@ namespace HospodaUBobra
                 }
             };
 
-            // Show the form as a modal dialog
             form.ShowDialog();
         }
 
-
-
         private void LoadDruhVlastnikaAudit()
         {
-            // Define a list of values including a blank option for unfiltered searches
             var druhVlastnikaAudit = new List<Tuple<string, string>>()
-    {
-        new Tuple<string, string>("", "All (No Filter)"), // Blank option
-        new Tuple<string, string>("FO", "Physical Person"), // Option for FO
-        new Tuple<string, string>("PO", "Legal Person") // Option for PO
-    };
+            {
+                new Tuple<string, string>("", "All (No Filter)"), 
+                new Tuple<string, string>("FO", "Physical Person"), 
+                new Tuple<string, string>("PO", "Legal Person") 
+            };
 
-            // Bind the list to the ComboBox
             cbDruhVlastnikaAudit.DataSource = druhVlastnikaAudit;
-            cbDruhVlastnikaAudit.DisplayMember = "Item2"; // Display text (e.g., "All (No Filter)")
-            cbDruhVlastnikaAudit.ValueMember = "Item1"; // Actual value (e.g., "", "FO", "PO")
-            cbDruhVlastnikaAudit.SelectedIndex = 0; // Default selection to "All (No Filter)"
+            cbDruhVlastnikaAudit.DisplayMember = "Item2";
+            cbDruhVlastnikaAudit.ValueMember = "Item1";
+            cbDruhVlastnikaAudit.SelectedIndex = 0;
         }
-
         private void LoadMestaAudit()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -454,10 +446,8 @@ namespace HospodaUBobra
                     {
                         var mestaList = new List<Tuple<int?, string>>();
 
-                        // Add a blank option for no filter
                         mestaList.Add(new Tuple<int?, string>(null, "All (No Filter)"));
 
-                        // Add the rest of the cities from the database
                         while (reader.Read())
                         {
                             int id = reader.GetInt32(0);
@@ -465,11 +455,10 @@ namespace HospodaUBobra
                             mestaList.Add(new Tuple<int?, string>(id, name));
                         }
 
-                        // Bind the list to the ComboBox
                         cbMestaAudit.DataSource = mestaList;
-                        cbMestaAudit.DisplayMember = "Item2"; // Display the city name
-                        cbMestaAudit.ValueMember = "Item1";   // Use the city ID as the value
-                        cbMestaAudit.SelectedIndex = 0;      // Default to "All (No Filter)"
+                        cbMestaAudit.DisplayMember = "Item2"; 
+                        cbMestaAudit.ValueMember = "Item1"; 
+                        cbMestaAudit.SelectedIndex = 0;  
                     }
                 }
                 catch (Exception ex)
@@ -493,10 +482,8 @@ namespace HospodaUBobra
                     {
                         var pivovarList = new List<Tuple<int?, string>>();
 
-                        // Add a blank option for no filter
                         pivovarList.Add(new Tuple<int?, string>(null, "All (No Filter)"));
 
-                        // Add the rest of the breweries from the database
                         while (reader.Read())
                         {
                             int id = reader.GetInt32(0);
@@ -504,11 +491,10 @@ namespace HospodaUBobra
                             pivovarList.Add(new Tuple<int?, string>(id, name));
                         }
 
-                        // Bind the list to the ComboBox
                         cbPivovarAudit.DataSource = pivovarList;
-                        cbPivovarAudit.DisplayMember = "Item2"; // Display the brewery name
-                        cbPivovarAudit.ValueMember = "Item1";   // Use the brewery ID as the value
-                        cbPivovarAudit.SelectedIndex = 0;      // Default to "All (No Filter)"
+                        cbPivovarAudit.DisplayMember = "Item2";
+                        cbPivovarAudit.ValueMember = "Item1";   
+                        cbPivovarAudit.SelectedIndex = 0;    
                     }
                 }
                 catch (Exception ex)
@@ -517,7 +503,5 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
     }
 }

@@ -20,8 +20,10 @@ namespace HospodaUBobra
         {
             InitializeComponent();
             LoadDruhPodnikuOptions();
-            //LoadProfileImageOptions();
             LoadKlienti();
+
+            dgvKlienti.ReadOnly = true;
+            cbDruhPodniku.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void LoadDruhPodnikuOptions()
@@ -47,29 +49,6 @@ namespace HospodaUBobra
             cbDruhPodniku.ValueMember = "ID";
         }
 
-        /*private void LoadProfileImageOptions()
-        {
-            using (OracleConnection conn = new OracleConnection(connectionString))
-            {
-                conn.Open();
-                string query = "SELECT ID_OBRAZKU, NAZEV FROM PROFILOVE_OBRAZKY";
-                using (OracleCommand cmd = new OracleCommand(query, conn))
-                using (OracleDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        cbProfilovyObrazek.Items.Add(new
-                        {
-                            ID = reader.GetInt32(0),
-                            Name = reader.GetString(1)
-                        });
-                    }
-                }
-            }
-            cbProfilovyObrazek.DisplayMember = "Name";
-            cbProfilovyObrazek.ValueMember = "ID";
-        }*/
-
         private void LoadKlienti()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -78,7 +57,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Query to retrieve data
                     string query = @"
                 SELECT 
                     k.ID_KLIENTA, 
@@ -99,16 +77,13 @@ namespace HospodaUBobra
                         DataTable klientiTable = new DataTable();
                         adapter.Fill(klientiTable);
 
-                        // Bind data to DataGridView
                         dgvKlienti.DataSource = klientiTable;
 
-                        // Hide the ID_KLIENTA column
                         if (dgvKlienti.Columns.Contains("ID_KLIENTA"))
                         {
                             dgvKlienti.Columns["ID_KLIENTA"].Visible = false;
                         }
 
-                        // Optional: Set more user-friendly column headers
                         dgvKlienti.Columns["JMENO"].HeaderText = "First Name";
                         dgvKlienti.Columns["PRIJMENI"].HeaderText = "Last Name";
                         dgvKlienti.Columns["NAZEV"].HeaderText = "Business Name";
@@ -130,16 +105,10 @@ namespace HospodaUBobra
             }
         }
 
-
-
-
-
-
         private void btnCreate_Click(object sender, EventArgs e)
         {
-            if(!ValidateInputs())
-    {
-                MessageBox.Show("Please fill in all required fields correctly.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (!ValidateInputs())
+            {
                 return;
             }
 
@@ -150,11 +119,10 @@ namespace HospodaUBobra
             string telefon = txtTelefon.Text.Trim();
             int? druhPodnikuId = cbDruhPodniku.SelectedValue as int?;
             int? profilovyObrazekId = null;
-            DateTime datumRegistrace = DateTime.Now; // Current timestamp as registration date
-            int roleId = 2; // Fixed role ID for clients (Klient role)
+            DateTime datumRegistrace = DateTime.Now;
+            int roleId = 2; 
 
-            // Generate password and salt
-            string defaultPassword = "DefaultPassword123"; // Replace with your desired default password
+            string defaultPassword = "DefaultPassword123";
             string salt = PasswordHelper.GenerateSalt();
             string hashedPassword = PasswordHelper.HashPassword(defaultPassword, salt);
 
@@ -167,8 +135,7 @@ namespace HospodaUBobra
                     string query = "CALL sprava_klienti(null, :idKlienta, :jmeno, :prijmeni, :nazev, :email, :telefon, :druhPodnikuId, :datumRegistrace, :heslo, :sul, :roleId, :profilovyObrazekId)";
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
-                        // Parameters for the procedure
-                        cmd.Parameters.Add(new OracleParameter("idKlienta", OracleDbType.Int32)).Value = DBNull.Value; // Let the trigger handle ID generation
+                        cmd.Parameters.Add(new OracleParameter("idKlienta", OracleDbType.Int32)).Value = DBNull.Value;
                         cmd.Parameters.Add(new OracleParameter("jmeno", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(jmeno) ? DBNull.Value : jmeno;
                         cmd.Parameters.Add(new OracleParameter("prijmeni", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(prijmeni) ? DBNull.Value : prijmeni;
                         cmd.Parameters.Add(new OracleParameter("nazev", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(nazev) ? DBNull.Value : nazev;
@@ -182,9 +149,9 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32)).Value = (object)profilovyObrazekId ?? DBNull.Value;
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Client created successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadKlienti(); // Refresh the data grid
-                        ClearFields(); // Clear input fields
+                        MessageBox.Show("Klient úspěšně vytvořen!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoadKlienti(); 
+                        ClearFields(); 
                     }
                 }
                 catch (OracleException ex)
@@ -202,13 +169,12 @@ namespace HospodaUBobra
         {
             if (selectedKlientId == -1)
             {
-                MessageBox.Show("No client selected for update. Please select a client.", "Update Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Žádný klient nebyl vybrán. Prosím vyberte klienta.", "Aktualizace Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (!ValidateInputs())
             {
-                MessageBox.Show("Please fill in all required fields correctly.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -219,15 +185,13 @@ namespace HospodaUBobra
             string telefon = txtTelefon.Text.Trim();
             int? druhPodnikuId = cbDruhPodniku.SelectedValue as int?;
             int? profilovyObrazekId = null;
-            DateTime datumRegistrace = DateTime.Now; // Current timestamp for update
-            int roleId = 2; // Fixed role ID for clients (Klient role)
-            string newPassword = txtPassword.Text.Trim(); // Get password field value
+            DateTime datumRegistrace = DateTime.Now;
+            int roleId = 2; 
+            string newPassword = txtPassword.Text.Trim(); 
 
-            // Declare variables for password and salt
             string hashedPassword = null;
             string salt = null;
 
-            // Only hash and salt the password if the user entered a new one
             if (!string.IsNullOrEmpty(newPassword))
             {
                 salt = PasswordHelper.GenerateSalt();
@@ -259,8 +223,7 @@ namespace HospodaUBobra
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
-                        // Parameters for the procedure
-                        cmd.Parameters.Add(new OracleParameter("identifikator", OracleDbType.Int32)).Value = selectedKlientId; // Pass client ID for update
+                        cmd.Parameters.Add(new OracleParameter("identifikator", OracleDbType.Int32)).Value = selectedKlientId;
                         cmd.Parameters.Add(new OracleParameter("idKlienta", OracleDbType.Int32)).Value = selectedKlientId;
                         cmd.Parameters.Add(new OracleParameter("jmeno", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(jmeno) ? DBNull.Value : jmeno;
                         cmd.Parameters.Add(new OracleParameter("prijmeni", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(prijmeni) ? DBNull.Value : prijmeni;
@@ -270,7 +233,6 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("druhPodnikuId", OracleDbType.Int32)).Value = (object)druhPodnikuId ?? DBNull.Value;
                         cmd.Parameters.Add(new OracleParameter("datumRegistrace", OracleDbType.Date)).Value = datumRegistrace;
 
-                        // Only pass password and salt if they are updated
                         if (!string.IsNullOrEmpty(newPassword))
                         {
                             cmd.Parameters.Add(new OracleParameter("heslo", OracleDbType.Varchar2)).Value = hashedPassword;
@@ -286,9 +248,9 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32)).Value = (object)profilovyObrazekId ?? DBNull.Value;
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Client updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadKlienti(); // Refresh the data grid
-                        ClearFields(); // Clear input fields
+                        MessageBox.Show("Kleint úspěšně aktualizován!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoadKlienti();
+                        ClearFields(); 
                     }
                 }
                 catch (OracleException ex)
@@ -306,11 +268,11 @@ namespace HospodaUBobra
         {
             if (selectedKlientId == -1)
             {
-                MessageBox.Show("Please select a Klient to delete.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Prosím vyberte klienta ke smazání.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete this Klient?", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult dialogResult = MessageBox.Show("Opravdu chcete odstranit tohoto klienta?", "Potvrdit Smazání", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.No)
             {
                 return;
@@ -328,7 +290,7 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("klientId", OracleDbType.Int32)).Value = selectedKlientId;
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Klient successfully deleted!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Klient úspěšně smazán!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                     LoadKlienti();
@@ -351,28 +313,61 @@ namespace HospodaUBobra
 
         private bool ValidateInputs()
         {
-            if (string.IsNullOrWhiteSpace(txtEmail.Text) || string.IsNullOrWhiteSpace(txtTelefon.Text) || cbDruhPodniku.SelectedIndex == -1)
+            StringBuilder errorMessage = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(txtUsername.Text) && string.IsNullOrWhiteSpace(txtPrijmeni.Text) && string.IsNullOrWhiteSpace(txtNazev.Text))
             {
-                return false;
+                errorMessage.AppendLine("Vyplňte alespoň 'Jméno a Příjmení' nebo 'Název'.");
             }
 
-            // Either 'Jmeno' and 'Prijmeni' or 'Nazev' must be filled
-            if ((string.IsNullOrWhiteSpace(txtUsername.Text) && string.IsNullOrWhiteSpace(txtPrijmeni.Text)) && string.IsNullOrWhiteSpace(txtNazev.Text))
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
             {
+                errorMessage.AppendLine("Zadejte platný email.");
+            }
+
+            if (string.IsNullOrWhiteSpace(txtTelefon.Text) || !IsValidPhoneNumber(txtTelefon.Text))
+            {
+                errorMessage.AppendLine("Zadejte platné telefonní číslo.");
+            }
+
+            if (cbDruhPodniku.SelectedIndex == -1)
+            {
+                errorMessage.AppendLine("Vyberte platný 'Druh Podniku'.");
+            }
+
+            if (errorMessage.Length > 0)
+            {
+                MessageBox.Show(errorMessage.ToString(), "Chyba validace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
             return true;
         }
 
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var mailAddress = new System.Net.Mail.MailAddress(email);
+                return mailAddress.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsValidPhoneNumber(string phoneNumber)
+        {
+            return phoneNumber.All(char.IsDigit) && phoneNumber.Length >= 9 && phoneNumber.Length <= 15;
+        }
+
         private void dataGridViewUsers_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvKlienti.CurrentRow != null)
             {
-                // Use the hidden ID_KLIENTA value programmatically
                 selectedKlientId = Convert.ToInt32(dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value);
 
-                // Populate other fields in the form
                 txtUsername.Text = dgvKlienti.CurrentRow.Cells["JMENO"].Value?.ToString() ?? string.Empty;
                 txtPrijmeni.Text = dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value?.ToString() ?? string.Empty;
                 txtNazev.Text = dgvKlienti.CurrentRow.Cells["NAZEV"].Value?.ToString() ?? string.Empty;
@@ -398,8 +393,6 @@ namespace HospodaUBobra
             txtTelefon.Clear();
             dtpDatumRegistrace.Value = DateTime.Now;
             cbDruhPodniku.SelectedIndex = -1;
-            //cbRole.SelectedIndex = -1;
-            //cbProfilovyObrazek.SelectedIndex = -1;
         }
     }
 }

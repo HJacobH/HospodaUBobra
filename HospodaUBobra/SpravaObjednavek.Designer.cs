@@ -41,13 +41,14 @@
             btnDelete = new Button();
             btnUpdate = new Button();
             btnAdd = new Button();
+            label5 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvOrders).BeginInit();
             SuspendLayout();
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 31);
+            label1.Location = new Point(14, 49);
             label1.Name = "label1";
             label1.Size = new Size(40, 15);
             label1.TabIndex = 0;
@@ -56,7 +57,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(12, 61);
+            label2.Location = new Point(14, 79);
             label2.Name = "label2";
             label2.Size = new Size(42, 15);
             label2.TabIndex = 1;
@@ -65,7 +66,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(12, 93);
+            label3.Location = new Point(14, 111);
             label3.Name = "label3";
             label3.Size = new Size(109, 15);
             label3.TabIndex = 2;
@@ -74,7 +75,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(12, 122);
+            label4.Location = new Point(14, 140);
             label4.Name = "label4";
             label4.Size = new Size(96, 15);
             label4.TabIndex = 3;
@@ -83,7 +84,7 @@
             // cbClients
             // 
             cbClients.FormattingEnabled = true;
-            cbClients.Location = new Point(133, 28);
+            cbClients.Location = new Point(135, 46);
             cbClients.Name = "cbClients";
             cbClients.Size = new Size(121, 23);
             cbClients.TabIndex = 4;
@@ -91,21 +92,21 @@
             // cbOrderStatuses
             // 
             cbOrderStatuses.FormattingEnabled = true;
-            cbOrderStatuses.Location = new Point(133, 58);
+            cbOrderStatuses.Location = new Point(135, 76);
             cbOrderStatuses.Name = "cbOrderStatuses";
             cbOrderStatuses.Size = new Size(121, 23);
             cbOrderStatuses.TabIndex = 5;
             // 
             // dtpOrderDate
             // 
-            dtpOrderDate.Location = new Point(133, 87);
+            dtpOrderDate.Location = new Point(135, 105);
             dtpOrderDate.Name = "dtpOrderDate";
             dtpOrderDate.Size = new Size(200, 23);
             dtpOrderDate.TabIndex = 6;
             // 
             // dtpDeliveryDate
             // 
-            dtpDeliveryDate.Location = new Point(133, 116);
+            dtpDeliveryDate.Location = new Point(135, 134);
             dtpDeliveryDate.Name = "dtpDeliveryDate";
             dtpDeliveryDate.Size = new Size(200, 23);
             dtpDeliveryDate.TabIndex = 7;
@@ -113,9 +114,9 @@
             // dgvOrders
             // 
             dgvOrders.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvOrders.Location = new Point(14, 154);
+            dgvOrders.Location = new Point(14, 169);
             dgvOrders.Name = "dgvOrders";
-            dgvOrders.Size = new Size(444, 266);
+            dgvOrders.Size = new Size(444, 251);
             dgvOrders.TabIndex = 8;
             dgvOrders.SelectionChanged += dgvOrders_SelectionChanged;
             // 
@@ -159,11 +160,22 @@
             btnAdd.UseVisualStyleBackColor = true;
             btnAdd.Click += btnAdd_Click;
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label5.Location = new Point(12, 5);
+            label5.Name = "label5";
+            label5.Size = new Size(166, 21);
+            label5.TabIndex = 25;
+            label5.Text = "Správce Objednávek";
+            // 
             // SpravaObjednavek
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(477, 464);
+            Controls.Add(label5);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
@@ -178,7 +190,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Name = "SpravaObjednavek";
-            Text = "SpravaObjednavek";
+            Text = "Správce Objednávek";
             ((System.ComponentModel.ISupportInitialize)dgvOrders).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -199,5 +211,6 @@
         private Button btnDelete;
         private Button btnUpdate;
         private Button btnAdd;
+        private Label label5;
     }
 }

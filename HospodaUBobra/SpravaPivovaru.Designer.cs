@@ -48,6 +48,7 @@
             btnUpdate = new Button();
             btnAdd = new Button();
             btnClear = new Button();
+            label8 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvBreweries).BeginInit();
             SuspendLayout();
             // 
@@ -228,11 +229,22 @@
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label8.Location = new Point(12, 4);
+            label8.Name = "label8";
+            label8.Size = new Size(142, 21);
+            label8.TabIndex = 30;
+            label8.Text = "Správce Pivovarů";
+            // 
             // SpravaPivovaru
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(525, 588);
+            Controls.Add(label8);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
@@ -254,7 +266,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Name = "SpravaPivovaru";
-            Text = "SpravaPivovaru";
+            Text = "Správce Pivovarů";
             ((System.ComponentModel.ISupportInitialize)dgvBreweries).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -282,5 +294,6 @@
         private Button btnUpdate;
         private Button btnAdd;
         private Button btnClear;
+        private Label label8;
     }
 }

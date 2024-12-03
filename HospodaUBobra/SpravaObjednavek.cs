@@ -23,6 +23,10 @@ namespace HospodaUBobra
             LoadOrders();
             LoadClients();
             LoadOrderStatuses();
+
+            dgvOrders.ReadOnly = true;
+            cbClients.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbOrderStatuses.DropDownStyle = ComboBoxStyle.DropDownList;
         }
         private void LoadOrders()
         {
@@ -322,22 +326,44 @@ namespace HospodaUBobra
 
         private void dgvOrders_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvOrders.CurrentRow != null)
+            if (dgvOrders.CurrentRow != null && dgvOrders.CurrentRow.Cells["OrderID"].Value != DBNull.Value)
             {
-                selectedOrderId = Convert.ToInt32(dgvOrders.CurrentRow.Cells["OrderID"].Value);
+                try
+                {
+                    selectedOrderId = Convert.ToInt32(dgvOrders.CurrentRow.Cells["OrderID"].Value);
 
-                // Find the matching client and status in the ComboBoxes
-                string clientName = dgvOrders.CurrentRow.Cells["ClientName"].Value.ToString();
-                string orderStatus = dgvOrders.CurrentRow.Cells["OrderStatus"].Value.ToString();
+                    // Find the matching client and status in the ComboBoxes
+                    string clientName = dgvOrders.CurrentRow.Cells["ClientName"].Value?.ToString() ?? string.Empty;
+                    string orderStatus = dgvOrders.CurrentRow.Cells["OrderStatus"].Value?.ToString() ?? string.Empty;
 
-                cbClients.SelectedIndex = cbClients.FindStringExact(clientName);
-                cbOrderStatuses.SelectedIndex = cbOrderStatuses.FindStringExact(orderStatus);
+                    cbClients.SelectedIndex = cbClients.FindStringExact(clientName);
+                    cbOrderStatuses.SelectedIndex = cbOrderStatuses.FindStringExact(orderStatus);
 
-                dtpOrderDate.Value = Convert.ToDateTime(dgvOrders.CurrentRow.Cells["OrderDate"].Value);
-                dtpDeliveryDate.Value = dgvOrders.CurrentRow.Cells["DeliveryDate"].Value == DBNull.Value
-                    ? DateTime.Now
-                    : Convert.ToDateTime(dgvOrders.CurrentRow.Cells["DeliveryDate"].Value);
+                    dtpOrderDate.Value = Convert.ToDateTime(dgvOrders.CurrentRow.Cells["OrderDate"].Value);
+                    dtpDeliveryDate.Value = dgvOrders.CurrentRow.Cells["DeliveryDate"].Value == DBNull.Value
+                        ? DateTime.Now
+                        : Convert.ToDateTime(dgvOrders.CurrentRow.Cells["DeliveryDate"].Value);
+                }
+                catch (Exception ex)
+                {
+                    // Log or display the error if needed
+                    MessageBox.Show($"Error selecting order: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
+            else
+            {
+                // Clear fields or handle the empty selection
+                ClearOrderFields();
+            }
+        }
+
+        private void ClearOrderFields()
+        {
+            selectedOrderId = -1;
+            cbClients.SelectedIndex = -1;
+            cbOrderStatuses.SelectedIndex = -1;
+            dtpOrderDate.Value = DateTime.Now;
+            dtpDeliveryDate.Value = DateTime.Now;
         }
     }
 }

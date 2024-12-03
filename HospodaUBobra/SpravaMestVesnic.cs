@@ -23,6 +23,10 @@ namespace HospodaUBobra
             LoadMestaVesniceData();
             LoadKraje();
             LoadOkresy();
+
+            dgvMestaVesnice.ReadOnly = true;
+            cbKraje.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbOkresy.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void LoadMestaVesniceData()
@@ -33,7 +37,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Query to join tables and get meaningful names
                     string query = @"
                 SELECT 
                     mv.ID_MES_VES AS Town_ID, 
@@ -54,13 +57,11 @@ namespace HospodaUBobra
 
                         dgvMestaVesnice.DataSource = dataTable;
 
-                        // Hide the Town_ID column
                         if (dgvMestaVesnice.Columns.Contains("Town_ID"))
                         {
                             dgvMestaVesnice.Columns["Town_ID"].Visible = false;
                         }
 
-                        // Set user-friendly column headers
                         dgvMestaVesnice.Columns["Name"].HeaderText = "Town Name";
                         dgvMestaVesnice.Columns["Population"].HeaderText = "Population";
                         dgvMestaVesnice.Columns["Postal_Code"].HeaderText = "Postal Code";
@@ -70,7 +71,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading towns and villages: " + ex.Message);
+                    MessageBox.Show("Error při načítání měst a vesnic: " + ex.Message);
                 }
             }
         }
@@ -96,13 +97,13 @@ namespace HospodaUBobra
                         }
 
                         cbKraje.DataSource = kraje;
-                        cbKraje.DisplayMember = "Item2"; // Display the name of the region
-                        cbKraje.ValueMember = "Item1";  // Use the ID as the value
+                        cbKraje.DisplayMember = "Item2"; 
+                        cbKraje.ValueMember = "Item1"; 
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading regions: " + ex.Message);
+                    MessageBox.Show("Error při načítání krajů: " + ex.Message);
                 }
             }
         }
@@ -128,29 +129,25 @@ namespace HospodaUBobra
                         }
 
                         cbOkresy.DataSource = okresy;
-                        cbOkresy.DisplayMember = "Item2"; // Display the name of the district
-                        cbOkresy.ValueMember = "Item1";  // Use the ID as the value
+                        cbOkresy.DisplayMember = "Item2"; 
+                        cbOkresy.ValueMember = "Item1"; 
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading districts: " + ex.Message);
+                    MessageBox.Show("Error při načítání okresů: " + ex.Message);
                 }
             }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNazev.Text) ||
-            !int.TryParse(txtPocetObyvatel.Text, out int pocetObyvatel) ||
-            string.IsNullOrWhiteSpace(txtPSC.Text) ||
-            cbOkresy.SelectedItem == null ||
-            cbKraje.SelectedItem == null)
+            if (!ValidateInputs())
             {
-                MessageBox.Show("Please enter valid data for all fields.");
-                return;
+                return; 
             }
 
+            int pocetObyvatel = int.Parse(txtPocetObyvatel.Text);
             int okresId = ((Tuple<int, string>)cbOkresy.SelectedItem).Item1;
             int krajId = ((Tuple<int, string>)cbKraje.SelectedItem).Item1;
 
@@ -161,20 +158,16 @@ namespace HospodaUBobra
         {
             if (selectedMestoId == -1)
             {
-                MessageBox.Show("Please select a record to update.");
+                MessageBox.Show("Vyberte záznam pro aktualizaci.", "Chyba aktualizace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtNazev.Text) ||
-                !int.TryParse(txtPocetObyvatel.Text, out int pocetObyvatel) ||
-                string.IsNullOrWhiteSpace(txtPSC.Text) ||
-                cbOkresy.SelectedItem == null ||
-                cbKraje.SelectedItem == null)
+            if (!ValidateInputs())
             {
-                MessageBox.Show("Please enter valid data for all fields.");
-                return;
+                return; 
             }
 
+            int pocetObyvatel = int.Parse(txtPocetObyvatel.Text);
             int okresId = ((Tuple<int, string>)cbOkresy.SelectedItem).Item1;
             int krajId = ((Tuple<int, string>)cbKraje.SelectedItem).Item1;
 
@@ -186,11 +179,11 @@ namespace HospodaUBobra
         {
             if (selectedMestoId == -1)
             {
-                MessageBox.Show("Please select a record to delete.");
+                MessageBox.Show("Prosím vyberte město/vesnici pro odstranění.");
                 return;
             }
 
-            DialogResult result = MessageBox.Show("Are you sure you want to delete this record?", "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show("Opravdu chcete odstranit toto město/vesnici?", "Potvrdit odstranění", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
@@ -205,15 +198,15 @@ namespace HospodaUBobra
                             cmd.Parameters.Add(new OracleParameter(":id_mes_ves", OracleDbType.Int32)).Value = selectedMestoId;
                             cmd.ExecuteNonQuery();
 
-                            MessageBox.Show("Record deleted successfully!");
-                            LoadMestaVesniceData(); // Refresh data
+                            MessageBox.Show("Město/Vesnice odstraněna úspěšně!");
+                            LoadMestaVesniceData(); 
                             ClearFormFields();
-                            selectedMestoId = -1; // Reset selection
+                            selectedMestoId = -1;
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error deleting record: " + ex.Message);
+                        MessageBox.Show("Error: " + ex.Message);
                     }
                 }
             }
@@ -233,15 +226,12 @@ namespace HospodaUBobra
         {
             if (dgvMestaVesnice.CurrentRow != null)
             {
-                // Use the hidden Town_ID value
                 selectedMestoId = Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["Town_ID"].Value);
 
-                // Populate other fields in the form
                 txtNazev.Text = dgvMestaVesnice.CurrentRow.Cells["Name"].Value?.ToString() ?? string.Empty;
                 txtPocetObyvatel.Text = dgvMestaVesnice.CurrentRow.Cells["Population"].Value?.ToString() ?? string.Empty;
                 txtPSC.Text = dgvMestaVesnice.CurrentRow.Cells["Postal_Code"].Value?.ToString() ?? string.Empty;
 
-                // Set the selected district and region based on the displayed names
                 cbOkresy.SelectedIndex = cbOkresy.FindStringExact(dgvMestaVesnice.CurrentRow.Cells["District"].Value?.ToString() ?? string.Empty);
                 cbKraje.SelectedIndex = cbKraje.FindStringExact(dgvMestaVesnice.CurrentRow.Cells["Region"].Value?.ToString() ?? string.Empty);
             }
@@ -269,9 +259,9 @@ namespace HospodaUBobra
                         cmd.ExecuteNonQuery();
                         string message = idMesVes.HasValue ? "Record updated successfully!" : "Record added successfully!";
                         MessageBox.Show(message);
-                        LoadMestaVesniceData(); // Refresh data
-                        ClearFormFields(); // Clear form fields
-                        selectedMestoId = -1; // Reset selection
+                        LoadMestaVesniceData();
+                        ClearFormFields();
+                        selectedMestoId = -1;
                     }
                     catch (Exception ex)
                     {
@@ -289,5 +279,44 @@ namespace HospodaUBobra
             cbOkresy.SelectedIndex = -1;
             cbKraje.SelectedIndex = -1;
         }
+
+        private bool ValidateInputs()
+        {
+            StringBuilder errorMessage = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(txtNazev.Text))
+            {
+                errorMessage.AppendLine("Zadejte platný název města nebo vesnice.");
+            }
+
+            if (!int.TryParse(txtPocetObyvatel.Text, out int population) || population <= 0)
+            {
+                errorMessage.AppendLine("Zadejte platný počet obyvatel (kladné celé číslo).");
+            }
+
+            if (string.IsNullOrWhiteSpace(txtPSC.Text) || !txtPSC.Text.All(char.IsDigit))
+            {
+                errorMessage.AppendLine("Zadejte platné PSČ (pouze čísla).");
+            }
+
+            if (cbOkresy.SelectedIndex == -1)
+            {
+                errorMessage.AppendLine("Vyberte platný okres.");
+            }
+
+            if (cbKraje.SelectedIndex == -1)
+            {
+                errorMessage.AppendLine("Vyberte platný kraj.");
+            }
+
+            if (errorMessage.Length > 0)
+            {
+                MessageBox.Show(errorMessage.ToString(), "Chyba validace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
     }
 }
