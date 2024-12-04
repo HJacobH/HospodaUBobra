@@ -18,6 +18,8 @@ namespace HospodaUBobra
         private string currentUsername;
         private Dictionary<string, List<string>> roleTables;
 
+        private DataTable originalDataTable;
+
         public Form1(string roleName)
         {
             InitializeComponent();
@@ -41,6 +43,44 @@ namespace HospodaUBobra
             currentUserLabel.Text = "Anonymous";
 
             dataGridView1.ReadOnly = true;
+
+            LoadInitialData();
+        }
+
+        private void LoadInitialData()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("PivaStats", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_beer_stats", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            adapter.Fill(dt);
+
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
+
+                            dataGridView1.DataSource = dt;
+                        }
+                    }
+                }
+                catch (OracleException ex)
+                {
+                    MessageBox.Show("Oracle error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void PopulateTableList()
@@ -190,7 +230,7 @@ namespace HospodaUBobra
                 SpravaCiselnikuToolStrip.Visible = false;
 
                 btnLogs.Visible = false;
-            } 
+            }
             else if (UserSession.Role == "User")
             {
                 uploadPfpToolStripMenuItem.Visible = true;
@@ -203,7 +243,7 @@ namespace HospodaUBobra
                 nizkyPocetPivToolStripMenuItem.Visible = true;
 
                 objednavkyToolStripMenuItem.Visible = true;
-                nesplneneObjednavkyToolStripMenuItem.Visible=true; //pouze jeho objednavky
+                nesplneneObjednavkyToolStripMenuItem.Visible = true; //pouze jeho objednavky
                 evidenceToolStripMenuItem.Visible = true; //pouze jeho objednavky
                 spravaObjednavekToolStripMenuItem.Visible = true; //pouze jeho objednavky
                 splneneObjednavkyToolStripMenuItem.Visible = true; //pouze jeho objednavky
@@ -291,16 +331,13 @@ namespace HospodaUBobra
                 btnLogout.Enabled = true;
                 ApplyRolePermissions();
 
-                // Check if the user is from KLIENTI or UZIVATELE and set the currentUserLabel accordingly
                 if (UserSession.Role == "Klient")
                 {
-                    // Get klient's name or business name
                     string klientName = GetKlientNameOrBusinessName(UserSession.UserID);
                     currentUserLabel.Text = klientName;
                 }
                 else
                 {
-                    // Get username for UZIVATELE
                     currentUserLabel.Text = GetUserUsername(UserSession.UserID);
                 }
 
@@ -308,7 +345,7 @@ namespace HospodaUBobra
             }
             else
             {
-                // Optionally handle login failure
+                
             }
         }
 
@@ -421,7 +458,6 @@ namespace HospodaUBobra
                 string tableName = isClient ? "KLIENTI" : "UZIVATELE";
                 string idColumn = isClient ? "ID_KLIENTA" : "ID_UZIVATELE";
 
-                // Step 1: Retrieve the PROFILE_OBRAZKY_ID from the appropriate table
                 string selectQuery = $"SELECT PROFILE_OBRAZKY_ID FROM {tableName} WHERE {idColumn} = :id";
                 using (OracleCommand cmdFetchProfile = new OracleCommand(selectQuery, conn))
                 {
@@ -513,6 +549,8 @@ namespace HospodaUBobra
                             DataTable dataTable = new DataTable();
                             adapter.Fill(dataTable);
 
+                            DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
+
                             dataGridView1.DataSource = dataTable;
                         }
                     }
@@ -540,7 +578,7 @@ namespace HospodaUBobra
             //UKOL5 procedura 3
             bool isAdmin = false;
 
-            if(UserSession.Role == "Admin")
+            if (UserSession.Role == "Admin")
             {
                 isAdmin = true;
             }
@@ -559,8 +597,8 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_user_id", OracleDbType.Int32).Value =UserSession.UserID; 
-                        cmd.Parameters.Add("p_is_admin", OracleDbType.Boolean).Value = isAdmin; 
+                        cmd.Parameters.Add("p_user_id", OracleDbType.Int32).Value = UserSession.UserID;
+                        cmd.Parameters.Add("p_is_admin", OracleDbType.Boolean).Value = isAdmin;
                         cmd.Parameters.Add("p_nedokoncene_objednavky", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
 
 
@@ -569,6 +607,9 @@ namespace HospodaUBobra
                         {
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
+
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
+
                             dataGridView1.DataSource = dt;
                         }
                     }
@@ -769,6 +810,8 @@ namespace HospodaUBobra
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
 
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
+
                             dataGridView1.DataSource = dt;
                         }
                     }
@@ -801,6 +844,8 @@ namespace HospodaUBobra
                         {
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
+
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
 
                             dataGridView1.DataSource = dt;
                         }
@@ -842,6 +887,7 @@ namespace HospodaUBobra
                             {
                                 DataTable dt = new DataTable();
                                 adapter.Fill(dt);
+                                DataGridViewFilterHelper.BindData(dataGridView1, dt);
                                 dataGridView1.DataSource = dt;
                             }
                         }
@@ -881,6 +927,9 @@ namespace HospodaUBobra
                         {
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
+
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
+
                             dataGridView1.DataSource = dt;
                         }
                     }
@@ -1103,6 +1152,7 @@ namespace HospodaUBobra
                             DataTable dataTable = new DataTable();
                             dataTable.Load(reader);
 
+                            DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
                             // Bind the DataTable to the DataGridView
                             dataGridView1.DataSource = dataTable;
                         }
@@ -1145,6 +1195,7 @@ namespace HospodaUBobra
                             DataTable dataTable = new DataTable();
                             dataTable.Load(reader);
 
+                            DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
                             // Bind the DataTable to the DataGridView
                             dataGridView1.DataSource = dataTable;
                         }
@@ -1182,6 +1233,9 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+
+                        DataGridViewFilterHelper.BindData(dataGridView1, dt);
+
                         dataGridView1.DataSource = dt;
 
                         dataGridView1.Columns["Title"].HeaderText = "Název";
@@ -1229,6 +1283,7 @@ namespace HospodaUBobra
                         {
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
                             dataGridView1.DataSource = dt;
 
                             dataGridView1.Columns["Klient_Name"].HeaderText = "Klient";
@@ -1274,6 +1329,7 @@ namespace HospodaUBobra
                         logTable.Columns["User"].ColumnName = "Uživatel";
                         logTable.Columns["Details"].ColumnName = "Podrobnosti";
 
+                        DataGridViewFilterHelper.BindData(dataGridView1, logTable);
                         dataGridView1.DataSource = logTable;
 
                         if (dataGridView1.Columns["ID Záznamu"] != null)
@@ -1297,6 +1353,11 @@ namespace HospodaUBobra
                     MessageBox.Show("Error loading log data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dataGridView1, txtSearch);
         }
     }
 }

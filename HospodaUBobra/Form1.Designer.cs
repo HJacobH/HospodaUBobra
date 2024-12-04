@@ -75,6 +75,7 @@
             btnLogout = new Button();
             profilePictureBox = new PictureBox();
             btnLogs = new Button();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -83,10 +84,10 @@
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 24);
+            dataGridView1.Location = new Point(12, 60);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(817, 414);
+            dataGridView1.Size = new Size(817, 378);
             dataGridView1.TabIndex = 0;
             // 
             // comboBoxTables
@@ -427,11 +428,20 @@
             btnLogs.UseVisualStyleBackColor = true;
             btnLogs.Click += btnLogs_Click;
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 31);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(817, 23);
+            txtSearch.TabIndex = 13;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(txtSearch);
             Controls.Add(btnLogs);
             Controls.Add(profilePictureBox);
             Controls.Add(btnLogout);
@@ -499,5 +509,6 @@
         private ToolStripMenuItem splneneObjednavkyToolStripMenuItem;
         private ToolStripMenuItem spravaVyrobyToolStripMenuItem;
         private Button btnLogs;
+        private TextBox txtSearch;
     }
 }
