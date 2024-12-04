@@ -36,22 +36,22 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Query to fetch orders
+                    // Base query to fetch orders
                     string query = @"
-            SELECT 
-                O.ID_OBJEDNAVKY AS OrderID, 
-                CASE 
-                    WHEN K.JMENO IS NOT NULL AND K.PRIJMENI IS NOT NULL THEN K.JMENO || ' ' || K.PRIJMENI
-                    ELSE K.NAZEV 
-                END AS ClientName, 
-                S.STAV AS OrderStatus, 
-                O.DATUM_OBJ AS OrderDate, 
-                O.DATUM_DOD AS DeliveryDate
-            FROM OBJEDNAVKY O
-            LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
-            LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
+                SELECT 
+                    O.ID_OBJEDNAVKY AS OrderID, 
+                    CASE 
+                        WHEN K.JMENO IS NOT NULL AND K.PRIJMENI IS NOT NULL THEN K.JMENO || ' ' || K.PRIJMENI
+                        ELSE K.NAZEV 
+                    END AS ClientName, 
+                    S.STAV AS OrderStatus, 
+                    O.DATUM_OBJ AS OrderDate, 
+                    O.DATUM_DOD AS DeliveryDate
+                FROM OBJEDNAVKY O
+                LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
+                LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
 
-                    // Modify the query for non-admins
+                    // Apply filtering for non-admin users
                     if (UserSession.Role != "Admin")
                     {
                         query += " WHERE K.ID_KLIENTA = :loggedInClientId";
@@ -61,7 +61,7 @@ namespace HospodaUBobra
                     {
                         if (UserSession.Role != "Admin")
                         {
-                            // Pass the logged-in user's client ID for non-admins
+                            // Bind the client ID parameter for non-admin users
                             cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
                         }
 
@@ -92,6 +92,7 @@ namespace HospodaUBobra
         }
 
 
+
         private void LoadClients()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -100,7 +101,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Query to fetch clients
+                    // Base query to fetch clients
                     string query = @"
                 SELECT 
                     ID_KLIENTA, 
@@ -110,7 +111,7 @@ namespace HospodaUBobra
                     END AS CLIENT_NAME
                 FROM KLIENTI";
 
-                    // Modify the query for non-admins
+                    // Apply filtering for non-admin users
                     if (UserSession.Role != "Admin")
                     {
                         query += " WHERE ID_KLIENTA = :loggedInClientId";
@@ -120,7 +121,7 @@ namespace HospodaUBobra
                     {
                         if (UserSession.Role != "Admin")
                         {
-                            // Pass the logged-in user's client ID for non-admins
+                            // Bind the client ID parameter for non-admin users
                             cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
                         }
 

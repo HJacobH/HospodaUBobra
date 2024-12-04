@@ -365,8 +365,6 @@ namespace HospodaUBobra
                     }
                 }
 
-                MessageBox.Show($"DEBUG: Logged-in User ID: {userId}, Review Owner ID: {reviewOwnerId}", "Debug Info");
-
                 if (reviewOwnerId != userId)
                 {
                     MessageBox.Show("Nemáte oprávnění odstranit tuto recenzi.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);

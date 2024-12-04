@@ -23,8 +23,6 @@ namespace HospodaUBobra
             InitializeComponent();
             connectionString = $"User Id={st};Password={heslo};Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
 
-            SetButtonVisibility();
-
             currentRole = roleName;
 
             roleTables = new Dictionary<string, List<string>>
@@ -35,23 +33,14 @@ namespace HospodaUBobra
             };
             comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
 
+            comboBoxTables.Visible = false;
+
             ApplyRolePermissions();
             PopulateTableList();
             btnLogout.Enabled = false;
             currentUserLabel.Text = "Anonymous";
 
             dataGridView1.ReadOnly = true;
-        }
-
-
-        private void SetButtonVisibility()
-        {
-            /*if (currentRole != "Admin")
-            {
-                zamestnanciToolStripMenuItem.Visible = false;
-                pridatPivoToolStripMenuItem.Visible = false;
-                SpravaCiselnikuToolStrip.Visible = false;
-            }*/
         }
 
         private void PopulateTableList()
@@ -74,10 +63,8 @@ namespace HospodaUBobra
                             {
                                 string tableName = reader.GetString(0);
 
-                                if (CanAccessTable(tableName))
-                                {
-                                    comboBoxTables.Items.Add(tableName);
-                                }
+                                comboBoxTables.Items.Add(tableName);
+
                             }
                         }
                     }
@@ -95,22 +82,6 @@ namespace HospodaUBobra
                 Log("General error: " + ex.Message);
                 MessageBox.Show("General error: " + ex.Message);
             }
-        }
-
-        private bool CanAccessTable(string tableName)
-        {
-
-            /*if (UserSession.Role == "Admin")
-            {
-                return true;
-            }
-
-            if (roleTables.ContainsKey(UserSession.Role) && roleTables[UserSession.Role] != null)
-            {
-                return roleTables[UserSession.Role].Contains(tableName);
-            }*/
-
-            return true; //pak zmenit zpatky na false
         }
 
         private void comboBoxTables_SelectedIndexChanged(object sender, EventArgs e)
@@ -191,15 +162,81 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            /*zamestnanciToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            pridatPivoToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            vytvoritUzivateleToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            SpravaCiselnikuToolStrip.Visible = UserSession.Role == "Admin";
-            vyrobkyToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            objednavkyToolStripMenuItem1.Visible = UserSession.Role == "Admin";
-            nizkyPocetPivToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            nesplneneObjednavkyToolStripMenuItem.Visible = UserSession.Role == "Admin";
-            evidenceToolStripMenuItem.Visible = UserSession.Role == "Admin";*/
+            if (UserSession.Role == "Anonymous")
+            {
+                //Uzivatel
+                uploadPfpToolStripMenuItem.Visible = false;
+                vytvoritUzivateleToolStripMenuItem.Visible = false;
+                spravaKlientuToolStripMenuItem.Visible = false;
+
+                //Recenze
+                smazaneRecenzeToolStripMenuItem.Visible = false;
+
+                //Piva
+                pridatPivoToolStripMenuItem.Visible = false;
+                nizkyPocetPivToolStripMenuItem.Visible = false;
+
+                //pivovary
+                zamestnanciToolStripMenuItem.Visible = false;
+                vyrobkyToolStripMenuItem.Visible = false;
+                objednavkyToolStripMenuItem1.Visible = false;
+                spravaPivovaruToolStripMenuItem.Visible = false;
+                vlastniciToolStripMenuItem.Visible = false;
+                hierarchiePracovnikuToolStripMenuItem.Visible = false;
+                spravaVyrobyToolStripMenuItem.Visible = false;
+                topMestaToolStripMenuItem.Visible = false;
+
+                objednavkyToolStripMenuItem.Visible = false;
+                SpravaCiselnikuToolStrip.Visible = false;
+
+                btnLogs.Visible = false;
+            } 
+            else if (UserSession.Role == "User")
+            {
+                uploadPfpToolStripMenuItem.Visible = true;
+                topMestaToolStripMenuItem.Visible = true;
+            }
+            else if (UserSession.Role == "Klient")
+            {
+                uploadPfpToolStripMenuItem.Visible = true;
+                topMestaToolStripMenuItem.Visible = true;
+                nizkyPocetPivToolStripMenuItem.Visible = true;
+
+                objednavkyToolStripMenuItem.Visible = true;
+                nesplneneObjednavkyToolStripMenuItem.Visible=true; //pouze jeho objednavky
+                evidenceToolStripMenuItem.Visible = true; //pouze jeho objednavky
+                spravaObjednavekToolStripMenuItem.Visible = true; //pouze jeho objednavky
+                splneneObjednavkyToolStripMenuItem.Visible = true; //pouze jeho objednavky
+            }
+            else if (UserSession.Role == "Admin")
+            {
+                //Uzivatel
+                uploadPfpToolStripMenuItem.Visible = true;
+                vytvoritUzivateleToolStripMenuItem.Visible = true;
+                spravaKlientuToolStripMenuItem.Visible = true;
+
+                //Recenze
+                smazaneRecenzeToolStripMenuItem.Visible = true;
+
+                //Piva
+                pridatPivoToolStripMenuItem.Visible = true;
+                nizkyPocetPivToolStripMenuItem.Visible = true;
+
+                //pivovary
+                zamestnanciToolStripMenuItem.Visible = true;
+                vyrobkyToolStripMenuItem.Visible = true;
+                objednavkyToolStripMenuItem1.Visible = true;
+                spravaPivovaruToolStripMenuItem.Visible = true;
+                vlastniciToolStripMenuItem.Visible = true;
+                hierarchiePracovnikuToolStripMenuItem.Visible = true;
+                spravaVyrobyToolStripMenuItem.Visible = true;
+                topMestaToolStripMenuItem.Visible = true;
+
+                objednavkyToolStripMenuItem.Visible = true;
+                SpravaCiselnikuToolStrip.Visible = true;
+
+                btnLogs.Visible = true;
+            }
 
             PopulateTableList();
         }
@@ -501,6 +538,17 @@ namespace HospodaUBobra
         private void explicidCursorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //UKOL5 procedura 3
+            bool isAdmin = false;
+
+            if(UserSession.Role == "Admin")
+            {
+                isAdmin = true;
+            }
+            else
+            {
+                isAdmin = false;
+            }
+
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 try
@@ -511,7 +559,11 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_incomplete_orders", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add("p_user_id", OracleDbType.Int32).Value =UserSession.UserID; 
+                        cmd.Parameters.Add("p_is_admin", OracleDbType.Boolean).Value = isAdmin; 
+                        cmd.Parameters.Add("p_nedokoncene_objednavky", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
+
+
 
                         using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                         {
@@ -542,6 +594,7 @@ namespace HospodaUBobra
                 btnLogout.Enabled = false;
                 currentUserLabel.Text = "Anonymous";
                 profilePictureBox.Image = null;
+                dataGridView1.DataSource = null;
             }
         }
 
@@ -1104,12 +1157,6 @@ namespace HospodaUBobra
             }
         }
 
-        private void spravaPriraazeníToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SpravaSpojeni spravaSpojeni = new SpravaSpojeni();
-            spravaSpojeni.ShowDialog();
-        }
-
         private void spravaFyzickychOsobToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SpravaFyzickzchOsob sp = new SpravaFyzickzchOsob();
@@ -1165,29 +1212,91 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = "SELECT * FROM SPLNENE_OBJEDNAVKY_VIEW";
-                    using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
-                    {
-                        DataTable dt = new DataTable();
-                        adapter.Fill(dt);
-                        dataGridView1.DataSource = dt;
 
-                        dataGridView1.Columns["Klient_Name"].HeaderText = "Klient";
-                        dataGridView1.Columns["Stav_Objednavky"].HeaderText = "Stav Objednávky";
-                        dataGridView1.Columns["Datum_Objednavky"].HeaderText = "Datum Objednávky";
-                        dataGridView1.Columns["Datum_Dodani"].HeaderText = "Datum Dodání";
+                    if (UserSession.Role != "Admin")
+                    {
+                        query += " WHERE KLIENT_ID = :loggedInClientId";
+                    }
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        if (UserSession.Role != "Admin")
+                        {
+                            cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
+                        }
+
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            adapter.Fill(dt);
+                            dataGridView1.DataSource = dt;
+
+                            dataGridView1.Columns["Klient_Name"].HeaderText = "Klient";
+                            dataGridView1.Columns["Stav_Objednavky"].HeaderText = "Stav Objednávky";
+                            dataGridView1.Columns["Datum_Objednavky"].HeaderText = "Datum Objednávky";
+                            dataGridView1.Columns["Datum_Dodani"].HeaderText = "Datum Dodání";
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading orders: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error loading completed orders: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
         }
 
         private void spravaVyrobyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SpravceVyroby spravceVyroby = new SpravceVyroby();
             spravceVyroby.ShowDialog();
+        }
+
+        private void btnLogs_Click(object sender, EventArgs e)
+        {
+            string query = "SELECT * FROM LOG_TABLE_VIEW";
+
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
+                    {
+                        DataTable logTable = new DataTable();
+                        adapter.Fill(logTable);
+
+                        logTable.Columns["Log ID"].ColumnName = "ID Záznamu";
+                        logTable.Columns["Table"].ColumnName = "Tabulka";
+                        logTable.Columns["Operation"].ColumnName = "Operace";
+                        logTable.Columns["Timestamp"].ColumnName = "Čas";
+                        logTable.Columns["User"].ColumnName = "Uživatel";
+                        logTable.Columns["Details"].ColumnName = "Podrobnosti";
+
+                        dataGridView1.DataSource = logTable;
+
+                        if (dataGridView1.Columns["ID Záznamu"] != null)
+                        {
+                            dataGridView1.Columns["ID Záznamu"].Visible = false;
+                        }
+
+                        if (dataGridView1.Columns["Uživatel"] != null)
+                        {
+                            dataGridView1.Columns["Uživatel"].Visible = false;
+                        }
+
+                        if (dataGridView1.Columns["Podrobnosti"] != null)
+                        {
+                            dataGridView1.Columns["Podrobnosti"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading log data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }

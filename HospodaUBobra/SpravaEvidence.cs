@@ -97,11 +97,27 @@ namespace HospodaUBobra
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
+                bool isAdmin = false;
+                if(UserSession.Role == "Admin")
+                {
+                    isAdmin = true;
+                }
+                else
+                {
+                    isAdmin= false;
+                }
+
                 try
                 {
                     conn.Open();
 
-                    string query = @"
+                    // Determine whether the user is an admin or a client
+                    string query;
+
+                    if (isAdmin)
+                    {
+                        // Admins see all evidence
+                        query = @"
                 SELECT 
                     e.ID_EVIDENCE,
                     e.MNOZSTVI,
@@ -120,35 +136,72 @@ namespace HospodaUBobra
                     OBJEDNAVKY o ON e.OBJEDNAVKA_ID_OBJEDNAVKY1 = o.ID_OBJEDNAVKY
                 LEFT JOIN 
                     KLIENTI k ON o.KLIENT_ID = k.ID_KLIENTA";
+                    }
+                    else
+                    {
+                        // Clients see only their evidence
+                        query = @"
+                SELECT 
+                    e.ID_EVIDENCE,
+                    e.MNOZSTVI,
+                    e.DATUM_OBJEDNAVKY,
+                    p.NAZEV AS BEER_NAME,
+                    u.NAZEV AS UNIT_NAME,
+                    e.CENA_OBJEDNAVKY,
+                    k.EMAIL AS CLIENT_EMAIL
+                FROM 
+                    EVIDENCE e
+                LEFT JOIN 
+                    PIVA p ON e.PIVO_ID_PIVA = p.ID_PIVA
+                LEFT JOIN 
+                    JEDNOTKY_OBJ u ON e.JEDNOTKA_OBJ_ID_JEDN_OBJ = u.ID_JEDN_OBJ
+                LEFT JOIN 
+                    OBJEDNAVKY o ON e.OBJEDNAVKA_ID_OBJEDNAVKY1 = o.ID_OBJEDNAVKY
+                LEFT JOIN 
+                    KLIENTI k ON o.KLIENT_ID = k.ID_KLIENTA
+                WHERE 
+                    k.ID_KLIENTA = :userID"; // Filter by the logged-in client's ID
+                    }
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
-                    using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                     {
-                        DataTable dataTable = new DataTable();
-                        adapter.Fill(dataTable);
-
-                        dgvEvidence.DataSource = dataTable;
-
-                        dgvEvidence.Columns["ID_EVIDENCE"].HeaderText = "Evidence ID";
-                        dgvEvidence.Columns["MNOZSTVI"].HeaderText = "Quantity";
-                        dgvEvidence.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Order Date";
-                        dgvEvidence.Columns["BEER_NAME"].HeaderText = "Beer Name";
-                        dgvEvidence.Columns["UNIT_NAME"].HeaderText = "Unit Name";
-                        dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Order Price";
-                        dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Client Email";
-
-                        if (dgvEvidence.Columns.Contains("ID_EVIDENCE"))
+                        if (!isAdmin)
                         {
-                            dgvEvidence.Columns["ID_EVIDENCE"].Visible = false;
+                            // Add parameter for client ID if the user is not an admin
+                            cmd.Parameters.Add(new OracleParameter(":userID", OracleDbType.Int32)).Value = UserSession.UserID;
+                        }
+
+                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            dgvEvidence.DataSource = dataTable;
+
+                            // Update column headers
+                            dgvEvidence.Columns["ID_EVIDENCE"].HeaderText = "Evidence ID";
+                            dgvEvidence.Columns["MNOZSTVI"].HeaderText = "Quantity";
+                            dgvEvidence.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Order Date";
+                            dgvEvidence.Columns["BEER_NAME"].HeaderText = "Beer Name";
+                            dgvEvidence.Columns["UNIT_NAME"].HeaderText = "Unit Name";
+                            dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Order Price";
+                            dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Client Email";
+
+                            // Hide ID_EVIDENCE column
+                            if (dgvEvidence.Columns.Contains("ID_EVIDENCE"))
+                            {
+                                dgvEvidence.Columns["ID_EVIDENCE"].Visible = false;
+                            }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading evidence data: " + ex.Message);
+                    MessageBox.Show("Error loading evidence data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+
 
 
         private void CalculateOrderPrice()
