@@ -42,6 +42,7 @@
             btnUpdate = new Button();
             btnAdd = new Button();
             label5 = new Label();
+            btnDeleteCancelledOrders = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvOrders).BeginInit();
             SuspendLayout();
             // 
@@ -170,11 +171,22 @@
             label5.TabIndex = 25;
             label5.Text = "Správce Objednávek";
             // 
+            // btnDeleteCancelledOrders
+            // 
+            btnDeleteCancelledOrders.Location = new Point(365, 12);
+            btnDeleteCancelledOrders.Name = "btnDeleteCancelledOrders";
+            btnDeleteCancelledOrders.Size = new Size(100, 38);
+            btnDeleteCancelledOrders.TabIndex = 26;
+            btnDeleteCancelledOrders.Text = "Smazat zrušené objednávky";
+            btnDeleteCancelledOrders.UseVisualStyleBackColor = true;
+            btnDeleteCancelledOrders.Click += btnDeleteCancelledOrders_Click;
+            // 
             // SpravaObjednavek
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(477, 464);
+            Controls.Add(btnDeleteCancelledOrders);
             Controls.Add(label5);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
@@ -212,5 +224,6 @@
         private Button btnUpdate;
         private Button btnAdd;
         private Label label5;
+        private Button btnDeleteCancelledOrders;
     }
 }

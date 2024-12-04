@@ -39,6 +39,8 @@ namespace HospodaUBobra
             PopulateTableList();
             btnLogout.Enabled = false;
             currentUserLabel.Text = "Anonymous";
+
+            dataGridView1.ReadOnly = true;
         }
 
 
@@ -686,36 +688,8 @@ namespace HospodaUBobra
 
         private void zobrazitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                using (OracleConnection conn = new OracleConnection(connectionString))
-                {
-                    conn.Open();
-
-                    string query = "SELECT * FROM hierarchie";
-
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
-                    {
-                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
-                        {
-                            DataTable dataTable = new DataTable();
-                            adapter.Fill(dataTable);
-
-                            dataGridView1.DataSource = dataTable;
-                        }
-                    }
-
-                    conn.Close();
-                }
-            }
-            catch (OracleException ex)
-            {
-                MessageBox.Show("Oracle error: " + ex.Message);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("General error: " + ex.Message);
-            }
+            SpravaPozicePracovnika spravaPozicePracovnika = new SpravaPozicePracovnika();
+            spravaPozicePracovnika.ShowDialog();
         }
 
         private void spravovatToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1140,6 +1114,80 @@ namespace HospodaUBobra
         {
             SpravaFyzickzchOsob sp = new SpravaFyzickzchOsob();
             sp.ShowDialog();
+        }
+
+        private void prideleniToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaPracovniku spravaPracovniku = new SpravaPracovniku();
+            spravaPracovniku.ShowDialog();
+        }
+
+        private void smazaneRecenzeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM SMAZANE_RECENZE_VIEW";
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+                        dataGridView1.DataSource = dt;
+
+                        dataGridView1.Columns["Title"].HeaderText = "Název";
+                        dataGridView1.Columns["Review_Text"].HeaderText = "Text Recenze";
+                        dataGridView1.Columns["Brewery_Name"].HeaderText = "Pivovar";
+                        dataGridView1.Columns["Beer_Name"].HeaderText = "Pivo";
+                        dataGridView1.Columns["Deleted_On"].HeaderText = "Smazáno Dne";
+
+                        if (dataGridView1.Columns["Deleted_On"] != null)
+                        {
+                            dataGridView1.Columns["Deleted_On"].DefaultCellStyle.Format = "yyyy-MM-dd HH:mm:ss";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading reviews: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void splneneObjednavkyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM SPLNENE_OBJEDNAVKY_VIEW";
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+                        dataGridView1.DataSource = dt;
+
+                        dataGridView1.Columns["Klient_Name"].HeaderText = "Klient";
+                        dataGridView1.Columns["Stav_Objednavky"].HeaderText = "Stav Objednávky";
+                        dataGridView1.Columns["Datum_Objednavky"].HeaderText = "Datum Objednávky";
+                        dataGridView1.Columns["Datum_Dodani"].HeaderText = "Datum Dodání";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading orders: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void spravaVyrobyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravceVyroby spravceVyroby = new SpravceVyroby();
+            spravceVyroby.ShowDialog();
         }
     }
 }

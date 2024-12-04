@@ -365,5 +365,36 @@ namespace HospodaUBobra
             dtpOrderDate.Value = DateTime.Now;
             dtpDeliveryDate.Value = DateTime.Now;
         }
-    }
+
+        private void btnDeleteCancelledOrders_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("DeleteOrdersAndItems", conn))
+                    {
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                        cmd.ExecuteNonQuery();
+
+                        MessageBox.Show("Zrušené objednávky a jejich evidence úspěšně odstraněna.",
+                                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Chyba při spojování s databází: " + ex.Message,
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Neočekávaná chyba: " + ex.Message,
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }    
 }
