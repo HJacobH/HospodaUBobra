@@ -43,6 +43,7 @@
             btnAdd = new Button();
             label5 = new Label();
             btnDeleteCancelledOrders = new Button();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvOrders).BeginInit();
             SuspendLayout();
             // 
@@ -115,9 +116,9 @@
             // dgvOrders
             // 
             dgvOrders.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvOrders.Location = new Point(14, 169);
+            dgvOrders.Location = new Point(14, 192);
             dgvOrders.Name = "dgvOrders";
-            dgvOrders.Size = new Size(444, 251);
+            dgvOrders.Size = new Size(444, 228);
             dgvOrders.TabIndex = 8;
             dgvOrders.SelectionChanged += dgvOrders_SelectionChanged;
             // 
@@ -181,11 +182,20 @@
             btnDeleteCancelledOrders.UseVisualStyleBackColor = true;
             btnDeleteCancelledOrders.Click += btnDeleteCancelledOrders_Click;
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(14, 163);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(444, 23);
+            txtSearch.TabIndex = 27;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaObjednavek
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(477, 464);
+            Controls.Add(txtSearch);
             Controls.Add(btnDeleteCancelledOrders);
             Controls.Add(label5);
             Controls.Add(btnBack);
@@ -225,5 +235,6 @@
         private Button btnAdd;
         private Label label5;
         private Button btnDeleteCancelledOrders;
+        private TextBox txtSearch;
     }
 }

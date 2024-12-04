@@ -70,6 +70,7 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+                        DataGridViewFilterHelper.BindData(dgvTableData, dt);
                         dgvTableData.DataSource = dt;
                     }
                 }
@@ -107,7 +108,7 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
                     cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = GetNextIdForTable(selectedTable);
                     cmd.Parameters.Add("p_value", OracleDbType.Varchar2).Value = txtAktualni.Text;
 
@@ -137,7 +138,7 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1; 
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1;
                     cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = id;
                     cmd.Parameters.Add("p_value", OracleDbType.Varchar2).Value = txtAktualni.Text;
 
@@ -282,6 +283,11 @@ namespace HospodaUBobra
                 var selectedValue = dgvTableData.CurrentRow.Cells[1].Value.ToString();
                 txtAktualni.Text = selectedValue;
             }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvTableData, txtSearch);
         }
     }
 }

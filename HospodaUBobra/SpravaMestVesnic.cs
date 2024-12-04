@@ -55,6 +55,7 @@ namespace HospodaUBobra
                         DataTable dataTable = new DataTable();
                         adapter.Fill(dataTable);
 
+                        DataGridViewFilterHelper.BindData(dgvMestaVesnice, dataTable);
                         dgvMestaVesnice.DataSource = dataTable;
 
                         if (dgvMestaVesnice.Columns.Contains("Town_ID"))
@@ -97,8 +98,8 @@ namespace HospodaUBobra
                         }
 
                         cbKraje.DataSource = kraje;
-                        cbKraje.DisplayMember = "Item2"; 
-                        cbKraje.ValueMember = "Item1"; 
+                        cbKraje.DisplayMember = "Item2";
+                        cbKraje.ValueMember = "Item1";
                     }
                 }
                 catch (Exception ex)
@@ -129,8 +130,8 @@ namespace HospodaUBobra
                         }
 
                         cbOkresy.DataSource = okresy;
-                        cbOkresy.DisplayMember = "Item2"; 
-                        cbOkresy.ValueMember = "Item1"; 
+                        cbOkresy.DisplayMember = "Item2";
+                        cbOkresy.ValueMember = "Item1";
                     }
                 }
                 catch (Exception ex)
@@ -144,7 +145,7 @@ namespace HospodaUBobra
         {
             if (!ValidateInputs())
             {
-                return; 
+                return;
             }
 
             int pocetObyvatel = int.Parse(txtPocetObyvatel.Text);
@@ -164,7 +165,7 @@ namespace HospodaUBobra
 
             if (!ValidateInputs())
             {
-                return; 
+                return;
             }
 
             int pocetObyvatel = int.Parse(txtPocetObyvatel.Text);
@@ -199,7 +200,7 @@ namespace HospodaUBobra
                             cmd.ExecuteNonQuery();
 
                             MessageBox.Show("Město/Vesnice odstraněna úspěšně!");
-                            LoadMestaVesniceData(); 
+                            LoadMestaVesniceData();
                             ClearFormFields();
                             selectedMestoId = -1;
                         }
@@ -318,5 +319,9 @@ namespace HospodaUBobra
             return true;
         }
 
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvMestaVesnice, txtSearch);
+        }
     }
 }

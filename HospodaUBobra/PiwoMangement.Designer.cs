@@ -48,6 +48,7 @@
             btnDelete = new Button();
             dgvPiva = new DataGridView();
             label8 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvPiva).BeginInit();
             SuspendLayout();
             // 
@@ -224,11 +225,20 @@
             label8.TabIndex = 19;
             label8.Text = "Správce Piv";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(227, 210);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(305, 23);
+            txtSearch.TabIndex = 20;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // PiwoMangement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(544, 498);
+            Controls.Add(txtSearch);
             Controls.Add(label8);
             Controls.Add(dgvPiva);
             Controls.Add(btnDelete);
@@ -278,5 +288,6 @@
         private Button btnDelete;
         private DataGridView dgvPiva;
         private Label label8;
+        private TextBox txtSearch;
     }
 }

@@ -38,6 +38,7 @@
             btnDelete = new Button();
             btnUpdate = new Button();
             btnAdd = new Button();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridViewPracovnici).BeginInit();
             SuspendLayout();
             // 
@@ -88,9 +89,9 @@
             // dataGridViewPracovnici
             // 
             dataGridViewPracovnici.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewPracovnici.Location = new Point(12, 109);
+            dataGridViewPracovnici.Location = new Point(12, 133);
             dataGridViewPracovnici.Name = "dataGridViewPracovnici";
-            dataGridViewPracovnici.Size = new Size(346, 306);
+            dataGridViewPracovnici.Size = new Size(346, 282);
             dataGridViewPracovnici.TabIndex = 5;
             dataGridViewPracovnici.SelectionChanged += dataGridViewPracovnici_SelectionChanged;
             // 
@@ -134,11 +135,20 @@
             btnAdd.UseVisualStyleBackColor = true;
             btnAdd.Click += btnAdd_Click;
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 104);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(346, 23);
+            txtSearch.TabIndex = 14;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaPracovniku
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(370, 450);
+            Controls.Add(txtSearch);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
@@ -168,5 +178,6 @@
         private Button btnDelete;
         private Button btnUpdate;
         private Button btnAdd;
+        private TextBox txtSearch;
     }
 }

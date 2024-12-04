@@ -44,6 +44,7 @@
             btnUpdate = new Button();
             btnDelete = new Button();
             label6 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).BeginInit();
             SuspendLayout();
             // 
@@ -152,9 +153,9 @@
             // dataGridViewUsers
             // 
             dataGridViewUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewUsers.Location = new Point(12, 217);
+            dataGridViewUsers.Location = new Point(12, 223);
             dataGridViewUsers.Name = "dataGridViewUsers";
-            dataGridViewUsers.Size = new Size(549, 268);
+            dataGridViewUsers.Size = new Size(549, 262);
             dataGridViewUsers.TabIndex = 12;
             dataGridViewUsers.SelectionChanged += dataGridViewUsers_SelectionChanged;
             // 
@@ -188,11 +189,20 @@
             label6.TabIndex = 15;
             label6.Text = "Správce uživatelů";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 194);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(549, 23);
+            txtSearch.TabIndex = 16;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // CreateUser
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(573, 522);
+            Controls.Add(txtSearch);
             Controls.Add(label6);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
@@ -234,5 +244,6 @@
         private Button btnUpdate;
         private Button btnDelete;
         private Label label6;
+        private TextBox txtSearch;
     }
 }

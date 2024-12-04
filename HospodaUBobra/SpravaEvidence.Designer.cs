@@ -35,7 +35,6 @@
             label5 = new Label();
             txtQuantity = new TextBox();
             txtOrderPrice = new TextBox();
-            txtOrderId = new TextBox();
             cbUnit = new ComboBox();
             cbBeer = new ComboBox();
             dtpOrderDate = new DateTimePicker();
@@ -46,6 +45,8 @@
             btnBack = new Button();
             btnClear = new Button();
             label6 = new Label();
+            txtSearch = new TextBox();
+            txtOrderId = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvEvidence).BeginInit();
             SuspendLayout();
             // 
@@ -110,14 +111,6 @@
             txtOrderPrice.Size = new Size(119, 23);
             txtOrderPrice.TabIndex = 7;
             // 
-            // txtOrderId
-            // 
-            txtOrderId.Location = new Point(131, 191);
-            txtOrderId.Name = "txtOrderId";
-            txtOrderId.Size = new Size(119, 23);
-            txtOrderId.TabIndex = 8;
-            txtOrderId.Visible = false;
-            // 
             // cbUnit
             // 
             cbUnit.FormattingEnabled = true;
@@ -145,9 +138,9 @@
             // dgvEvidence
             // 
             dgvEvidence.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvEvidence.Location = new Point(16, 185);
+            dgvEvidence.Location = new Point(16, 220);
             dgvEvidence.Name = "dgvEvidence";
-            dgvEvidence.Size = new Size(458, 310);
+            dgvEvidence.Size = new Size(458, 275);
             dgvEvidence.TabIndex = 12;
             dgvEvidence.SelectionChanged += dgvEvidence_SelectionChanged;
             // 
@@ -211,11 +204,28 @@
             label6.TabIndex = 18;
             label6.Text = "Správce Evidence";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(16, 191);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(458, 23);
+            txtSearch.TabIndex = 19;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
+            // txtOrderId
+            // 
+            txtOrderId.Location = new Point(296, 143);
+            txtOrderId.Name = "txtOrderId";
+            txtOrderId.Size = new Size(100, 23);
+            txtOrderId.TabIndex = 20;
+            // 
             // SpravaEvidence
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(486, 531);
+            Controls.Add(txtOrderId);
+            Controls.Add(txtSearch);
             Controls.Add(label6);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
@@ -226,7 +236,6 @@
             Controls.Add(dtpOrderDate);
             Controls.Add(cbBeer);
             Controls.Add(cbUnit);
-            Controls.Add(txtOrderId);
             Controls.Add(txtOrderPrice);
             Controls.Add(txtQuantity);
             Controls.Add(label5);
@@ -250,7 +259,6 @@
         private Label label5;
         private TextBox txtQuantity;
         private TextBox txtOrderPrice;
-        private TextBox txtOrderId;
         private ComboBox cbUnit;
         private ComboBox cbBeer;
         private DateTimePicker dtpOrderDate;
@@ -261,5 +269,7 @@
         private Button btnBack;
         private Button btnClear;
         private Label label6;
+        private TextBox txtSearch;
+        private TextBox txtOrderId;
     }
 }

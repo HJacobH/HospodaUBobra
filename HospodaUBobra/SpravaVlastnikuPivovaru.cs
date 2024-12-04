@@ -111,6 +111,7 @@ namespace HospodaUBobra
                         DataTable ownersTable = new DataTable();
                         adapter.Fill(ownersTable);
 
+                        DataGridViewFilterHelper.BindData(dgvOwners, ownersTable);
                         dgvOwners.DataSource = ownersTable;
 
                         // Set column headers
@@ -338,7 +339,7 @@ namespace HospodaUBobra
             cbMestoVesnice.SelectedIndex = -1;
             cbDruhVlastnika.SelectedIndex = -1;
 
-            selectedOwnerId = -1; 
+            selectedOwnerId = -1;
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -422,9 +423,9 @@ namespace HospodaUBobra
         {
             var druhVlastnikaAudit = new List<Tuple<string, string>>()
             {
-                new Tuple<string, string>("", "All (No Filter)"), 
-                new Tuple<string, string>("FO", "Physical Person"), 
-                new Tuple<string, string>("PO", "Legal Person") 
+                new Tuple<string, string>("", "All (No Filter)"),
+                new Tuple<string, string>("FO", "Physical Person"),
+                new Tuple<string, string>("PO", "Legal Person")
             };
 
             cbDruhVlastnikaAudit.DataSource = druhVlastnikaAudit;
@@ -456,9 +457,9 @@ namespace HospodaUBobra
                         }
 
                         cbMestaAudit.DataSource = mestaList;
-                        cbMestaAudit.DisplayMember = "Item2"; 
-                        cbMestaAudit.ValueMember = "Item1"; 
-                        cbMestaAudit.SelectedIndex = 0;  
+                        cbMestaAudit.DisplayMember = "Item2";
+                        cbMestaAudit.ValueMember = "Item1";
+                        cbMestaAudit.SelectedIndex = 0;
                     }
                 }
                 catch (Exception ex)
@@ -493,8 +494,8 @@ namespace HospodaUBobra
 
                         cbPivovarAudit.DataSource = pivovarList;
                         cbPivovarAudit.DisplayMember = "Item2";
-                        cbPivovarAudit.ValueMember = "Item1";   
-                        cbPivovarAudit.SelectedIndex = 0;    
+                        cbPivovarAudit.ValueMember = "Item1";
+                        cbPivovarAudit.SelectedIndex = 0;
                     }
                 }
                 catch (Exception ex)
@@ -502,6 +503,11 @@ namespace HospodaUBobra
                     MessageBox.Show("Error loading breweries: " + ex.Message);
                 }
             }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvOwners, txtSearch);
         }
     }
 }

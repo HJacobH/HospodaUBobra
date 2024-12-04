@@ -40,6 +40,7 @@
             btnBack = new Button();
             textBoxNazevPozice = new TextBox();
             label4 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridViewPozice).BeginInit();
             SuspendLayout();
             // 
@@ -90,9 +91,9 @@
             // dataGridViewPozice
             // 
             dataGridViewPozice.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewPozice.Location = new Point(12, 115);
+            dataGridViewPozice.Location = new Point(12, 141);
             dataGridViewPozice.Name = "dataGridViewPozice";
-            dataGridViewPozice.Size = new Size(357, 302);
+            dataGridViewPozice.Size = new Size(357, 276);
             dataGridViewPozice.TabIndex = 5;
             dataGridViewPozice.SelectionChanged += dataGridViewPozice_SelectionChanged;
             // 
@@ -152,11 +153,20 @@
             label4.TabIndex = 11;
             label4.Text = "Vybraná pozice:";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 112);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(357, 23);
+            txtSearch.TabIndex = 12;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaPozicePracovnika
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(381, 450);
+            Controls.Add(txtSearch);
             Controls.Add(label4);
             Controls.Add(textBoxNazevPozice);
             Controls.Add(btnBack);
@@ -190,5 +200,6 @@
         private Button btnBack;
         private TextBox textBoxNazevPozice;
         private Label label4;
+        private TextBox txtSearch;
     }
 }

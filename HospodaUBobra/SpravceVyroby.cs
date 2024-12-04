@@ -87,6 +87,7 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+                        DataGridViewFilterHelper.BindData(dataGridView1, dt);
                         dataGridView1.DataSource = dt;
 
                         // Hide the ID column
@@ -326,6 +327,11 @@ namespace HospodaUBobra
                 // Set selected value for cbPiva
                 cbPiva.SelectedIndex = cbPiva.FindStringExact(selectedRow.Cells["Pivo"].Value.ToString());
             }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dataGridView1, txtSearch);
         }
     }
 }

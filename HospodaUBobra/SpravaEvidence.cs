@@ -51,7 +51,7 @@ namespace HospodaUBobra
 
                         cbBeer.DataSource = beers;
                         cbBeer.DisplayMember = "Item2";
-                        cbBeer.ValueMember = "Item1"; 
+                        cbBeer.ValueMember = "Item1";
                     }
                 }
                 catch (Exception ex)
@@ -82,8 +82,8 @@ namespace HospodaUBobra
                         }
 
                         cbUnit.DataSource = units;
-                        cbUnit.DisplayMember = "Item2"; 
-                        cbUnit.ValueMember = "Item1"; 
+                        cbUnit.DisplayMember = "Item2";
+                        cbUnit.ValueMember = "Item1";
                     }
                 }
                 catch (Exception ex)
@@ -98,13 +98,13 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 bool isAdmin = false;
-                if(UserSession.Role == "Admin")
+                if (UserSession.Role == "Admin")
                 {
                     isAdmin = true;
                 }
                 else
                 {
-                    isAdmin= false;
+                    isAdmin = false;
                 }
 
                 try
@@ -176,6 +176,7 @@ namespace HospodaUBobra
                             DataTable dataTable = new DataTable();
                             adapter.Fill(dataTable);
 
+                            DataGridViewFilterHelper.BindData(dgvEvidence, dataTable);
                             dgvEvidence.DataSource = dataTable;
 
                             // Update column headers
@@ -209,13 +210,13 @@ namespace HospodaUBobra
             if (cbBeer.SelectedItem is Tuple<int, string, decimal> selectedBeer && int.TryParse(txtQuantity.Text, out int quantity))
             {
                 decimal pricePerUnit = selectedBeer.Item3;
-                txtOrderPrice.Text = (pricePerUnit * quantity).ToString("F2"); 
+                txtOrderPrice.Text = (pricePerUnit * quantity).ToString("F2");
             }
         }
 
         private void txtQuantity_TextChanged(object sender, EventArgs e)
         {
-            CalculateOrderPrice(); 
+            CalculateOrderPrice();
         }
 
         private void dgvEvidence_SelectionChanged(object sender, EventArgs e)
@@ -314,8 +315,8 @@ namespace HospodaUBobra
                             {
                                 MessageBox.Show("Evidence record deleted successfully!");
                                 LoadEvidenceData();
-                                selectedEvidenceId = -1; 
-                                ClearFormFields(); 
+                                selectedEvidenceId = -1;
+                                ClearFormFields();
                             }
                             else
                             {
@@ -406,7 +407,7 @@ namespace HospodaUBobra
             {
                 decimal pricePerUnit = selectedBeer.Item3;
                 decimal totalPrice = pricePerUnit * quantity;
-                txtOrderPrice.Text = totalPrice.ToString("F2"); 
+                txtOrderPrice.Text = totalPrice.ToString("F2");
             }
             else
             {
@@ -448,13 +449,12 @@ namespace HospodaUBobra
                 return false;
             }
 
-            if (!int.TryParse(txtOrderId.Text.Trim(), out int orderId) || orderId <= 0)
-            {
-                errorMessage = "Prosím, zadejte platné ID objednávky (celé číslo větší než nula).";
-                return false;
-            }
-
             return true;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvEvidence, txtSearch);
         }
     }
 }

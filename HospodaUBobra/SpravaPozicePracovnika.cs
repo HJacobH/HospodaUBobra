@@ -38,6 +38,7 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+                        DataGridViewFilterHelper.BindData(dataGridViewPozice, dt);
                         dataGridViewPozice.DataSource = dt;
 
                         dataGridViewPozice.Columns["ID_POZICE"].Visible = false;
@@ -91,8 +92,8 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
-                        cmd.Parameters.Add("p_id_pozice", OracleDbType.Int32).Value = GetNextPoziceId(conn); 
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
+                        cmd.Parameters.Add("p_id_pozice", OracleDbType.Int32).Value = GetNextPoziceId(conn);
                         cmd.Parameters.Add("p_nazev_pozice", OracleDbType.Varchar2).Value = nazevPozice;
                         cmd.Parameters.Add("p_parent_id", OracleDbType.Int32).Value = DBNull.Value;
 
@@ -100,7 +101,7 @@ namespace HospodaUBobra
 
                         MessageBox.Show("Nová pozice byla úspěšně přidána.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         textBoxNazevPozice.Clear();
-                        LoadData(); 
+                        LoadData();
                     }
                 }
                 catch (Exception ex)
@@ -247,6 +248,11 @@ namespace HospodaUBobra
             {
                 return Convert.ToInt32(cmd.ExecuteScalar());
             }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dataGridViewPozice, txtSearch);
         }
     }
 }

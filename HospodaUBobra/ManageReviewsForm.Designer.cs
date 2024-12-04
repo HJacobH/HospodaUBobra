@@ -51,6 +51,7 @@
             button1 = new Button();
             cbHodnoceni = new ComboBox();
             label9 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridViewReviews).BeginInit();
             SuspendLayout();
             // 
@@ -120,7 +121,7 @@
             txtReviewText.Location = new Point(112, 155);
             txtReviewText.Multiline = true;
             txtReviewText.Name = "txtReviewText";
-            txtReviewText.Size = new Size(442, 90);
+            txtReviewText.Size = new Size(442, 64);
             txtReviewText.TabIndex = 7;
             // 
             // label4
@@ -262,11 +263,20 @@
             label9.TabIndex = 23;
             label9.Text = "Počet Hvězdiček:";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(112, 225);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(442, 23);
+            txtSearch.TabIndex = 24;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // ManageReviewsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(566, 537);
+            Controls.Add(txtSearch);
             Controls.Add(label9);
             Controls.Add(cbHodnoceni);
             Controls.Add(button1);
@@ -322,5 +332,6 @@
         private Button button1;
         private ComboBox cbHodnoceni;
         private Label label9;
+        private TextBox txtSearch;
     }
 }

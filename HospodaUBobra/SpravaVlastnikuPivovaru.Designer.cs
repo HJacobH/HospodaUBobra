@@ -59,6 +59,7 @@
             label11 = new Label();
             label12 = new Label();
             label13 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvOwners).BeginInit();
             SuspendLayout();
             // 
@@ -332,11 +333,20 @@
             label13.TabIndex = 42;
             label13.Text = "Filtrace vlastníků";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(314, 258);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(298, 23);
+            txtSearch.TabIndex = 43;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaVlastnikuPivovaru
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 624);
+            Controls.Add(txtSearch);
             Controls.Add(label13);
             Controls.Add(label12);
             Controls.Add(label11);
@@ -408,5 +418,6 @@
         private Label label11;
         private Label label12;
         private Label label13;
+        private TextBox txtSearch;
     }
 }

@@ -51,6 +51,7 @@
             label8 = new Label();
             btnClear = new Button();
             label9 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvKlienti).BeginInit();
             SuspendLayout();
             // 
@@ -77,9 +78,9 @@
             // dgvKlienti
             // 
             dgvKlienti.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvKlienti.Location = new Point(10, 270);
+            dgvKlienti.Location = new Point(10, 299);
             dgvKlienti.Name = "dgvKlienti";
-            dgvKlienti.Size = new Size(549, 274);
+            dgvKlienti.Size = new Size(549, 245);
             dgvKlienti.TabIndex = 27;
             dgvKlienti.SelectionChanged += dataGridViewUsers_SelectionChanged;
             // 
@@ -253,11 +254,20 @@
             label9.TabIndex = 39;
             label9.Text = "Správce Klientů";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 270);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(547, 23);
+            txtSearch.TabIndex = 40;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaKlientu
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(571, 590);
+            Controls.Add(txtSearch);
             Controls.Add(label9);
             Controls.Add(btnClear);
             Controls.Add(label8);
@@ -313,5 +323,6 @@
         private Label label8;
         private Button btnClear;
         private Label label9;
+        private TextBox txtSearch;
     }
 }

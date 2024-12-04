@@ -70,6 +70,7 @@ namespace HospodaUBobra
                             DataTable ordersTable = new DataTable();
                             adapter.Fill(ordersTable);
 
+                            DataGridViewFilterHelper.BindData(dgvOrders, ordersTable);
                             dgvOrders.DataSource = ordersTable;
 
                             // Set column headers
@@ -397,5 +398,10 @@ namespace HospodaUBobra
                                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-    }    
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvOrders, txtSearch);
+        }
+    }
 }

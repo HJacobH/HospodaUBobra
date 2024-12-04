@@ -62,6 +62,7 @@ namespace HospodaUBobra
                         DataTable dataTable = new DataTable();
                         adapter.Fill(dataTable);
 
+                        DataGridViewFilterHelper.BindData(dgvPiva, dataTable);
                         dgvPiva.DataSource = dataTable;
 
                         // Rename column headers for clarity
@@ -91,9 +92,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
-
 
         private void LoadPackagingOptions()
         {
@@ -249,8 +247,8 @@ namespace HospodaUBobra
                         if (rowsAffected > 0)
                         {
                             MessageBox.Show("Pivo odstraněno úspěšně!");
-                            LoadPivaData(); 
-                            selectedBeerId = -1; 
+                            LoadPivaData();
+                            selectedBeerId = -1;
                             LoadPivaData();
                         }
                         else
@@ -268,7 +266,7 @@ namespace HospodaUBobra
                     MessageBox.Show("Chyba: " + ex.Message);
                 }
             }
-        }    
+        }
 
         private void dgvPiva_SelectionChanged(object sender, EventArgs e)
         {
@@ -353,6 +351,11 @@ namespace HospodaUBobra
             }
 
             return true;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvPiva, txtSearch);
         }
     }
 }

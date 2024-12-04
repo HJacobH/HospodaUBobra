@@ -40,6 +40,7 @@
             btnDelete = new Button();
             btnBack = new Button();
             label4 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvFyzickeOsoby).BeginInit();
             SuspendLayout();
             // 
@@ -95,15 +96,15 @@
             // dgvFyzickeOsoby
             // 
             dgvFyzickeOsoby.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvFyzickeOsoby.Location = new Point(12, 122);
+            dgvFyzickeOsoby.Location = new Point(11, 158);
             dgvFyzickeOsoby.Name = "dgvFyzickeOsoby";
-            dgvFyzickeOsoby.Size = new Size(318, 212);
+            dgvFyzickeOsoby.Size = new Size(318, 237);
             dgvFyzickeOsoby.TabIndex = 6;
             dgvFyzickeOsoby.SelectionChanged += dgvFyzickeOsoby_SelectionChanged;
             // 
             // btnAdd
             // 
-            btnAdd.Location = new Point(12, 340);
+            btnAdd.Location = new Point(11, 401);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(75, 28);
             btnAdd.TabIndex = 7;
@@ -113,7 +114,7 @@
             // 
             // btnUpdate
             // 
-            btnUpdate.Location = new Point(93, 340);
+            btnUpdate.Location = new Point(92, 401);
             btnUpdate.Name = "btnUpdate";
             btnUpdate.Size = new Size(75, 28);
             btnUpdate.TabIndex = 8;
@@ -123,7 +124,7 @@
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(174, 340);
+            btnDelete.Location = new Point(173, 401);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(75, 28);
             btnDelete.TabIndex = 9;
@@ -133,7 +134,7 @@
             // 
             // btnBack
             // 
-            btnBack.Location = new Point(258, 340);
+            btnBack.Location = new Point(257, 401);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(75, 28);
             btnBack.TabIndex = 10;
@@ -151,11 +152,20 @@
             label4.TabIndex = 11;
             label4.Text = "Správce Fyzických Osob";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 129);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(317, 23);
+            txtSearch.TabIndex = 12;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaFyzickzchOsob
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(345, 374);
+            ClientSize = new Size(345, 441);
+            Controls.Add(txtSearch);
             Controls.Add(label4);
             Controls.Add(btnBack);
             Controls.Add(btnDelete);
@@ -189,5 +199,6 @@
         private Button btnDelete;
         private Button btnBack;
         private Label label4;
+        private TextBox txtSearch;
     }
 }

@@ -82,6 +82,7 @@ namespace HospodaUBobra
                         DataTable klientiTable = new DataTable();
                         adapter.Fill(klientiTable);
 
+                        DataGridViewFilterHelper.BindData(dgvKlienti, klientiTable);
                         dgvKlienti.DataSource = klientiTable;
 
                         if (dgvKlienti.Columns.Contains("ID_KLIENTA"))
@@ -125,7 +126,7 @@ namespace HospodaUBobra
             int druhPodnikuId = cbDruhPodniku.SelectedValue != null ? Convert.ToInt32(cbDruhPodniku.SelectedValue) : -1;
             int? profilovyObrazekId = null;
             DateTime datumRegistrace = DateTime.Now;
-            int roleId = 2; 
+            int roleId = 2;
 
             string defaultPassword = "DefaultPassword123";
             string salt = PasswordHelper.GenerateSalt();
@@ -155,8 +156,8 @@ namespace HospodaUBobra
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Klient úspěšně vytvořen!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadKlienti(); 
-                        ClearFields(); 
+                        LoadKlienti();
+                        ClearFields();
                     }
                 }
                 catch (OracleException ex)
@@ -410,6 +411,11 @@ namespace HospodaUBobra
             txtTelefon.Clear();
             dtpDatumRegistrace.Value = DateTime.Now;
             cbDruhPodniku.SelectedIndex = -1;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvKlienti, txtSearch);
         }
     }
 }

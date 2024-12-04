@@ -49,6 +49,7 @@
             cbPozice = new ComboBox();
             cbPoziceSalary = new ComboBox();
             btnIncrease = new Button();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvZamestnanci).BeginInit();
             SuspendLayout();
             // 
@@ -160,9 +161,9 @@
             // dgvZamestnanci
             // 
             dgvZamestnanci.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvZamestnanci.Location = new Point(15, 235);
+            dgvZamestnanci.Location = new Point(15, 264);
             dgvZamestnanci.Name = "dgvZamestnanci";
-            dgvZamestnanci.Size = new Size(579, 296);
+            dgvZamestnanci.Size = new Size(579, 267);
             dgvZamestnanci.TabIndex = 14;
             dgvZamestnanci.SelectionChanged += dgvZamestnanci_SelectionChanged;
             // 
@@ -232,11 +233,20 @@
             btnIncrease.UseVisualStyleBackColor = true;
             btnIncrease.Click += btnIncrease_Click;
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(15, 235);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(579, 23);
+            txtSearch.TabIndex = 22;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // EmplyeeManagement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(606, 575);
+            Controls.Add(txtSearch);
             Controls.Add(btnIncrease);
             Controls.Add(cbPoziceSalary);
             Controls.Add(cbPozice);
@@ -288,5 +298,6 @@
         private ComboBox cbPozice;
         private ComboBox cbPoziceSalary;
         private Button btnIncrease;
+        private TextBox txtSearch;
     }
 }

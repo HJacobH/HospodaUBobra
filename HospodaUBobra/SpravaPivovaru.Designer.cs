@@ -49,6 +49,7 @@
             btnAdd = new Button();
             btnClear = new Button();
             label8 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvBreweries).BeginInit();
             SuspendLayout();
             // 
@@ -100,7 +101,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(16, 252);
+            label6.Location = new Point(16, 221);
             label6.Name = "label6";
             label6.Size = new Size(83, 15);
             label6.TabIndex = 5;
@@ -109,7 +110,7 @@
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(16, 281);
+            label7.Location = new Point(16, 250);
             label7.Name = "label7";
             label7.Size = new Size(87, 15);
             label7.TabIndex = 6;
@@ -127,13 +128,13 @@
             txtPopisAkci.Location = new Point(133, 154);
             txtPopisAkci.Multiline = true;
             txtPopisAkci.Name = "txtPopisAkci";
-            txtPopisAkci.Size = new Size(335, 86);
+            txtPopisAkci.Size = new Size(335, 58);
             txtPopisAkci.TabIndex = 8;
             // 
             // cbDruhPodniku
             // 
             cbDruhPodniku.FormattingEnabled = true;
-            cbDruhPodniku.Location = new Point(133, 249);
+            cbDruhPodniku.Location = new Point(133, 218);
             cbDruhPodniku.Name = "cbDruhPodniku";
             cbDruhPodniku.Size = new Size(121, 23);
             cbDruhPodniku.TabIndex = 9;
@@ -141,7 +142,7 @@
             // cbMestoVesnice
             // 
             cbMestoVesnice.FormattingEnabled = true;
-            cbMestoVesnice.Location = new Point(133, 278);
+            cbMestoVesnice.Location = new Point(133, 247);
             cbMestoVesnice.Name = "cbMestoVesnice";
             cbMestoVesnice.Size = new Size(121, 23);
             cbMestoVesnice.TabIndex = 10;
@@ -239,11 +240,20 @@
             label8.TabIndex = 30;
             label8.Text = "Správce Pivovarů";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(16, 278);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(497, 23);
+            txtSearch.TabIndex = 31;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaPivovaru
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(525, 588);
+            Controls.Add(txtSearch);
             Controls.Add(label8);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
@@ -295,5 +305,6 @@
         private Button btnAdd;
         private Button btnClear;
         private Label label8;
+        private TextBox txtSearch;
     }
 }

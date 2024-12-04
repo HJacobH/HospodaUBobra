@@ -58,7 +58,8 @@ namespace HospodaUBobra
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
-                        adapter.Fill(dt);
+                        adapter.Fill(dt); 
+                        DataGridViewFilterHelper.BindData(dgvZamestnanci, dt);
                         dgvZamestnanci.DataSource = dt;
                     }
                 }
@@ -358,5 +359,9 @@ namespace HospodaUBobra
             return true;
         }
 
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvZamestnanci, txtSearch);
+        }
     }
 }

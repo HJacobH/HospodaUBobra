@@ -69,6 +69,7 @@ namespace HospodaUBobra
                     {
                         DataTable pracovniciTable = new DataTable();
                         adapter.Fill(pracovniciTable);
+                        DataGridViewFilterHelper.BindData(dataGridViewPracovnici, pracovniciTable);
                         dataGridViewPracovnici.DataSource = pracovniciTable;
 
                         // Hide the ID column
@@ -316,6 +317,11 @@ namespace HospodaUBobra
         private void btnBack_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dataGridViewPracovnici, txtSearch);
         }
     }
 }

@@ -40,6 +40,7 @@
             btnAdd = new Button();
             txtLitryZaDen = new TextBox();
             label4 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -90,9 +91,9 @@
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 135);
+            dataGridView1.Location = new Point(12, 162);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(346, 278);
+            dataGridView1.Size = new Size(346, 251);
             dataGridView1.TabIndex = 5;
             dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
             // 
@@ -152,11 +153,20 @@
             label4.TabIndex = 19;
             label4.Text = "Litry za den:";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 134);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(346, 23);
+            txtSearch.TabIndex = 20;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravceVyroby
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(372, 450);
+            Controls.Add(txtSearch);
             Controls.Add(label4);
             Controls.Add(txtLitryZaDen);
             Controls.Add(btnBack);
@@ -190,5 +200,6 @@
         private Button btnAdd;
         private TextBox txtLitryZaDen;
         private Label label4;
+        private TextBox txtSearch;
     }
 }

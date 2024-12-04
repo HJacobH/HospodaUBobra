@@ -45,6 +45,7 @@
             btnAdd = new Button();
             btnClear = new Button();
             label6 = new Label();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvMestaVesnice).BeginInit();
             SuspendLayout();
             // 
@@ -133,9 +134,9 @@
             // dgvMestaVesnice
             // 
             dgvMestaVesnice.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvMestaVesnice.Location = new Point(11, 178);
+            dgvMestaVesnice.Location = new Point(11, 208);
             dgvMestaVesnice.Name = "dgvMestaVesnice";
-            dgvMestaVesnice.Size = new Size(449, 259);
+            dgvMestaVesnice.Size = new Size(449, 229);
             dgvMestaVesnice.TabIndex = 10;
             dgvMestaVesnice.SelectionChanged += dgvMestaVesnice_SelectionChanged;
             // 
@@ -199,11 +200,20 @@
             label6.TabIndex = 22;
             label6.Text = "Správce Měst a Vesnic";
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 179);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(448, 23);
+            txtSearch.TabIndex = 23;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // SpravaMestVesnic
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(472, 474);
+            Controls.Add(txtSearch);
             Controls.Add(label6);
             Controls.Add(btnClear);
             Controls.Add(btnBack);
@@ -247,5 +257,6 @@
         private Button btnAdd;
         private Button btnClear;
         private Label label6;
+        private TextBox txtSearch;
     }
 }

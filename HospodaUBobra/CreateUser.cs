@@ -75,6 +75,7 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+                        DataGridViewFilterHelper.BindData(dataGridViewUsers, dt);
                         dataGridViewUsers.DataSource = dt;
                     }
                 }
@@ -400,6 +401,11 @@ namespace HospodaUBobra
                 int roleIndex = comboBoxRole.Items.IndexOf(roleName);
                 comboBoxRole.SelectedIndex = roleIndex;
             }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dataGridViewUsers, txtSearch);
         }
     }
 }

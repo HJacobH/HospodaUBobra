@@ -80,6 +80,7 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
 
+                        DataGridViewFilterHelper.BindData(dgvFyzickeOsoby, dt);
                         dgvFyzickeOsoby.DataSource = dt;
 
                         dgvFyzickeOsoby.Columns["JMENO_A_PRIJMENI"].HeaderText = "Name and Surname";
@@ -166,7 +167,7 @@ namespace HospodaUBobra
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Fyzická osoba byla aktualizována.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadFyzickeOsoby(); 
+                        LoadFyzickeOsoby();
                     }
                 }
                 catch (Exception ex)
@@ -204,7 +205,7 @@ namespace HospodaUBobra
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Fyzická osoba byla odstraněna.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadFyzickeOsoby(); 
+                        LoadFyzickeOsoby();
                     }
                 }
                 catch (Exception ex)
@@ -260,6 +261,11 @@ namespace HospodaUBobra
             }
 
             return true;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvFyzickeOsoby, txtSearch);
         }
     }
 }

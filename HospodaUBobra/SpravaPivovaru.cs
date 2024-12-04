@@ -68,6 +68,7 @@ namespace HospodaUBobra
                         DataTable breweriesTable = new DataTable();
                         adapter.Fill(breweriesTable);
 
+                        DataGridViewFilterHelper.BindData(dgvBreweries, breweriesTable);
                         dgvBreweries.DataSource = breweriesTable;
 
                         dgvBreweries.Columns["ID_PIVOVARU"].HeaderText = "Brewery ID";
@@ -144,7 +145,7 @@ namespace HospodaUBobra
 
                         cbMestoVesnice.DataSource = mestoVesnice;
                         cbMestoVesnice.DisplayMember = "Item2";
-                        cbMestoVesnice.ValueMember = "Item1";  
+                        cbMestoVesnice.ValueMember = "Item1";
                         cbMestoVesnice.SelectedIndex = -1;
                     }
                 }
@@ -300,7 +301,7 @@ namespace HospodaUBobra
             txtPopisAkci.Clear();
 
             cbRokZalozeni.SelectedIndex = -1;
-            cbProvozProhlidek.SelectedIndex = -1; 
+            cbProvozProhlidek.SelectedIndex = -1;
             cbProvozAkci.SelectedIndex = -1;
             cbDruhPodniku.SelectedIndex = -1;
             cbMestoVesnice.SelectedIndex = -1;
@@ -384,6 +385,11 @@ namespace HospodaUBobra
             }
 
             return true;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dgvBreweries, txtSearch);
         }
     }
 }

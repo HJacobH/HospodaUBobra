@@ -157,6 +157,7 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
 
+                        DataGridViewFilterHelper.BindData(dataGridViewReviews, dt);
                         dataGridViewReviews.DataSource = dt;
 
                         if (dataGridViewReviews.Columns.Contains("id_recenze"))
@@ -248,7 +249,7 @@ namespace HospodaUBobra
                 }
             }
 
-                LoadReviews();
+            LoadReviews();
             MessageBox.Show("Recenze přidána úspěšně!");
         }
 
@@ -563,7 +564,7 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
-
+                        DataGridViewFilterHelper.BindData(dataGridViewReviews, dt);
                         dataGridViewReviews.DataSource = dt;
                     }
                 }
@@ -616,6 +617,11 @@ namespace HospodaUBobra
             }
 
             return true;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            DataGridViewFilterHelper.FilterData(dataGridViewReviews, txtSearch);
         }
     }
 }

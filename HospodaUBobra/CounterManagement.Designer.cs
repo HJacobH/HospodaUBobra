@@ -39,6 +39,7 @@
             btnAdd = new Button();
             btnUpdate = new Button();
             btnDelete = new Button();
+            txtSearch = new TextBox();
             ((System.ComponentModel.ISupportInitialize)dgvTableData).BeginInit();
             SuspendLayout();
             // 
@@ -76,11 +77,11 @@
             // dgvTableData
             // 
             dgvTableData.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvTableData.Location = new Point(8, 65);
+            dgvTableData.Location = new Point(8, 86);
             dgvTableData.Margin = new Padding(2);
             dgvTableData.Name = "dgvTableData";
             dgvTableData.RowHeadersWidth = 62;
-            dgvTableData.Size = new Size(436, 270);
+            dgvTableData.Size = new Size(436, 249);
             dgvTableData.TabIndex = 3;
             dgvTableData.SelectionChanged += dgvTableData_SelectionChanged;
             // 
@@ -150,11 +151,20 @@
             btnDelete.UseVisualStyleBackColor = true;
             btnDelete.Click += btnDelete_Click;
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(12, 58);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(432, 23);
+            txtSearch.TabIndex = 11;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // CounterManagement
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(560, 346);
+            Controls.Add(txtSearch);
             Controls.Add(btnDelete);
             Controls.Add(btnUpdate);
             Controls.Add(btnAdd);
@@ -187,5 +197,6 @@
         private Button btnAdd;
         private Button btnUpdate;
         private Button btnDelete;
+        private TextBox txtSearch;
     }
 }
