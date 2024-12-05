@@ -42,6 +42,10 @@ namespace HospodaUBobra
             btnLogout.Enabled = false;
             currentUserLabel.Text = "Anonymous";
 
+            UserSession.EmulatedRole = null;
+
+            PopulateRoleEmulationDropdown();
+
             dataGridView1.ReadOnly = true;
 
             LoadInitialData();
@@ -202,21 +206,24 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            if (UserSession.Role == "Anonymous")
+            // Determine the current role: actual role or emulated role
+            string currentRole = UserSession.EmulatedRole ?? UserSession.Role;
+
+            if (currentRole == "Anonymous")
             {
-                //Uzivatel
+                // Uzivatel
                 uploadPfpToolStripMenuItem.Visible = false;
                 vytvoritUzivateleToolStripMenuItem.Visible = false;
                 spravaKlientuToolStripMenuItem.Visible = false;
 
-                //Recenze
+                // Recenze
                 smazaneRecenzeToolStripMenuItem.Visible = false;
 
-                //Piva
+                // Piva
                 pridatPivoToolStripMenuItem.Visible = false;
                 nizkyPocetPivToolStripMenuItem.Visible = false;
 
-                //pivovary
+                // Pivovary
                 zamestnanciToolStripMenuItem.Visible = false;
                 vyrobkyToolStripMenuItem.Visible = false;
                 objednavkyToolStripMenuItem1.Visible = false;
@@ -226,43 +233,97 @@ namespace HospodaUBobra
                 spravaVyrobyToolStripMenuItem.Visible = false;
                 topMestaToolStripMenuItem.Visible = false;
 
+                SpravaCiselnikuToolStrip.Visible = false;
+
                 objednavkyToolStripMenuItem.Visible = false;
                 SpravaCiselnikuToolStrip.Visible = false;
 
+                cbEmulace.Visible = false;
                 btnLogs.Visible = false;
+
+                if(UserSession.Role == "Admin")
+                {
+                    cbEmulace.Visible = true;
+                }
             }
-            else if (UserSession.Role == "User")
+            else if (currentRole == "User")
             {
+                vytvoritUzivateleToolStripMenuItem.Visible = false;
+                spravaKlientuToolStripMenuItem.Visible = false;
+
+                // Recenze
+                smazaneRecenzeToolStripMenuItem.Visible = false;
+
+                // Piva
+                pridatPivoToolStripMenuItem.Visible = false;
+                nizkyPocetPivToolStripMenuItem.Visible = false;
+
+                // Pivovary
+                zamestnanciToolStripMenuItem.Visible = false;
+                vyrobkyToolStripMenuItem.Visible = false;
+                objednavkyToolStripMenuItem1.Visible = false;
+                spravaPivovaruToolStripMenuItem.Visible = false;
+                vlastniciToolStripMenuItem.Visible = false;
+                hierarchiePracovnikuToolStripMenuItem.Visible = false;
+                spravaVyrobyToolStripMenuItem.Visible = false;
+
                 uploadPfpToolStripMenuItem.Visible = true;
                 topMestaToolStripMenuItem.Visible = true;
+
+                objednavkyToolStripMenuItem.Visible = false;
+
+
+                SpravaCiselnikuToolStrip.Visible = false;
+
+                cbEmulace.Visible = false;
+                if (UserSession.Role == "Admin")
+                {
+                    cbEmulace.Visible = true;
+                }
+                btnLogs.Visible = false;
             }
-            else if (UserSession.Role == "Klient")
+            else if (currentRole == "Klient")
             {
                 uploadPfpToolStripMenuItem.Visible = true;
+                vytvoritUzivateleToolStripMenuItem.Visible = false;
+                spravaKlientuToolStripMenuItem.Visible = false;
+
+                smazaneRecenzeToolStripMenuItem.Visible = false;
+
+                pridatPivoToolStripMenuItem.Visible = false;
+
                 topMestaToolStripMenuItem.Visible = true;
                 nizkyPocetPivToolStripMenuItem.Visible = true;
 
                 objednavkyToolStripMenuItem.Visible = true;
-                nesplneneObjednavkyToolStripMenuItem.Visible = true; //pouze jeho objednavky
-                evidenceToolStripMenuItem.Visible = true; //pouze jeho objednavky
-                spravaObjednavekToolStripMenuItem.Visible = true; //pouze jeho objednavky
-                splneneObjednavkyToolStripMenuItem.Visible = true; //pouze jeho objednavky
+                nesplneneObjednavkyToolStripMenuItem.Visible = true; 
+                evidenceToolStripMenuItem.Visible = true; 
+                spravaObjednavekToolStripMenuItem.Visible = true;
+                splneneObjednavkyToolStripMenuItem.Visible = true;
+
+                SpravaCiselnikuToolStrip.Visible = false;
+                cbEmulace.Visible = false;
+                if (UserSession.Role == "Admin")
+                {
+                    cbEmulace.Visible = true;
+                }
+                btnLogs.Visible = false;
             }
-            else if (UserSession.Role == "Admin")
+            else if (currentRole == "Admin")
             {
-                //Uzivatel
+                // Uzivatel
                 uploadPfpToolStripMenuItem.Visible = true;
                 vytvoritUzivateleToolStripMenuItem.Visible = true;
                 spravaKlientuToolStripMenuItem.Visible = true;
 
-                //Recenze
+                // Recenze
                 smazaneRecenzeToolStripMenuItem.Visible = true;
 
-                //Piva
+                // Piva
                 pridatPivoToolStripMenuItem.Visible = true;
                 nizkyPocetPivToolStripMenuItem.Visible = true;
 
-                //pivovary
+                // Pivovary
                 zamestnanciToolStripMenuItem.Visible = true;
                 vyrobkyToolStripMenuItem.Visible = true;
                 objednavkyToolStripMenuItem1.Visible = true;
@@ -275,11 +336,14 @@ namespace HospodaUBobra
                 objednavkyToolStripMenuItem.Visible = true;
                 SpravaCiselnikuToolStrip.Visible = true;
 
+                cbEmulace.Visible = true;
                 btnLogs.Visible = true;
             }
 
             PopulateTableList();
         }
+
+
 
         private void btnShowKlientObj_Click(object sender, EventArgs e)
         {
@@ -345,7 +409,7 @@ namespace HospodaUBobra
             }
             else
             {
-                
+
             }
         }
 
@@ -630,22 +694,17 @@ namespace HospodaUBobra
             if (UserSession.Role != "Anonymous")
             {
                 UserSession.ClearSession();
-                ApplyRolePermissions();
                 MessageBox.Show("Odhlášení úspěšné!");
+                ApplyRolePermissions();
                 btnLogout.Enabled = false;
                 currentUserLabel.Text = "Anonymous";
                 profilePictureBox.Image = null;
                 dataGridView1.DataSource = null;
             }
-        }
-
-        private void SetLoadingMessage()
-        {
-            profilePictureBox.Image = null;
-            profilePictureBox.Invalidate();
-            Graphics g = profilePictureBox.CreateGraphics();
-            g.DrawString("Loading...", new Font("Arial", 12), Brushes.Gray, new PointF(10, profilePictureBox.Height / 2 - 10));
-            g.Dispose();
+            else
+            {
+                ApplyRolePermissions();
+            }
         }
 
         private int GetNextPictureId()
@@ -1358,6 +1417,41 @@ namespace HospodaUBobra
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             DataGridViewFilterHelper.FilterData(dataGridView1, txtSearch);
+        }
+
+        private void PopulateRoleEmulationDropdown()
+        {
+            cbEmulace.Items.Clear();
+
+            cbEmulace.Items.Add("Anonymous");
+            cbEmulace.Items.Add("User");
+            cbEmulace.Items.Add("Klient");
+            cbEmulace.Items.Add("Admin");
+
+            cbEmulace.SelectedItem = UserSession.Role;
+        }
+
+
+        private void cbEmulace_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbEmulace.SelectedItem != null)
+            {
+                string selectedRole = cbEmulace.SelectedItem.ToString();
+
+                if (selectedRole == UserSession.Role)
+                {
+                    UserSession.EmulatedRole = null;
+                    //MessageBox.Show($"Emulation turned off. Acting as: {UserSession.Role}", "Emulation Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    UserSession.EmulatedRole = selectedRole; // Set emulated role
+                    MessageBox.Show($"Now emulating role: {selectedRole}", "Emulation Enabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+
+                // Reapply permissions
+                ApplyRolePermissions();
+            }
         }
     }
 }

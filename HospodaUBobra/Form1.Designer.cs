@@ -76,6 +76,7 @@
             profilePictureBox = new PictureBox();
             btnLogs = new Button();
             txtSearch = new TextBox();
+            cbEmulace = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -436,11 +437,21 @@
             txtSearch.TabIndex = 13;
             txtSearch.TextChanged += txtSearch_TextChanged;
             // 
+            // cbEmulace
+            // 
+            cbEmulace.FormattingEnabled = true;
+            cbEmulace.Location = new Point(835, 161);
+            cbEmulace.Name = "cbEmulace";
+            cbEmulace.Size = new Size(121, 23);
+            cbEmulace.TabIndex = 14;
+            cbEmulace.SelectedIndexChanged += cbEmulace_SelectedIndexChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(cbEmulace);
             Controls.Add(txtSearch);
             Controls.Add(btnLogs);
             Controls.Add(profilePictureBox);
@@ -510,5 +521,6 @@
         private ToolStripMenuItem spravaVyrobyToolStripMenuItem;
         private Button btnLogs;
         private TextBox txtSearch;
+        private ComboBox cbEmulace;
     }
 }
