@@ -35,7 +35,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT ROLE_NAME FROM ROLE WHERE ROLE_NAME != 'Anonymous' AND ROLE_NAME != 'Klient'";
+                string query = "SELECT * FROM A_SPRAVA_UZIVATELE_ROLE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -56,18 +56,7 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                string query = @"
-            SELECT 
-                U.ID_UZIVATELE, 
-                U.UZIVATELSKE_JMENO, 
-                U.EMAIL, 
-                U.TELEFON, 
-                U.DATUM_REGISTRACE, 
-                R.ROLE_NAME AS ROLE_NAME
-            FROM 
-                UZIVATELE U
-            INNER JOIN 
-                ROLE R ON U.ROLE_ID = R.ROLE_ID";
+                string query = @"SELECT * from A_DGV_UZIVATELE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {

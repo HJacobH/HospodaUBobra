@@ -34,8 +34,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Load Zamestnanci into cbZamestnanci
-                    string zamestnanciQuery = "SELECT ID_ZAMESTNANCE, JMENO || ' ' || PRIJMENI AS FULL_NAME FROM ZAMESTNANCI";
+                    string zamestnanciQuery = "SELECT * FROM A_CB_JMENO_PRIJMENI_ZAMESTNANCI";
                     using (OracleDataAdapter adapter = new OracleDataAdapter(zamestnanciQuery, conn))
                     {
                         DataTable zamestnanciTable = new DataTable();
@@ -45,8 +44,7 @@ namespace HospodaUBobra
                         cbZamestnanci.ValueMember = "ID_ZAMESTNANCE";
                     }
 
-                    // Load Pivovary into cbPivovary
-                    string pivovaryQuery = "SELECT ID_PIVOVARU, NAZEV FROM PIVOVARY";
+                    string pivovaryQuery = "SELECT * FROM A_CB_NAZEV_PIVOVARU";
                     using (OracleDataAdapter adapter = new OracleDataAdapter(pivovaryQuery, conn))
                     {
                         DataTable pivovaryTable = new DataTable();
@@ -56,15 +54,7 @@ namespace HospodaUBobra
                         cbPivovary.ValueMember = "ID_PIVOVARU";
                     }
 
-                    // Load Pracovnici into DataGridView with readable values
-                    string pracovniciQuery = @"
-                SELECT 
-                    p.ID AS ID, -- Include ID for internal use but hide it in the UI
-                    pv.NAZEV AS Pivovar, -- Display the name of the brewery
-                    z.JMENO || ' ' || z.PRIJMENI AS Zamestnanec -- Display the full name of the employee
-                FROM PRACOVNICI p
-                JOIN PIVOVARY pv ON p.PIVOVAR_ID_PIVOVARU = pv.ID_PIVOVARU
-                JOIN ZAMESTNANCI z ON p.ZAMESTNANEC_ID_ZAMESTNANCE = z.ID_ZAMESTNANCE";
+                    string pracovniciQuery = @"SELECT * FROM A_DGV_PRACOVNICI";
                     using (OracleDataAdapter adapter = new OracleDataAdapter(pracovniciQuery, conn))
                     {
                         DataTable pracovniciTable = new DataTable();
@@ -72,7 +62,6 @@ namespace HospodaUBobra
                         DataGridViewFilterHelper.BindData(dataGridViewPracovnici, pracovniciTable);
                         dataGridViewPracovnici.DataSource = pracovniciTable;
 
-                        // Hide the ID column
                         if (dataGridViewPracovnici.Columns["ID"] != null)
                         {
                             dataGridViewPracovnici.Columns["ID"].Visible = false;

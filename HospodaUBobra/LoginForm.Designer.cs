@@ -86,9 +86,10 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(130, 9);
+            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label3.Location = new Point(115, 9);
             label3.Name = "label3";
-            label3.Size = new Size(58, 15);
+            label3.Size = new Size(86, 21);
             label3.TabIndex = 5;
             label3.Text = "Přihlášení";
             // 

@@ -35,7 +35,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_PIVA, NAZEV, CENA FROM PIVA";
+                    string query = "SELECT * FROM A_EVIDENCE_CB_PIVA_VIEW";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())
@@ -56,7 +56,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading beers: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání piv: " + ex.Message);
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_JEDN_OBJ, NAZEV FROM JEDNOTKY_OBJ";
+                    string query = "SELECT * FROM A_EVIDENCE_CB_JEDNOTKY_OBJ_VIEW";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())
@@ -88,7 +88,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading units: " + ex.Message);
+                    MessageBox.Show("Chyba při načítaní jednotek: " + ex.Message);
                 }
             }
         }
@@ -111,63 +111,21 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Determine whether the user is an admin or a client
                     string query;
 
                     if (isAdmin)
                     {
-                        // Admins see all evidence
-                        query = @"
-                SELECT 
-                    e.ID_EVIDENCE,
-                    e.MNOZSTVI,
-                    e.DATUM_OBJEDNAVKY,
-                    p.NAZEV AS BEER_NAME,
-                    u.NAZEV AS UNIT_NAME,
-                    e.CENA_OBJEDNAVKY,
-                    k.EMAIL AS CLIENT_EMAIL
-                FROM 
-                    EVIDENCE e
-                LEFT JOIN 
-                    PIVA p ON e.PIVO_ID_PIVA = p.ID_PIVA
-                LEFT JOIN 
-                    JEDNOTKY_OBJ u ON e.JEDNOTKA_OBJ_ID_JEDN_OBJ = u.ID_JEDN_OBJ
-                LEFT JOIN 
-                    OBJEDNAVKY o ON e.OBJEDNAVKA_ID_OBJEDNAVKY1 = o.ID_OBJEDNAVKY
-                LEFT JOIN 
-                    KLIENTI k ON o.KLIENT_ID = k.ID_KLIENTA";
+                        query = @"SELECT * FROM A_EVIDENCE_ADMIN_VIEW";
                     }
                     else
                     {
-                        // Clients see only their evidence
-                        query = @"
-                SELECT 
-                    e.ID_EVIDENCE,
-                    e.MNOZSTVI,
-                    e.DATUM_OBJEDNAVKY,
-                    p.NAZEV AS BEER_NAME,
-                    u.NAZEV AS UNIT_NAME,
-                    e.CENA_OBJEDNAVKY,
-                    k.EMAIL AS CLIENT_EMAIL
-                FROM 
-                    EVIDENCE e
-                LEFT JOIN 
-                    PIVA p ON e.PIVO_ID_PIVA = p.ID_PIVA
-                LEFT JOIN 
-                    JEDNOTKY_OBJ u ON e.JEDNOTKA_OBJ_ID_JEDN_OBJ = u.ID_JEDN_OBJ
-                LEFT JOIN 
-                    OBJEDNAVKY o ON e.OBJEDNAVKA_ID_OBJEDNAVKY1 = o.ID_OBJEDNAVKY
-                LEFT JOIN 
-                    KLIENTI k ON o.KLIENT_ID = k.ID_KLIENTA
-                WHERE 
-                    k.ID_KLIENTA = :userID"; // Filter by the logged-in client's ID
+                        query = @"SELECT * FROM A_EVIDENCE_KLIENT_VIEW WHERE CLIENT_ID = :userID";
                     }
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
                         if (!isAdmin)
                         {
-                            // Add parameter for client ID if the user is not an admin
                             cmd.Parameters.Add(new OracleParameter(":userID", OracleDbType.Int32)).Value = UserSession.UserID;
                         }
 
@@ -179,16 +137,14 @@ namespace HospodaUBobra
                             DataGridViewFilterHelper.BindData(dgvEvidence, dataTable);
                             dgvEvidence.DataSource = dataTable;
 
-                            // Update column headers
                             dgvEvidence.Columns["ID_EVIDENCE"].HeaderText = "Evidence ID";
-                            dgvEvidence.Columns["MNOZSTVI"].HeaderText = "Quantity";
-                            dgvEvidence.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Order Date";
-                            dgvEvidence.Columns["BEER_NAME"].HeaderText = "Beer Name";
-                            dgvEvidence.Columns["UNIT_NAME"].HeaderText = "Unit Name";
-                            dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Order Price";
-                            dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Client Email";
+                            dgvEvidence.Columns["MNOZSTVI"].HeaderText = "Množství";
+                            dgvEvidence.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Datum objednávky";
+                            dgvEvidence.Columns["BEER_NAME"].HeaderText = "Pivo";
+                            dgvEvidence.Columns["UNIT_NAME"].HeaderText = "Jednotky";
+                            dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Cena objednavky";
+                            dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Email klienta";
 
-                            // Hide ID_EVIDENCE column
                             if (dgvEvidence.Columns.Contains("ID_EVIDENCE"))
                             {
                                 dgvEvidence.Columns["ID_EVIDENCE"].Visible = false;
@@ -198,12 +154,10 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading evidence data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při načítaní evidencí: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
-
-
 
         private void CalculateOrderPrice()
         {
@@ -223,19 +177,41 @@ namespace HospodaUBobra
         {
             if (dgvEvidence.CurrentRow != null)
             {
-                selectedEvidenceId = Convert.ToInt32(dgvEvidence.CurrentRow.Cells["ID_EVIDENCE"].Value);
-                txtQuantity.Text = dgvEvidence.CurrentRow.Cells["MNOZSTVI"].Value.ToString();
-                dtpOrderDate.Value = Convert.ToDateTime(dgvEvidence.CurrentRow.Cells["DATUM_OBJEDNAVKY"].Value);
+                var currentRow = dgvEvidence.CurrentRow;
 
-                string beerName = dgvEvidence.CurrentRow.Cells["BEER_NAME"].Value?.ToString();
+                selectedEvidenceId = currentRow.Cells["ID_EVIDENCE"].Value != DBNull.Value
+                    ? Convert.ToInt32(currentRow.Cells["ID_EVIDENCE"].Value)
+                    : -1;
+
+                txtQuantity.Text = currentRow.Cells["MNOZSTVI"].Value != DBNull.Value
+                    ? currentRow.Cells["MNOZSTVI"].Value.ToString()
+                    : string.Empty;
+
+                dtpOrderDate.Value = currentRow.Cells["DATUM_OBJEDNAVKY"].Value != DBNull.Value
+                    ? Convert.ToDateTime(currentRow.Cells["DATUM_OBJEDNAVKY"].Value)
+                    : DateTime.Now;
+
+                string beerName = currentRow.Cells["BEER_NAME"].Value != DBNull.Value
+                    ? currentRow.Cells["BEER_NAME"].Value.ToString()
+                    : string.Empty;
                 cbBeer.SelectedIndex = cbBeer.FindStringExact(beerName);
 
-                string unitName = dgvEvidence.CurrentRow.Cells["UNIT_NAME"].Value?.ToString();
+                string unitName = currentRow.Cells["UNIT_NAME"].Value != DBNull.Value
+                    ? currentRow.Cells["UNIT_NAME"].Value.ToString()
+                    : string.Empty;
                 cbUnit.SelectedIndex = cbUnit.FindStringExact(unitName);
 
-                txtOrderPrice.Text = dgvEvidence.CurrentRow.Cells["CENA_OBJEDNAVKY"].Value.ToString();
+                txtOrderPrice.Text = currentRow.Cells["CENA_OBJEDNAVKY"].Value != DBNull.Value
+                    ? currentRow.Cells["CENA_OBJEDNAVKY"].Value.ToString()
+                    : string.Empty;
 
-                txtOrderId.Text = dgvEvidence.CurrentRow.Cells["CLIENT_EMAIL"].Value.ToString();
+                txtOrderId.Text = currentRow.Cells["CLIENT_EMAIL"].Value != DBNull.Value
+                    ? currentRow.Cells["CLIENT_EMAIL"].Value.ToString()
+                    : string.Empty;
+            }
+            else
+            {
+                ClearFormFields();
             }
         }
 

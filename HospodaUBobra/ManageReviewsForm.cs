@@ -17,7 +17,6 @@ namespace HospodaUBobra
     {
         string connectionString = $"User Id=st69639;Password=Server2022;Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
         private int selectedReviewId;
-        private string selectedReviewUser;
 
         public ManageReviewsForm()
         {
@@ -63,7 +62,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_uzivatele, uzivatelske_jmeno FROM UZIVATELE";
+                string query = "SELECT * FROM A_CB_UZIVATELE_RECENZE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -88,7 +87,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_piva, nazev FROM PIVA";
+                string query = "SELECT * FROM A_CB_PIVA_RECENZE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -109,7 +108,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_pivovaru, nazev FROM PIVOVARY";
+                string query = "SELECT * FROM A_CB_NAZEV_PIVOVARU";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -131,24 +130,7 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                string query = @"
-            SELECT 
-                r.id_recenze, 
-                r.titulek, 
-                r.text_recenze, 
-                pivo.nazev AS pivo_name, 
-                pivovar.nazev AS pivovar_name, 
-                r.pocet_hvezdicek, 
-                r.id_uzivatele,
-                u.uzivatelske_jmeno AS uzivatelske_jmeno
-            FROM 
-                RECENZE r
-            LEFT JOIN 
-                PIVOVARY pivovar ON r.pivovar_id_pivovaru = pivovar.id_pivovaru
-            LEFT JOIN 
-                PIVA pivo ON r.pivo_id_piva = pivo.id_piva
-            LEFT JOIN 
-                UZIVATELE u ON r.id_uzivatele = u.id_uzivatele";
+                string query = @"SELECT * FROM A_DGV_RECENZE";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -213,39 +195,7 @@ namespace HospodaUBobra
                     cmd.Parameters.Add("p_pocet_hvezdicek", OracleDbType.Int32).Value = rating;
                     cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = UserSession.UserID;
 
-                    try
-                    {
-                        // Execute the command
-                        cmd.ExecuteNonQuery();
-
-                        // Retrieve the generated review ID
-                        int newReviewId = ((Oracle.ManagedDataAccess.Types.OracleDecimal)cmd.Parameters["p_id_recenze"].Value).ToInt32();
-
-                        // Insert details into the PODROBNOSTI_RECENZE table
-                        using (OracleCommand detailCmd = new OracleCommand("sprava_podrobnosti_recenze", conn))
-                        {
-                            detailCmd.CommandType = CommandType.StoredProcedure;
-
-                            detailCmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Insert
-                            detailCmd.Parameters.Add("p_id", OracleDbType.Int32).Value = DBNull.Value; // No ID for insert
-                            detailCmd.Parameters.Add("p_recenze_id", OracleDbType.Int32).Value = newReviewId; // New review ID
-                            detailCmd.Parameters.Add("p_uzivatel_id", OracleDbType.Int32).Value = UserSession.UserID; // Current user
-                            detailCmd.Parameters.Add("p_datum_zverejneni", OracleDbType.Date).Value = DateTime.Now; // Current date
-
-                            detailCmd.ExecuteNonQuery();
-                        }
-
-                        MessageBox.Show("Recenze úspěšně přidána!");
-                        LoadReviews(); // Refresh the reviews list
-                    }
-                    catch (OracleException ex)
-                    {
-                        MessageBox.Show("Chyba při přidávání recenze: " + ex.Message);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Obecná chyba: " + ex.Message);
-                    }
+                    cmd.ExecuteNonQuery();                    
                 }
             }
 

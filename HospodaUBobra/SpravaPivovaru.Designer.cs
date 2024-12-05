@@ -120,7 +120,7 @@
             // 
             txtNazev.Location = new Point(133, 34);
             txtNazev.Name = "txtNazev";
-            txtNazev.Size = new Size(100, 23);
+            txtNazev.Size = new Size(121, 23);
             txtNazev.TabIndex = 7;
             // 
             // txtPopisAkci

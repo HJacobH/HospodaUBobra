@@ -37,21 +37,7 @@ namespace HospodaUBobra
                 conn.Open();
 
                 string query = @"
-            SELECT 
-                Z.ID_ZAMESTNANCE,
-                Z.JMENO,
-                Z.PRIJMENI,
-                Z.DATUM_NAROZENI,
-                Z.PLAT,
-                Z.DATUM_NASTUPU,
-                Z.OBLIBENA_PIVA,
-                P.NAZEV_POZICE AS POZICE
-            FROM 
-                ZAMESTNANCI Z
-            INNER JOIN 
-                POZICE_PRACOVNIKA P 
-            ON 
-                Z.POZICE = P.ID_POZICE";
+            SELECT * FROM A_DGV_ZAMESTNANCI";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
@@ -269,15 +255,26 @@ namespace HospodaUBobra
         {
             if (dgvZamestnanci.CurrentRow != null)
             {
-                selectedZamestnanecId = Convert.ToInt32(dgvZamestnanci.CurrentRow.Cells["ID_ZAMESTNANCE"].Value);
-                txtJmeno.Text = dgvZamestnanci.CurrentRow.Cells["JMENO"].Value.ToString();
-                txtPrijmeni.Text = dgvZamestnanci.CurrentRow.Cells["PRIJMENI"].Value.ToString();
-                dateTimePickerNarozeni.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NAROZENI"].Value);
-                txtVyplata.Text = dgvZamestnanci.CurrentRow.Cells["PLAT"].Value.ToString();
-                dateTimePickerStartWorking.Value = Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value);
-                txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value.ToString();
+                selectedZamestnanecId = dgvZamestnanci.CurrentRow.Cells["ID_ZAMESTNANCE"].Value != DBNull.Value
+                    ? Convert.ToInt32(dgvZamestnanci.CurrentRow.Cells["ID_ZAMESTNANCE"].Value)
+                    : -1;
 
-                string positionName = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value.ToString();
+                txtJmeno.Text = dgvZamestnanci.CurrentRow.Cells["JMENO"].Value?.ToString() ?? string.Empty;
+                txtPrijmeni.Text = dgvZamestnanci.CurrentRow.Cells["PRIJMENI"].Value?.ToString() ?? string.Empty;
+
+                dateTimePickerNarozeni.Value = dgvZamestnanci.CurrentRow.Cells["DATUM_NAROZENI"].Value != DBNull.Value
+                    ? Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NAROZENI"].Value)
+                    : DateTime.Now;
+
+                txtVyplata.Text = dgvZamestnanci.CurrentRow.Cells["PLAT"].Value?.ToString() ?? "0";
+
+                dateTimePickerStartWorking.Value = dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value != DBNull.Value
+                    ? Convert.ToDateTime(dgvZamestnanci.CurrentRow.Cells["DATUM_NASTUPU"].Value)
+                    : DateTime.Now;
+
+                txtFavBeer.Text = dgvZamestnanci.CurrentRow.Cells["OBLIBENA_PIVA"].Value?.ToString() ?? string.Empty;
+
+                string positionName = dgvZamestnanci.CurrentRow.Cells["POZICE"].Value?.ToString() ?? string.Empty;
                 cbPozice.SelectedIndex = cbPozice.FindStringExact(positionName);
             }
         }

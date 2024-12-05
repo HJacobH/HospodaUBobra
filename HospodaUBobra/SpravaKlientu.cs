@@ -33,7 +33,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_DRUHU, DRUH_PODNIKU FROM DRUHY_PODNIKU";
+                    string query = "SELECT * FROM A_CB_DRUHY_PODKNIKU";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())
@@ -42,9 +42,9 @@ namespace HospodaUBobra
                         druhPodnikuTable.Load(reader);
 
                         cbDruhPodniku.DataSource = druhPodnikuTable;
-                        cbDruhPodniku.DisplayMember = "DRUH_PODNIKU"; // Column to show in dropdown
-                        cbDruhPodniku.ValueMember = "ID_DRUHU";       // Column used as the value
-                        cbDruhPodniku.SelectedIndex = -1;            // Ensure no default selection
+                        cbDruhPodniku.DisplayMember = "DRUH_PODNIKU"; 
+                        cbDruhPodniku.ValueMember = "ID_DRUHU";       
+                        cbDruhPodniku.SelectedIndex = -1;          
                     }
                 }
                 catch (Exception ex)
@@ -62,20 +62,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = @"
-            SELECT 
-                k.ID_KLIENTA, 
-                k.JMENO, 
-                k.PRIJMENI, 
-                k.NAZEV, 
-                k.EMAIL, 
-                k.TELEFON, 
-                k.DATUM_REGISTRACE, 
-                dp.DRUH_PODNIKU, 
-                r.ROLE_NAME
-            FROM KLIENTI k
-            LEFT JOIN DRUHY_PODNIKU dp ON k.DRUH_PODNIKU_ID_DRUHU = dp.ID_DRUHU
-            LEFT JOIN ROLE r ON k.ROLE_ID = r.ROLE_ID";
+                    string query = @"SELECT * FROM A_DGR_KLIENTI";
 
                     using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
                     {
@@ -90,13 +77,13 @@ namespace HospodaUBobra
                             dgvKlienti.Columns["ID_KLIENTA"].Visible = false;
                         }
 
-                        dgvKlienti.Columns["JMENO"].HeaderText = "First Name";
-                        dgvKlienti.Columns["PRIJMENI"].HeaderText = "Last Name";
-                        dgvKlienti.Columns["NAZEV"].HeaderText = "Business Name";
+                        dgvKlienti.Columns["JMENO"].HeaderText = "Jméno";
+                        dgvKlienti.Columns["PRIJMENI"].HeaderText = "Příjmení";
+                        dgvKlienti.Columns["NAZEV"].HeaderText = "Název podniku";
                         dgvKlienti.Columns["EMAIL"].HeaderText = "Email";
-                        dgvKlienti.Columns["TELEFON"].HeaderText = "Phone";
-                        dgvKlienti.Columns["DATUM_REGISTRACE"].HeaderText = "Registration Date";
-                        dgvKlienti.Columns["DRUH_PODNIKU"].HeaderText = "Business Type";
+                        dgvKlienti.Columns["TELEFON"].HeaderText = "Telefon";
+                        dgvKlienti.Columns["DATUM_REGISTRACE"].HeaderText = "Datum registrace";
+                        dgvKlienti.Columns["DRUH_PODNIKU"].HeaderText = "Druh podniku";
                         dgvKlienti.Columns["ROLE_NAME"].HeaderText = "Role";
                     }
                 }
@@ -384,16 +371,69 @@ namespace HospodaUBobra
         {
             if (dgvKlienti.CurrentRow != null)
             {
-                selectedKlientId = Convert.ToInt32(dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value);
+                // Check and handle ID_KLIENTA
+                if (dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value != DBNull.Value)
+                {
+                    selectedKlientId = Convert.ToInt32(dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value);
+                }
+                else
+                {
+                    selectedKlientId = -1; // Default value
+                }
 
-                txtUsername.Text = dgvKlienti.CurrentRow.Cells["JMENO"].Value?.ToString() ?? string.Empty;
-                txtPrijmeni.Text = dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value?.ToString() ?? string.Empty;
-                txtNazev.Text = dgvKlienti.CurrentRow.Cells["NAZEV"].Value?.ToString() ?? string.Empty;
-                txtEmail.Text = dgvKlienti.CurrentRow.Cells["EMAIL"].Value?.ToString() ?? string.Empty;
-                txtTelefon.Text = dgvKlienti.CurrentRow.Cells["TELEFON"].Value?.ToString() ?? string.Empty;
-                dtpDatumRegistrace.Value = Convert.ToDateTime(dgvKlienti.CurrentRow.Cells["DATUM_REGISTRACE"].Value);
+                // Handle JMENO
+                txtUsername.Text = dgvKlienti.CurrentRow.Cells["JMENO"].Value != DBNull.Value
+                    ? dgvKlienti.CurrentRow.Cells["JMENO"].Value.ToString()
+                    : string.Empty;
 
-                cbDruhPodniku.SelectedIndex = cbDruhPodniku.FindStringExact(dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value?.ToString() ?? string.Empty);
+                // Handle PRIJMENI
+                txtPrijmeni.Text = dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value != DBNull.Value
+                    ? dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value.ToString()
+                    : string.Empty;
+
+                // Handle NAZEV
+                txtNazev.Text = dgvKlienti.CurrentRow.Cells["NAZEV"].Value != DBNull.Value
+                    ? dgvKlienti.CurrentRow.Cells["NAZEV"].Value.ToString()
+                    : string.Empty;
+
+                // Handle EMAIL
+                txtEmail.Text = dgvKlienti.CurrentRow.Cells["EMAIL"].Value != DBNull.Value
+                    ? dgvKlienti.CurrentRow.Cells["EMAIL"].Value.ToString()
+                    : string.Empty;
+
+                // Handle TELEFON
+                txtTelefon.Text = dgvKlienti.CurrentRow.Cells["TELEFON"].Value != DBNull.Value
+                    ? dgvKlienti.CurrentRow.Cells["TELEFON"].Value.ToString()
+                    : string.Empty;
+
+                // Handle DATUM_REGISTRACE
+                if (dgvKlienti.CurrentRow.Cells["DATUM_REGISTRACE"].Value != DBNull.Value)
+                {
+                    dtpDatumRegistrace.Value = Convert.ToDateTime(dgvKlienti.CurrentRow.Cells["DATUM_REGISTRACE"].Value);
+                }
+                else
+                {
+                    dtpDatumRegistrace.Value = DateTime.Now; // Default date
+                }
+
+                // Handle DRUH_PODNIKU
+                string druhPodniku = dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value != DBNull.Value
+                    ? dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value.ToString()
+                    : string.Empty;
+
+                cbDruhPodniku.SelectedIndex = cbDruhPodniku.FindStringExact(druhPodniku);
+            }
+            else
+            {
+                // Reset all fields if no row is selected
+                selectedKlientId = -1;
+                txtUsername.Clear();
+                txtPrijmeni.Clear();
+                txtNazev.Clear();
+                txtEmail.Clear();
+                txtTelefon.Clear();
+                dtpDatumRegistrace.Value = DateTime.Now;
+                cbDruhPodniku.SelectedIndex = -1;
             }
         }
 

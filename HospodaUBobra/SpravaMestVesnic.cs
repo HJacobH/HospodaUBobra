@@ -37,17 +37,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = @"
-                SELECT 
-                    mv.ID_MES_VES AS Town_ID, 
-                    mv.NAZEV AS Name, 
-                    mv.POCET_OBYVATEL AS Population, 
-                    mv.PSC AS Postal_Code, 
-                    o.NAZEV AS District, 
-                    k.NAZEV AS Region
-                FROM MESTA_VESNICE mv
-                LEFT JOIN OKRESY o ON mv.OKRES_ID_OKRESU = o.ID_OKRESU
-                LEFT JOIN KRAJE k ON mv.KRAJ_ID_KRAJE = k.ID_KRAJE";
+                    string query = @"SELECT * FROM A_DGV_MESTA_VESNICE";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -63,11 +53,11 @@ namespace HospodaUBobra
                             dgvMestaVesnice.Columns["Town_ID"].Visible = false;
                         }
 
-                        dgvMestaVesnice.Columns["Name"].HeaderText = "Town Name";
-                        dgvMestaVesnice.Columns["Population"].HeaderText = "Population";
-                        dgvMestaVesnice.Columns["Postal_Code"].HeaderText = "Postal Code";
-                        dgvMestaVesnice.Columns["District"].HeaderText = "District";
-                        dgvMestaVesnice.Columns["Region"].HeaderText = "Region";
+                        dgvMestaVesnice.Columns["Name"].HeaderText = "Název";
+                        dgvMestaVesnice.Columns["Population"].HeaderText = "Počet obyvatel";
+                        dgvMestaVesnice.Columns["Postal_Code"].HeaderText = "PSČ";
+                        dgvMestaVesnice.Columns["District"].HeaderText = "Okres";
+                        dgvMestaVesnice.Columns["Region"].HeaderText = "Kraj";
                     }
                 }
                 catch (Exception ex)
@@ -84,7 +74,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_KRAJE, NAZEV FROM KRAJE";
+                    string query = "SELECT * FROM A_CB_KRAJE";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())
@@ -116,7 +106,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_OKRESU, NAZEV FROM OKRESY";
+                    string query = "SELECT * FROM A_CB_OKRESY";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())

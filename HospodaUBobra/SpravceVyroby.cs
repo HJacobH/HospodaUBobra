@@ -35,8 +35,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Load Pivovary into cbPivovary
-                    string pivovaryQuery = "SELECT ID_PIVOVARU, NAZEV FROM PIVOVARY";
+                    string pivovaryQuery = "SELECT * FROM A_CB_NAZEV_PIVOVARU";
                     using (OracleDataAdapter adapter = new OracleDataAdapter(pivovaryQuery, conn))
                     {
                         DataTable pivovaryTable = new DataTable();
@@ -46,8 +45,7 @@ namespace HospodaUBobra
                         cbPivovary.ValueMember = "ID_PIVOVARU";
                     }
 
-                    // Load Piva into cbPiva
-                    string pivaQuery = "SELECT ID_PIVA, NAZEV FROM PIVA";
+                    string pivaQuery = "SELECT * FROM A_CB_PIVA_RECENZE";
                     using (OracleDataAdapter adapter = new OracleDataAdapter(pivaQuery, conn))
                     {
                         DataTable pivaTable = new DataTable();
@@ -72,16 +70,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Query to load the VYROBY table with human-readable names for PIVOVARY and PIVA
-                    string query = @"
-                    SELECT 
-                            v.ID, 
-                            v.LITRY_ZA_DEN AS ""Litry za den"",
-                            p.NAZEV AS ""Pivovar"", 
-                            pi.NAZEV AS ""Pivo""
-                        FROM VYROBY v
-                        JOIN PIVOVARY p ON v.PIVOVAR_ID_PIVOVARU = p.ID_PIVOVARU
-                        JOIN PIVA pi ON v.PIVO_ID_PIVA = pi.ID_PIVA";
+                    string query = @"SELECT * FROM A_DGV_VYROBA";
 
                     using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
                     {
@@ -90,34 +79,12 @@ namespace HospodaUBobra
                         DataGridViewFilterHelper.BindData(dataGridView1, dt);
                         dataGridView1.DataSource = dt;
 
-                        // Hide the ID column
                         if (dataGridView1.Columns["ID"] != null)
                         {
                             dataGridView1.Columns["ID"].Visible = false;
                         }
                     }
 
-                    // Load PIVOVARY into cbPivovary
-                    string pivovaryQuery = "SELECT ID_PIVOVARU, NAZEV FROM PIVOVARY";
-                    using (OracleDataAdapter adapter = new OracleDataAdapter(pivovaryQuery, conn))
-                    {
-                        DataTable pivovaryTable = new DataTable();
-                        adapter.Fill(pivovaryTable);
-                        cbPivovary.DataSource = pivovaryTable;
-                        cbPivovary.DisplayMember = "NAZEV";
-                        cbPivovary.ValueMember = "ID_PIVOVARU";
-                    }
-
-                    // Load PIVA into cbPiva
-                    string pivaQuery = "SELECT ID_PIVA, NAZEV FROM PIVA";
-                    using (OracleDataAdapter adapter = new OracleDataAdapter(pivaQuery, conn))
-                    {
-                        DataTable pivaTable = new DataTable();
-                        adapter.Fill(pivaTable);
-                        cbPiva.DataSource = pivaTable;
-                        cbPiva.DisplayMember = "NAZEV";
-                        cbPiva.ValueMember = "ID_PIVA";
-                    }
                 }
                 catch (Exception ex)
                 {

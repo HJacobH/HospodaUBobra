@@ -91,19 +91,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = @"
-            SELECT 
-                V.ID_VLASTNIKA, 
-                V.JMENO_NAZEV, 
-                V.PRIJMENI, 
-                V.ULICE, 
-                V.CISLO_POPISNE, 
-                V.ICO, 
-                V.DIC, 
-                MV.NAZEV AS MESTO_VESNICE, 
-                V.DRUH_VLASTNIKA
-            FROM VLASTNICI_PIVOVARU V
-            LEFT JOIN MESTA_VESNICE MV ON V.MESTO_VESNICE_ID_MES_VES = MV.ID_MES_VES";
+                    string query = @"SELECT * FROM A_DGV_VLASTNICI_PIVOVARU";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -114,18 +102,16 @@ namespace HospodaUBobra
                         DataGridViewFilterHelper.BindData(dgvOwners, ownersTable);
                         dgvOwners.DataSource = ownersTable;
 
-                        // Set column headers
                         dgvOwners.Columns["ID_VLASTNIKA"].HeaderText = "Owner ID";
-                        dgvOwners.Columns["JMENO_NAZEV"].HeaderText = "Name/Company";
-                        dgvOwners.Columns["PRIJMENI"].HeaderText = "Surname";
-                        dgvOwners.Columns["ULICE"].HeaderText = "Street";
-                        dgvOwners.Columns["CISLO_POPISNE"].HeaderText = "Street Number";
+                        dgvOwners.Columns["JMENO_NAZEV"].HeaderText = "Jméno/Název";
+                        dgvOwners.Columns["PRIJMENI"].HeaderText = "Příjmení";
+                        dgvOwners.Columns["ULICE"].HeaderText = "Ulice";
+                        dgvOwners.Columns["CISLO_POPISNE"].HeaderText = "Číslo popisné";
                         dgvOwners.Columns["ICO"].HeaderText = "ICO";
                         dgvOwners.Columns["DIC"].HeaderText = "DIC";
-                        dgvOwners.Columns["MESTO_VESNICE"].HeaderText = "City/Village";
-                        dgvOwners.Columns["DRUH_VLASTNIKA"].HeaderText = "Owner Type";
+                        dgvOwners.Columns["MESTO_VESNICE"].HeaderText = "Město/Vesnice";
+                        dgvOwners.Columns["DRUH_VLASTNIKA"].HeaderText = "Druh vlastníka";
 
-                        // Hide the Owner ID column
                         dgvOwners.Columns["ID_VLASTNIKA"].Visible = false;
                     }
                 }

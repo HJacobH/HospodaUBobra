@@ -33,7 +33,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = "SELECT ID_POZICE, NAZEV_POZICE, PARENT_ID FROM POZICE_PRACOVNIKA";
+                    string query = "SELECT * FROM A_CB_POZICE_PRACOVNIKA";
                     using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
                     {
                         DataTable dt = new DataTable();
@@ -44,7 +44,7 @@ namespace HospodaUBobra
                         dataGridViewPozice.Columns["ID_POZICE"].Visible = false;
                     }
 
-                    string poziceQuery = "SELECT ID_POZICE, NAZEV_POZICE FROM POZICE_PRACOVNIKA";
+                    string poziceQuery = "SELECT * FROM A_CB_POZICE_PRACOVNIKA_NO_PARENT";
                     using (OracleCommand cmd = new OracleCommand(poziceQuery, conn))
                     {
                         using (OracleDataReader reader = cmd.ExecuteReader())

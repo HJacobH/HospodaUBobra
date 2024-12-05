@@ -40,27 +40,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = @"
-            SELECT 
-                P.ID_PIVOVARU, 
-                P.NAZEV, 
-                P.ROK_ZALOZENI, 
-                CASE 
-                    WHEN P.PROVOZ_PROHLIDEK = 1 THEN 'Ano' 
-                    WHEN P.PROVOZ_PROHLIDEK = 2 THEN 'Ne' 
-                    ELSE 'Neznámé'
-                END AS PROVOZ_PROHLIDEK, 
-                CASE 
-                    WHEN P.PROVOZ_AKCI = 1 THEN 'Ano' 
-                    WHEN P.PROVOZ_AKCI = 2 THEN 'Ne' 
-                    ELSE 'Neznámé'
-                END AS PROVOZ_AKCI, 
-                P.POPIS_AKCI, 
-                DP.DRUH_PODNIKU AS DRUH_PODNIKU, 
-                MV.NAZEV AS MESTO_VESNICE
-            FROM PIVOVARY P
-            LEFT JOIN DRUHY_PODNIKU DP ON P.DRUH_PODNIKU_ID_DRUHU = DP.ID_DRUHU
-            LEFT JOIN MESTA_VESNICE MV ON P.MESTO_VESNICE_ID_MES_VES = MV.ID_MES_VES";
+                    string query = @"A_DGV_PIVOVARY";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -72,13 +52,13 @@ namespace HospodaUBobra
                         dgvBreweries.DataSource = breweriesTable;
 
                         dgvBreweries.Columns["ID_PIVOVARU"].HeaderText = "Brewery ID";
-                        dgvBreweries.Columns["NAZEV"].HeaderText = "Name";
-                        dgvBreweries.Columns["ROK_ZALOZENI"].HeaderText = "Year Established";
-                        dgvBreweries.Columns["PROVOZ_PROHLIDEK"].HeaderText = "Tour Operation";
-                        dgvBreweries.Columns["PROVOZ_AKCI"].HeaderText = "Event Operation";
-                        dgvBreweries.Columns["POPIS_AKCI"].HeaderText = "Event Description";
-                        dgvBreweries.Columns["DRUH_PODNIKU"].HeaderText = "Type";
-                        dgvBreweries.Columns["MESTO_VESNICE"].HeaderText = "City/Village";
+                        dgvBreweries.Columns["NAZEV"].HeaderText = "Název";
+                        dgvBreweries.Columns["ROK_ZALOZENI"].HeaderText = "Rok založení";
+                        dgvBreweries.Columns["PROVOZ_PROHLIDEK"].HeaderText = "Provoz prohlídek";
+                        dgvBreweries.Columns["PROVOZ_AKCI"].HeaderText = "Provoz akcí";
+                        dgvBreweries.Columns["POPIS_AKCI"].HeaderText = "Popis akce";
+                        dgvBreweries.Columns["DRUH_PODNIKU"].HeaderText = "Druh podniku";
+                        dgvBreweries.Columns["MESTO_VESNICE"].HeaderText = "Město/Vesnice";
 
                         dgvBreweries.Columns["ID_PIVOVARU"].Visible = false;
                     }
@@ -97,7 +77,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_DRUHU, DRUH_PODNIKU FROM DRUHY_PODNIKU";
+                    string query = "SELECT * FROM A_CB_DRUHY_PODNIKU";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())
@@ -130,7 +110,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_MES_VES, NAZEV FROM MESTA_VESNICE";
+                    string query = "SELECT * FROM A_CB_MESTA_VESNICE";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())

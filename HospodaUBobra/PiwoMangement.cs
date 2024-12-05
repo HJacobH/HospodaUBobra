@@ -38,23 +38,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Updated query to include joins with BALENI_PIV and JEDNOTKY_PIV
-                    string query = @"
-                SELECT 
-                    p.ID_PIVA, 
-                    p.NAZEV, 
-                    p.OBSAH_ALKOHOLU, 
-                    p.OBJEM, 
-                    p.CENA, 
-                    p.POCET_KS_SKLADEM, 
-                    b.BALENI AS PACKAGING,
-                    j.JEDNOTKA AS UNIT
-                FROM 
-                    PIVA p
-                LEFT JOIN 
-                    BALENI_PIV b ON p.BALENI_PIVA_ID_BALENI = b.ID_BALENI
-                LEFT JOIN 
-                    JEDNOTKY_PIV j ON p.JEDNOTKA_PIVA_ID_JEDN = j.ID_JEDN";
+                    string query = @"SELECT * FROM A_DGV_PIVA";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -65,17 +49,15 @@ namespace HospodaUBobra
                         DataGridViewFilterHelper.BindData(dgvPiva, dataTable);
                         dgvPiva.DataSource = dataTable;
 
-                        // Rename column headers for clarity
                         dgvPiva.Columns["ID_PIVA"].HeaderText = "Beer ID";
-                        dgvPiva.Columns["NAZEV"].HeaderText = "Name";
-                        dgvPiva.Columns["OBSAH_ALKOHOLU"].HeaderText = "Alcohol Content (%)";
-                        dgvPiva.Columns["OBJEM"].HeaderText = "Volume (ml)";
-                        dgvPiva.Columns["CENA"].HeaderText = "Price (CZK)";
-                        dgvPiva.Columns["POCET_KS_SKLADEM"].HeaderText = "Stock Quantity";
-                        dgvPiva.Columns["PACKAGING"].HeaderText = "Packaging";
-                        dgvPiva.Columns["UNIT"].HeaderText = "Unit";
+                        dgvPiva.Columns["NAZEV"].HeaderText = "Nazev";
+                        dgvPiva.Columns["OBSAH_ALKOHOLU"].HeaderText = "Procento alkoholu (%)";
+                        dgvPiva.Columns["OBJEM"].HeaderText = "Objem";
+                        dgvPiva.Columns["CENA"].HeaderText = "Cena (CZK)";
+                        dgvPiva.Columns["POCET_KS_SKLADEM"].HeaderText = "Počet kusů skladem";
+                        dgvPiva.Columns["PACKAGING"].HeaderText = "Balení";
+                        dgvPiva.Columns["UNIT"].HeaderText = "Jednotka";
 
-                        // Hide the ID_PIVA column
                         if (dgvPiva.Columns.Contains("ID_PIVA"))
                         {
                             dgvPiva.Columns["ID_PIVA"].Visible = false;
@@ -98,7 +80,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_baleni, baleni FROM BALENI_PIV";
+                string query = "SELECT * FROM A_VIEW_BALENI_PIV";
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 using (OracleDataReader reader = cmd.ExecuteReader())
                 {
@@ -122,7 +104,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT id_jedn, jednotka FROM JEDNOTKY_PIV";
+                string query = "SELECT * FROM A_VIEW_JEDNOTKY_PIV";
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 using (OracleDataReader reader = cmd.ExecuteReader())
                 {

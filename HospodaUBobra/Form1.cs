@@ -73,6 +73,12 @@ namespace HospodaUBobra
                             DataGridViewFilterHelper.BindData(dataGridView1, dt);
 
                             dataGridView1.DataSource = dt;
+
+                            if (dataGridView1.Columns.Contains("BEER_ID"))
+                            {
+                                dataGridView1.Columns["BEER_ID"].Visible = false;
+                            }
+
                         }
                     }
                 }
@@ -990,6 +996,11 @@ namespace HospodaUBobra
                             DataGridViewFilterHelper.BindData(dataGridView1, dt);
 
                             dataGridView1.DataSource = dt;
+
+                            if (dataGridView1.Columns.Contains("BEER_ID"))
+                            {
+                                dataGridView1.Columns["BEER_ID"].Visible = false;
+                            }
                         }
                     }
                 }

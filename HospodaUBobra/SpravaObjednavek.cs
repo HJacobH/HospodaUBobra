@@ -36,7 +36,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Base query to fetch orders
                     string query = @"
                 SELECT 
                     O.ID_OBJEDNAVKY AS OrderID, 
@@ -51,7 +50,6 @@ namespace HospodaUBobra
                 LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
                 LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
 
-                    // Apply filtering for non-admin users
                     if (UserSession.Role != "Admin")
                     {
                         query += " WHERE K.ID_KLIENTA = :loggedInClientId";
@@ -61,7 +59,6 @@ namespace HospodaUBobra
                     {
                         if (UserSession.Role != "Admin")
                         {
-                            // Bind the client ID parameter for non-admin users
                             cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
                         }
 
@@ -73,14 +70,12 @@ namespace HospodaUBobra
                             DataGridViewFilterHelper.BindData(dgvOrders, ordersTable);
                             dgvOrders.DataSource = ordersTable;
 
-                            // Set column headers
                             dgvOrders.Columns["OrderID"].HeaderText = "Order ID";
                             dgvOrders.Columns["ClientName"].HeaderText = "Client Name";
                             dgvOrders.Columns["OrderStatus"].HeaderText = "Order Status";
                             dgvOrders.Columns["OrderDate"].HeaderText = "Order Date";
                             dgvOrders.Columns["DeliveryDate"].HeaderText = "Delivery Date";
 
-                            // Hide the OrderID column
                             dgvOrders.Columns["OrderID"].Visible = false;
                         }
                     }
@@ -91,9 +86,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
-
         private void LoadClients()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -102,7 +94,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Base query to fetch clients
                     string query = @"
                 SELECT 
                     ID_KLIENTA, 
@@ -112,7 +103,6 @@ namespace HospodaUBobra
                     END AS CLIENT_NAME
                 FROM KLIENTI";
 
-                    // Apply filtering for non-admin users
                     if (UserSession.Role != "Admin")
                     {
                         query += " WHERE ID_KLIENTA = :loggedInClientId";
@@ -122,7 +112,6 @@ namespace HospodaUBobra
                     {
                         if (UserSession.Role != "Admin")
                         {
-                            // Bind the client ID parameter for non-admin users
                             cmd.Parameters.Add(new OracleParameter(":loggedInClientId", OracleDbType.Int32)).Value = UserSession.UserID;
                         }
 
@@ -137,8 +126,8 @@ namespace HospodaUBobra
                             }
 
                             cbClients.DataSource = clients;
-                            cbClients.DisplayMember = "Item2"; // Display client name
-                            cbClients.ValueMember = "Item1";  // Use client ID as the value
+                            cbClients.DisplayMember = "Item2"; 
+                            cbClients.ValueMember = "Item1";  
                         }
                     }
                 }
@@ -149,8 +138,6 @@ namespace HospodaUBobra
             }
         }
 
-
-
         private void LoadOrderStatuses()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -158,7 +145,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_STAVU, STAV FROM STAVY_OBJEDNAVEK";
+                    string query = "SELECT * FROM A_CB_STAVY_OBJEDNAVEK";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())

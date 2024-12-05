@@ -32,7 +32,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT ID_VLASTNIKA, JMENO_NAZEV FROM VLASTNICI_PIVOVARU WHERE DRUH_VLASTNIKA = 'FO'";
+                    string query = "SELECT * FROM A_FO_VLASTNICI_VIEW";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -50,7 +50,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error loading VLASTNICI_PIVOVARU: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Chyba při načítání vlastníků pivovarů: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -63,16 +63,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = @"
-                SELECT 
-                    f.ID_FYZICKE_OSOBY,
-                    v.JMENO_NAZEV AS JMENO_A_PRIJMENI,
-                    f.DATUM_NAROZENI,
-                    f.RODNE_CISLO
-                FROM 
-                    FYZICKE_OSOBY f
-                LEFT JOIN 
-                    VLASTNICI_PIVOVARU v ON f.ID = v.ID_VLASTNIKA";
+                    string query = @"SELECT * FROM A_DGR_FYZICKE_OSOBY";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -83,9 +74,9 @@ namespace HospodaUBobra
                         DataGridViewFilterHelper.BindData(dgvFyzickeOsoby, dt);
                         dgvFyzickeOsoby.DataSource = dt;
 
-                        dgvFyzickeOsoby.Columns["JMENO_A_PRIJMENI"].HeaderText = "Name and Surname";
-                        dgvFyzickeOsoby.Columns["DATUM_NAROZENI"].HeaderText = "Date of Birth";
-                        dgvFyzickeOsoby.Columns["RODNE_CISLO"].HeaderText = "Personal ID";
+                        dgvFyzickeOsoby.Columns["JMENO_A_PRIJMENI"].HeaderText = "Jméno a příjmení";
+                        dgvFyzickeOsoby.Columns["DATUM_NAROZENI"].HeaderText = "Datum Narození";
+                        dgvFyzickeOsoby.Columns["RODNE_CISLO"].HeaderText = "Rodné číslo";
 
                         if (dgvFyzickeOsoby.Columns.Contains("ID_FYZICKE_OSOBY"))
                         {
@@ -95,7 +86,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error loading FYZICKE_OSOBY: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Chyba při načítání fyzických osob: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -222,13 +213,49 @@ namespace HospodaUBobra
 
         private void dgvFyzickeOsoby_SelectionChanged(object sender, EventArgs e)
         {
+            int fyzickaOsobaId;
+
             if (dgvFyzickeOsoby.CurrentRow != null)
             {
-                int fyzickaOsobaId = Convert.ToInt32(dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value);
+                // Check and handle ID_FYZICKE_OSOBY
+                if (dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value != DBNull.Value)
+                {
+                    fyzickaOsobaId = Convert.ToInt32(dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value);
+                    comboBoxVlastnikPivovaru.SelectedValue = fyzickaOsobaId;
+                }
+                else
+                {
+                    fyzickaOsobaId = -1; // Default or reset value
+                    comboBoxVlastnikPivovaru.SelectedIndex = -1; // Clear selection
+                }
 
-                comboBoxVlastnikPivovaru.SelectedValue = fyzickaOsobaId;
-                dateTimePickerDatumNarozeni.Value = Convert.ToDateTime(dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value);
-                textBoxRodneCislo.Text = dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value.ToString();
+                // Check and handle DATUM_NAROZENI
+                if (dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value != DBNull.Value)
+                {
+                    dateTimePickerDatumNarozeni.Value = Convert.ToDateTime(dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value);
+                }
+                else
+                {
+                    dateTimePickerDatumNarozeni.Value = DateTime.Now; // Default date
+                }
+
+                // Check and handle RODNE_CISLO
+                if (dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value != DBNull.Value)
+                {
+                    textBoxRodneCislo.Text = dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value.ToString();
+                }
+                else
+                {
+                    textBoxRodneCislo.Clear(); // Clear text box
+                }
+            }
+            else
+            {
+                // Reset all fields if no row is selected
+                fyzickaOsobaId = -1;
+                comboBoxVlastnikPivovaru.SelectedIndex = -1;
+                dateTimePickerDatumNarozeni.Value = DateTime.Now;
+                textBoxRodneCislo.Clear();
             }
         }
 
