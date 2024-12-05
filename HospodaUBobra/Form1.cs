@@ -198,7 +198,6 @@ namespace HospodaUBobra
 
         private void ApplyRolePermissions()
         {
-            // Determine the current role: actual role or emulated role
             string currentRole = UserSession.EmulatedRole ?? UserSession.Role;
 
             if (currentRole == "Anonymous")
@@ -232,8 +231,9 @@ namespace HospodaUBobra
 
                 cbEmulace.Visible = false;
                 btnLogs.Visible = false;
+                btnSystemKatalog.Visible = false;
 
-                if(UserSession.Role == "Admin")
+                if (UserSession.Role == "Admin")
                 {
                     cbEmulace.Visible = true;
                 }
@@ -267,6 +267,7 @@ namespace HospodaUBobra
 
                 SpravaCiselnikuToolStrip.Visible = false;
 
+                btnSystemKatalog.Visible = false;
                 cbEmulace.Visible = false;
                 if (UserSession.Role == "Admin")
                 {
@@ -288,8 +289,8 @@ namespace HospodaUBobra
                 nizkyPocetPivToolStripMenuItem.Visible = true;
 
                 objednavkyToolStripMenuItem.Visible = true;
-                nesplneneObjednavkyToolStripMenuItem.Visible = true; 
-                evidenceToolStripMenuItem.Visible = true; 
+                nesplneneObjednavkyToolStripMenuItem.Visible = true;
+                evidenceToolStripMenuItem.Visible = true;
                 spravaObjednavekToolStripMenuItem.Visible = true;
                 splneneObjednavkyToolStripMenuItem.Visible = true;
 
@@ -300,6 +301,7 @@ namespace HospodaUBobra
                     cbEmulace.Visible = true;
                 }
                 btnLogs.Visible = false;
+                btnSystemKatalog.Visible = false;
             }
             else if (currentRole == "Admin")
             {
@@ -329,6 +331,7 @@ namespace HospodaUBobra
                 SpravaCiselnikuToolStrip.Visible = true;
 
                 cbEmulace.Visible = true;
+                btnSystemKatalog.Visible = true;
                 btnLogs.Visible = true;
             }
 
@@ -1493,11 +1496,42 @@ namespace HospodaUBobra
                 }
                 else
                 {
-                    UserSession.EmulatedRole = selectedRole; 
+                    UserSession.EmulatedRole = selectedRole;
                     MessageBox.Show($"Nyní emulujete roli: {selectedRole}", "Emulace zapnuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadInitialData();
                 }
 
                 ApplyRolePermissions();
+            }
+        }
+
+        private void btnSystemKatalog_Click(object sender, EventArgs e)
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+
+                    string query = "SELECT * FROM A_SYSTEMOVY_KATALOG";
+
+                    using (OracleDataAdapter adapter = new OracleDataAdapter(query, conn))
+                    {
+                        DataTable dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+
+                        dataGridView1.DataSource = dataTable;
+
+                        dataGridView1.Columns["ObjectType"].HeaderText = "Typ objektu";
+                        dataGridView1.Columns["ObjectName"].HeaderText = "Název";
+                        dataGridView1.Columns["ObjectStatus"].HeaderText = "Status";
+                        dataGridView1.Columns["CreationDate"].HeaderText = "Datum vytvoření";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading system catalog: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

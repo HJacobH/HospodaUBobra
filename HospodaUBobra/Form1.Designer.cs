@@ -77,6 +77,7 @@
             btnLogs = new Button();
             txtSearch = new TextBox();
             cbEmulace = new ComboBox();
+            btnSystemKatalog = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -446,11 +447,22 @@
             cbEmulace.TabIndex = 14;
             cbEmulace.SelectedIndexChanged += cbEmulace_SelectedIndexChanged;
             // 
+            // btnSystemKatalog
+            // 
+            btnSystemKatalog.Location = new Point(835, 319);
+            btnSystemKatalog.Name = "btnSystemKatalog";
+            btnSystemKatalog.Size = new Size(121, 33);
+            btnSystemKatalog.TabIndex = 15;
+            btnSystemKatalog.Text = "Systémový katalog";
+            btnSystemKatalog.UseVisualStyleBackColor = true;
+            btnSystemKatalog.Click += btnSystemKatalog_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(btnSystemKatalog);
             Controls.Add(cbEmulace);
             Controls.Add(txtSearch);
             Controls.Add(btnLogs);
@@ -522,5 +534,6 @@
         private Button btnLogs;
         private TextBox txtSearch;
         private ComboBox cbEmulace;
+        private Button btnSystemKatalog;
     }
 }
