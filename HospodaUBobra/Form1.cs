@@ -645,17 +645,9 @@ namespace HospodaUBobra
 
         private void explicidCursorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //UKOL5 procedura 3
-            bool isAdmin = false;
-
-            if (UserSession.Role == "Admin")
-            {
-                isAdmin = true;
-            }
-            else
-            {
-                isAdmin = false;
-            }
+            // UKOL5 procedura 3
+            bool isAdmin = UserSession.Role == "Admin";
+            bool isEmulatingKlient = UserSession.EmulatedRole == "Klient";
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -671,16 +663,60 @@ namespace HospodaUBobra
                         cmd.Parameters.Add("p_is_admin", OracleDbType.Boolean).Value = isAdmin;
                         cmd.Parameters.Add("p_nedokoncene_objednavky", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
 
-
-
                         using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
                         {
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
 
-                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
+                            if (isEmulatingKlient && dt.Columns.Contains("ZAKAZNIK"))
+                            {
+                                foreach (DataRow row in dt.Rows)
+                                {
+                                    if (row["ZAKAZNIK"] != DBNull.Value)
+                                    {
+                                        string originalName = row["ZAKAZNIK"].ToString();
+                                        string[] nameParts = originalName.Split(' ');
 
+                                        if (nameParts.Length > 1)
+                                        {
+                                            string firstNameInitial = nameParts[0].Length > 0 ? nameParts[0][0] + "." : string.Empty;
+                                            string censoredLastName = new string('*', nameParts[1].Length);
+                                            row["ZAKAZNIK"] = $"{firstNameInitial} {censoredLastName}";
+                                        }
+                                        else
+                                        {
+                                            row["ZAKAZNIK"] = new string('*', originalName.Length);
+                                        }
+                                    }
+                                }
+                            }
+                            DataGridViewFilterHelper.BindData(dataGridView1, dt);
                             dataGridView1.DataSource = dt;
+
+                            if (dt.Columns.Contains("ZAKAZNIK"))
+                            {
+                                dataGridView1.Columns["ZAKAZNIK"].HeaderText = "Zákazník";
+                            }
+                            if (dt.Columns.Contains("STAV_OBJEDNAVKY"))
+                            {
+                                dataGridView1.Columns["STAV_OBJEDNAVKY"].HeaderText = "Stav objednávky";
+                            }
+                            if (dt.Columns.Contains("DATUM_OBJEDNAVKY"))
+                            {
+                                dataGridView1.Columns["DATUM_OBJEDNAVKY"].HeaderText = "Datum objednávky";
+                            }
+                            if (dt.Columns.Contains("DATUM_DODANI"))
+                            {
+                                dataGridView1.Columns["DATUM_DODANI"].HeaderText = "Datum dodání";
+                            }
+                            if (dt.Columns.Contains("STAV_DODANI"))
+                            {
+                                dataGridView1.Columns["STAV_DODANI"].HeaderText = "Stav dodání";
+                            }
+                            if (dt.Columns.Contains("DNY_ZPOZDENI"))
+                            {
+                                dataGridView1.Columns["DNY_ZPOZDENI"].HeaderText = "Dny zpoždění";
+                            }
                         }
                     }
                 }
@@ -1353,6 +1389,20 @@ namespace HospodaUBobra
                         {
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
+
+                            // Censor the client name when emulating as a client
+                            if (UserSession.EmulatedRole == "Klient")
+                            {
+                                foreach (DataRow row in dt.Rows)
+                                {
+                                    if (!row.IsNull("Klient_Name"))
+                                    {
+                                        string originalName = row["Klient_Name"].ToString();
+                                        row["Klient_Name"] = new string('*', originalName.Length);
+                                    }
+                                }
+                            }
+
                             DataGridViewFilterHelper.BindData(dataGridView1, dt);
                             dataGridView1.DataSource = dt;
 
@@ -1360,6 +1410,8 @@ namespace HospodaUBobra
                             dataGridView1.Columns["Stav_Objednavky"].HeaderText = "Stav Objednávky";
                             dataGridView1.Columns["Datum_Objednavky"].HeaderText = "Datum Objednávky";
                             dataGridView1.Columns["Datum_Dodani"].HeaderText = "Datum Dodání";
+
+                            dataGridView1.Columns["KLIENT_ID"].Visible = false;
                         }
                     }
                 }

@@ -36,24 +36,13 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = @"
-                SELECT 
-                    O.ID_OBJEDNAVKY AS OrderID, 
-                    CASE 
-                        WHEN K.JMENO IS NOT NULL AND K.PRIJMENI IS NOT NULL THEN K.JMENO || ' ' || K.PRIJMENI
-                        ELSE K.NAZEV 
-                    END AS ClientName, 
-                    S.STAV AS OrderStatus, 
-                    O.DATUM_OBJ AS OrderDate, 
-                    O.DATUM_DOD AS DeliveryDate
-                FROM OBJEDNAVKY O
-                LEFT JOIN KLIENTI K ON O.KLIENT_ID = K.ID_KLIENTA
-                LEFT JOIN STAVY_OBJEDNAVEK S ON O.STAV_OBJEDNAVKY_ID_STAVU = S.ID_STAVU";
+                    string query = "SELECT * FROM A_DGV_OBJEDNAVKY_VIEW";
 
                     if (UserSession.Role != "Admin")
                     {
-                        query += " WHERE K.ID_KLIENTA = :loggedInClientId";
+                        query += " WHERE ClientID = :loggedInClientId"; 
                     }
+
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -67,15 +56,40 @@ namespace HospodaUBobra
                             DataTable ordersTable = new DataTable();
                             adapter.Fill(ordersTable);
 
+                            if (UserSession.EmulatedRole == "Klient" && ordersTable.Columns.Contains("ClientName"))
+                            {
+                                foreach (DataRow row in ordersTable.Rows)
+                                {
+                                    if (row["ClientName"] != DBNull.Value)
+                                    {
+                                        string originalName = row["ClientName"].ToString();
+                                        string[] nameParts = originalName.Split(' ');
+
+                                        if (nameParts.Length > 1)
+                                        {
+                                            string firstNameInitial = nameParts[0].Length > 0 ? nameParts[0][0] + "." : string.Empty;
+                                            string censoredLastName = new string('*', nameParts[1].Length);
+                                            row["ClientName"] = $"{firstNameInitial} {censoredLastName}";
+                                        }
+                                        else
+                                        {
+                                            row["ClientName"] = new string('*', originalName.Length);
+                                        }
+                                    }
+                                }
+                            }
+
                             DataGridViewFilterHelper.BindData(dgvOrders, ordersTable);
                             dgvOrders.DataSource = ordersTable;
 
                             dgvOrders.Columns["OrderID"].HeaderText = "Order ID";
-                            dgvOrders.Columns["ClientName"].HeaderText = "Client Name";
-                            dgvOrders.Columns["OrderStatus"].HeaderText = "Order Status";
-                            dgvOrders.Columns["OrderDate"].HeaderText = "Order Date";
-                            dgvOrders.Columns["DeliveryDate"].HeaderText = "Delivery Date";
+                            dgvOrders.Columns["ClientName"].HeaderText = "Jméno klienta";
+                            dgvOrders.Columns["OrderStatus"].HeaderText = "Status objednávky";
+                            dgvOrders.Columns["OrderDate"].HeaderText = "Datum vytvoření objednávky";
+                            dgvOrders.Columns["DeliveryDate"].HeaderText = "Datum doručení objednávky";
 
+
+                            dgvOrders.Columns["CLIENTID"].Visible = false;
                             dgvOrders.Columns["OrderID"].Visible = false;
                         }
                     }
@@ -85,6 +99,7 @@ namespace HospodaUBobra
                     MessageBox.Show("Error loading orders: " + ex.Message);
                 }
             }
+
         }
         private void LoadClients()
         {
@@ -94,18 +109,11 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string query = @"
-                SELECT 
-                    ID_KLIENTA, 
-                    CASE 
-                        WHEN JMENO IS NOT NULL AND PRIJMENI IS NOT NULL THEN JMENO || ' ' || PRIJMENI
-                        ELSE NAZEV 
-                    END AS CLIENT_NAME
-                FROM KLIENTI";
+                    string query = "SELECT * FROM A_CB_KLIENTI_VIEW";
 
                     if (UserSession.Role != "Admin")
                     {
-                        query += " WHERE ID_KLIENTA = :loggedInClientId";
+                        query += " WHERE ID_KLIENTA = :loggedInClientId"; 
                     }
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
@@ -321,7 +329,6 @@ namespace HospodaUBobra
                 {
                     selectedOrderId = Convert.ToInt32(dgvOrders.CurrentRow.Cells["OrderID"].Value);
 
-                    // Find the matching client and status in the ComboBoxes
                     string clientName = dgvOrders.CurrentRow.Cells["ClientName"].Value?.ToString() ?? string.Empty;
                     string orderStatus = dgvOrders.CurrentRow.Cells["OrderStatus"].Value?.ToString() ?? string.Empty;
 
@@ -335,13 +342,11 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    // Log or display the error if needed
                     MessageBox.Show($"Error selecting order: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                // Clear fields or handle the empty selection
                 ClearOrderFields();
             }
         }

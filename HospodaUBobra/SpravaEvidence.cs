@@ -97,15 +97,8 @@ namespace HospodaUBobra
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                bool isAdmin = false;
-                if (UserSession.Role == "Admin")
-                {
-                    isAdmin = true;
-                }
-                else
-                {
-                    isAdmin = false;
-                }
+                bool isAdmin = UserSession.Role == "Admin";
+                bool isEmulatingKlient = UserSession.EmulatedRole == "Klient";
 
                 try
                 {
@@ -134,6 +127,15 @@ namespace HospodaUBobra
                             DataTable dataTable = new DataTable();
                             adapter.Fill(dataTable);
 
+                            if (isEmulatingKlient && dataTable.Columns.Contains("CLIENT_EMAIL"))
+                            {
+                                foreach (DataRow row in dataTable.Rows)
+                                {
+                                    string email = row["CLIENT_EMAIL"].ToString();
+                                    row["CLIENT_EMAIL"] = CensureEmail(email);
+                                }
+                            }
+
                             DataGridViewFilterHelper.BindData(dgvEvidence, dataTable);
                             dgvEvidence.DataSource = dataTable;
 
@@ -149,6 +151,10 @@ namespace HospodaUBobra
                             {
                                 dgvEvidence.Columns["ID_EVIDENCE"].Visible = false;
                             }
+                            if (dgvEvidence.Columns.Contains("CLIENT_ID"))
+                            {
+                                dgvEvidence.Columns["CLIENT_ID"].Visible = false;
+                            }
                         }
                     }
                 }
@@ -158,6 +164,52 @@ namespace HospodaUBobra
                 }
             }
         }
+
+        private string CensureEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email) || !email.Contains("@"))
+            {
+                return email;
+            }
+
+            var parts = email.Split('@');
+            var username = parts[0];
+            var domain = parts[1];
+
+            if (username.Length > 2)
+            {
+                username = username.First() + new string('*', username.Length - 2) + username.Last();
+            }
+            else
+            {
+                username = new string('*', username.Length);
+            }
+
+            var domainParts = domain.Split('.');
+            if (domainParts.Length > 1)
+            {
+                var baseDomain = domainParts[0]; 
+                var topLevelDomain = string.Join(".", domainParts.Skip(1)); 
+
+                if (baseDomain.Length > 1)
+                {
+                    baseDomain = baseDomain.First() + new string('*', baseDomain.Length - 1);
+                }
+                else
+                {
+                    baseDomain = "*";
+                }
+
+                domain = $"{baseDomain}.{topLevelDomain}";
+            }
+            else
+            {
+                domain = domain.First() + new string('*', domain.Length - 1);
+            }
+
+            return $"{username}@{domain}";
+        }
+
 
         private void CalculateOrderPrice()
         {
