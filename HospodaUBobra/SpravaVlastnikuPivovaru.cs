@@ -128,24 +128,42 @@ namespace HospodaUBobra
         {
             if (dgvOwners.CurrentRow != null)
             {
-                selectedOwnerId = Convert.ToInt32(dgvOwners.CurrentRow.Cells["ID_VLASTNIKA"].Value);
-                txtJmenoNazev.Text = dgvOwners.CurrentRow.Cells["JMENO_NAZEV"].Value?.ToString();
-                txtPrijmeni.Text = dgvOwners.CurrentRow.Cells["PRIJMENI"].Value?.ToString();
-                txtUlice.Text = dgvOwners.CurrentRow.Cells["ULICE"].Value?.ToString();
-                txtCisloPopisne.Text = dgvOwners.CurrentRow.Cells["CISLO_POPISNE"].Value?.ToString();
-                txtICO.Text = dgvOwners.CurrentRow.Cells["ICO"].Value?.ToString();
-                txtDIC.Text = dgvOwners.CurrentRow.Cells["DIC"].Value?.ToString();
+                selectedOwnerId = dgvOwners.CurrentRow.Cells["ID_VLASTNIKA"].Value != DBNull.Value
+                    ? Convert.ToInt32(dgvOwners.CurrentRow.Cells["ID_VLASTNIKA"].Value)
+                    : -1;
+
+                txtJmenoNazev.Text = dgvOwners.CurrentRow.Cells["JMENO_NAZEV"].Value?.ToString() ?? string.Empty;
+                txtPrijmeni.Text = dgvOwners.CurrentRow.Cells["PRIJMENI"].Value?.ToString() ?? string.Empty;
+                txtUlice.Text = dgvOwners.CurrentRow.Cells["ULICE"].Value?.ToString() ?? string.Empty;
+                txtCisloPopisne.Text = dgvOwners.CurrentRow.Cells["CISLO_POPISNE"].Value?.ToString() ?? string.Empty;
+                txtICO.Text = dgvOwners.CurrentRow.Cells["ICO"].Value?.ToString() ?? string.Empty;
+                txtDIC.Text = dgvOwners.CurrentRow.Cells["DIC"].Value?.ToString() ?? string.Empty;
 
                 string mestoVesnice = dgvOwners.CurrentRow.Cells["MESTO_VESNICE"].Value?.ToString();
                 var selectedCity = ((List<Tuple<int, string>>)cbMestoVesnice.DataSource)
                     .FirstOrDefault(x => x.Item2 == mestoVesnice);
-                cbMestoVesnice.SelectedValue = selectedCity?.Item1;
+                cbMestoVesnice.SelectedValue = selectedCity?.Item1 ?? -1;
 
                 string druhVlastnika = dgvOwners.CurrentRow.Cells["DRUH_VLASTNIKA"].Value?.ToString();
-                cbDruhVlastnika.SelectedValue = druhVlastnika;
+                cbDruhVlastnika.SelectedValue = druhVlastnika ?? string.Empty;
+            }
+            else
+            {
+                ClearFormFields();
             }
         }
-
+        private void ClearFormFields()
+        {
+            selectedOwnerId = -1;
+            txtJmenoNazev.Clear();
+            txtPrijmeni.Clear();
+            txtUlice.Clear();
+            txtCisloPopisne.Clear();
+            txtICO.Clear();
+            txtDIC.Clear();
+            cbMestoVesnice.SelectedIndex = -1;
+            cbDruhVlastnika.SelectedIndex = -1;
+        }
         private void btnAdd_Click(object sender, EventArgs e)
         {
             if (!ValidateFields())

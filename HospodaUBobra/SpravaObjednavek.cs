@@ -27,6 +27,15 @@ namespace HospodaUBobra
             dgvOrders.ReadOnly = true;
             cbClients.DropDownStyle = ComboBoxStyle.DropDownList;
             cbOrderStatuses.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            if(UserSession.Role == "Klient" || UserSession.EmulatedRole == "Klient")
+            {
+                btnDeleteCancelledOrders.Visible = false;
+            }
+            else
+            {
+                btnDeleteCancelledOrders.Visible = true;
+            }
         }
         private void LoadOrders()
         {
@@ -368,7 +377,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    using (OracleCommand cmd = new OracleCommand("DeleteOrdersAndItems", conn))
+                    using (OracleCommand cmd = new OracleCommand("DeleteCancelledOrders", conn))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -376,6 +385,7 @@ namespace HospodaUBobra
 
                         MessageBox.Show("Zrušené objednávky a jejich evidence úspěšně odstraněna.",
                                         "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoadOrders();
                     }
                 }
             }

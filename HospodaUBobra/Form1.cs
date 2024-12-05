@@ -14,25 +14,11 @@ namespace HospodaUBobra
         string heslo = "Server2022";
         string connectionString;
 
-        private string currentRole;
-        private string currentUsername;
-        private Dictionary<string, List<string>> roleTables;
-
-        private DataTable originalDataTable;
-
         public Form1(string roleName)
         {
             InitializeComponent();
             connectionString = $"User Id={st};Password={heslo};Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fei-sql3.upceucebny.cz)(PORT=1521)))(CONNECT_DATA=(SID=BDAS)));";
 
-            currentRole = roleName;
-
-            roleTables = new Dictionary<string, List<string>>
-            {
-                { "Admin", null },
-                { "User", new List<string> { "PIVA", "PIVOVARY", "RECENZE", "MESSAGES" } },
-                { "Anonymous", new List<string> { "PIVA", "PIVOVARY", "RECENZE" } }
-            };
             comboBoxTables.SelectedIndexChanged += new EventHandler(comboBoxTables_SelectedIndexChanged);
 
             comboBoxTables.Visible = false;
@@ -1486,10 +1472,10 @@ namespace HospodaUBobra
         {
             cbEmulace.Items.Clear();
 
-            cbEmulace.Items.Add("Anonymous");
-            cbEmulace.Items.Add("User");
-            cbEmulace.Items.Add("Klient");
             cbEmulace.Items.Add("Admin");
+            cbEmulace.Items.Add("Klient");
+            cbEmulace.Items.Add("User");
+            cbEmulace.Items.Add("Anonymous");
 
             cbEmulace.SelectedItem = UserSession.Role;
         }
@@ -1504,15 +1490,13 @@ namespace HospodaUBobra
                 if (selectedRole == UserSession.Role)
                 {
                     UserSession.EmulatedRole = null;
-                    //MessageBox.Show($"Emulation turned off. Acting as: {UserSession.Role}", "Emulation Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    UserSession.EmulatedRole = selectedRole; // Set emulated role
-                    MessageBox.Show($"Now emulating role: {selectedRole}", "Emulation Enabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    UserSession.EmulatedRole = selectedRole; 
+                    MessageBox.Show($"Nyní emulujete roli: {selectedRole}", "Emulace zapnuta", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
-                // Reapply permissions
                 ApplyRolePermissions();
             }
         }

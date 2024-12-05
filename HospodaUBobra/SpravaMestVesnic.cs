@@ -215,9 +215,11 @@ namespace HospodaUBobra
 
         private void dgvMestaVesnice_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvMestaVesnice.CurrentRow != null)
+            if (dgvMestaVesnice.CurrentRow != null && dgvMestaVesnice.CurrentRow.Cells["Town_ID"].Value != DBNull.Value)
             {
-                selectedMestoId = Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["Town_ID"].Value);
+                selectedMestoId = dgvMestaVesnice.CurrentRow.Cells["Town_ID"].Value != DBNull.Value
+                    ? Convert.ToInt32(dgvMestaVesnice.CurrentRow.Cells["Town_ID"].Value)
+                    : -1;
 
                 txtNazev.Text = dgvMestaVesnice.CurrentRow.Cells["Name"].Value?.ToString() ?? string.Empty;
                 txtPocetObyvatel.Text = dgvMestaVesnice.CurrentRow.Cells["Population"].Value?.ToString() ?? string.Empty;
@@ -225,6 +227,10 @@ namespace HospodaUBobra
 
                 cbOkresy.SelectedIndex = cbOkresy.FindStringExact(dgvMestaVesnice.CurrentRow.Cells["District"].Value?.ToString() ?? string.Empty);
                 cbKraje.SelectedIndex = cbKraje.FindStringExact(dgvMestaVesnice.CurrentRow.Cells["Region"].Value?.ToString() ?? string.Empty);
+            }
+            else
+            {
+                ClearFormFields();
             }
         }
 
