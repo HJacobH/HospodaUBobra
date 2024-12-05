@@ -40,7 +40,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = @"A_DGV_PIVOVARY";
+                    string query = "SELECT * FROM A_DGV_PIVOVARY";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
@@ -293,36 +293,45 @@ namespace HospodaUBobra
         {
             if (dgvBreweries.CurrentRow != null)
             {
-                selectedBreweryId = Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ID_PIVOVARU"].Value);
+                selectedBreweryId = dgvBreweries.CurrentRow.Cells["ID_PIVOVARU"].Value is DBNull
+                    ? 0
+                    : Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ID_PIVOVARU"].Value);
 
-                txtNazev.Text = dgvBreweries.CurrentRow.Cells["NAZEV"].Value.ToString();
+                txtNazev.Text = dgvBreweries.CurrentRow.Cells["NAZEV"].Value?.ToString() ?? string.Empty;
 
-                int selectedYear = Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ROK_ZALOZENI"].Value);
+                int selectedYear = dgvBreweries.CurrentRow.Cells["ROK_ZALOZENI"].Value is DBNull
+                    ? 0
+                    : Convert.ToInt32(dgvBreweries.CurrentRow.Cells["ROK_ZALOZENI"].Value);
                 cbRokZalozeni.SelectedItem = selectedYear;
 
-                string prohlidekValue = dgvBreweries.CurrentRow.Cells["PROVOZ_PROHLIDEK"].Value.ToString();
-                cbProvozProhlidek.SelectedValue = prohlidekValue == "Ano" ? 1 : 2;
+                string prohlidkeValue = dgvBreweries.CurrentRow.Cells["PROVOZ_PROHLIDEK"].Value?.ToString() ?? "Neznámé";
+                cbProvozProhlidek.SelectedValue = prohlidkeValue == "Ano" ? 1 : 2;
 
-                string akciValue = dgvBreweries.CurrentRow.Cells["PROVOZ_AKCI"].Value.ToString();
-                cbProvozAkci.SelectedValue = akciValue == "Ano" ? 1 : 2;
+                string akceValue = dgvBreweries.CurrentRow.Cells["PROVOZ_AKCI"].Value?.ToString() ?? "Neznámé";
+                cbProvozAkci.SelectedValue = akceValue == "Ano" ? 1 : 2;
 
-                txtPopisAkci.Text = dgvBreweries.CurrentRow.Cells["POPIS_AKCI"].Value?.ToString();
+                txtPopisAkci.Text = dgvBreweries.CurrentRow.Cells["POPIS_AKCI"].Value?.ToString() ?? string.Empty;
 
-                string druhPodnikuName = dgvBreweries.CurrentRow.Cells["DRUH_PODNIKU"].Value.ToString();
+                string druhPodnikuName = dgvBreweries.CurrentRow.Cells["DRUH_PODNIKU"].Value?.ToString() ?? string.Empty;
                 var druhPodnikuItem = ((List<Tuple<int, string>>)cbDruhPodniku.DataSource)
                     .FirstOrDefault(item => item.Item2 == druhPodnikuName);
-                if (druhPodnikuItem != null)
-                {
-                    cbDruhPodniku.SelectedValue = druhPodnikuItem.Item1;
-                }
+                cbDruhPodniku.SelectedItem = druhPodnikuItem ?? null;
 
-                string mestoVesniceName = dgvBreweries.CurrentRow.Cells["MESTO_VESNICE"].Value.ToString();
+                string mestoVesniceName = dgvBreweries.CurrentRow.Cells["MESTO_VESNICE"].Value?.ToString() ?? string.Empty;
                 var mestoVesniceItem = ((List<Tuple<int, string>>)cbMestoVesnice.DataSource)
                     .FirstOrDefault(item => item.Item2 == mestoVesniceName);
-                if (mestoVesniceItem != null)
-                {
-                    cbMestoVesnice.SelectedValue = mestoVesniceItem.Item1;
-                }
+                cbMestoVesnice.SelectedItem = mestoVesniceItem ?? null;
+            }
+            else
+            {
+                selectedBreweryId = 0;
+                txtNazev.Clear();
+                cbRokZalozeni.SelectedIndex = -1;
+                cbProvozProhlidek.SelectedIndex = -1;
+                cbProvozAkci.SelectedIndex = -1;
+                txtPopisAkci.Clear();
+                cbDruhPodniku.SelectedIndex = -1;
+                cbMestoVesnice.SelectedIndex = -1;
             }
         }
 

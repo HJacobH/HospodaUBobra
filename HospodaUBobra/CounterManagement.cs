@@ -267,11 +267,12 @@ namespace HospodaUBobra
                 return false;
             }
 
-            if (!Regex.IsMatch(input, @"^[a-zA-Z0-9\s]+$"))
+            if (!Regex.IsMatch(input, @"^[a-zA-Z0-9\s\.]+$"))
             {
-                MessageBox.Show("Hodnota může obsahovat pouze písmena, číslice a mezery.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Hodnota může obsahovat pouze písmena, číslice, mezery a tečky.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
+
 
             return true;
         }
