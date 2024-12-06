@@ -33,7 +33,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    string query = "SELECT * FROM A_CB_DRUHY_PODKNIKU";
+                    string query = "SELECT * FROM A_CB_DRUHY_PODNIKU";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     using (OracleDataReader reader = cmd.ExecuteReader())
@@ -111,51 +111,49 @@ namespace HospodaUBobra
             string email = txtEmail.Text.Trim();
             string telefon = txtTelefon.Text.Trim();
             int druhPodnikuId = cbDruhPodniku.SelectedValue != null ? Convert.ToInt32(cbDruhPodniku.SelectedValue) : -1;
-            int? profilovyObrazekId = null;
-            DateTime datumRegistrace = DateTime.Now;
-            int roleId = 2;
 
-            string defaultPassword = "DefaultPassword123";
+            string defaultPassword = txtPassword.Text.Trim();
             string salt = PasswordHelper.GenerateSalt();
             string hashedPassword = PasswordHelper.HashPassword(defaultPassword, salt);
 
-            using (OracleConnection conn = new OracleConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
 
-                    string query = "CALL sprava_klienti(null, :idKlienta, :jmeno, :prijmeni, :nazev, :email, :telefon, :druhPodnikuId, :datumRegistrace, :heslo, :sul, :roleId, :profilovyObrazekId)";
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(connectionString))
+                {
+                    connection.Open();
+
+                    using (OracleCommand cmd = new OracleCommand("sprava_klienti", connection))
                     {
-                        cmd.Parameters.Add(new OracleParameter("idKlienta", OracleDbType.Int32)).Value = DBNull.Value;
-                        cmd.Parameters.Add(new OracleParameter("jmeno", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(jmeno) ? DBNull.Value : jmeno;
-                        cmd.Parameters.Add(new OracleParameter("prijmeni", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(prijmeni) ? DBNull.Value : prijmeni;
-                        cmd.Parameters.Add(new OracleParameter("nazev", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(nazev) ? DBNull.Value : nazev;
-                        cmd.Parameters.Add(new OracleParameter("email", OracleDbType.Varchar2)).Value = email;
-                        cmd.Parameters.Add(new OracleParameter("telefon", OracleDbType.Varchar2)).Value = telefon;
-                        cmd.Parameters.Add(new OracleParameter("druhPodnikuId", OracleDbType.Int32)).Value = (object)druhPodnikuId ?? DBNull.Value;
-                        cmd.Parameters.Add(new OracleParameter("datumRegistrace", OracleDbType.Date)).Value = datumRegistrace;
-                        cmd.Parameters.Add(new OracleParameter("heslo", OracleDbType.Varchar2)).Value = hashedPassword;
-                        cmd.Parameters.Add(new OracleParameter("sul", OracleDbType.Varchar2)).Value = salt;
-                        cmd.Parameters.Add(new OracleParameter("roleId", OracleDbType.Int32)).Value = roleId;
-                        cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32)).Value = (object)profilovyObrazekId ?? DBNull.Value;
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value;
+                        cmd.Parameters.Add("p_id_klienta", OracleDbType.Int32).Value = DBNull.Value; 
+                        cmd.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = jmeno;
+                        cmd.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = prijmeni;
+                        cmd.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = nazev;
+                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email;
+                        cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon;
+                        cmd.Parameters.Add("p_druh_podniku_id", OracleDbType.Int32).Value = druhPodnikuId;
+                        cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = DateTime.Now;
+                        cmd.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = hashedPassword;
+                        cmd.Parameters.Add("p_sul", OracleDbType.Varchar2).Value = salt;
+                        cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = 2; 
+                        cmd.Parameters.Add("p_profilovy_obrazek_id", OracleDbType.Int32).Value = DBNull.Value; 
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Klient úspěšně vytvořen!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        MessageBox.Show("Nový klient úspěšně přidán.");
                         LoadKlienti();
                         ClearFields();
                     }
                 }
-                catch (OracleException ex)
-                {
-                    MessageBox.Show($"Oracle error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
             }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+            }
+
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -166,7 +164,7 @@ namespace HospodaUBobra
                 return;
             }
 
-            if (!ValidateInputs())
+            if (!ValidateInputs(skipEmailCheck: true)) // Skip email check for update
             {
                 return;
             }
@@ -218,21 +216,21 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = @"
-            CALL sprava_klienti(
-                :identifikator, 
-                :idKlienta, 
-                :jmeno, 
-                :prijmeni, 
-                :nazev, 
-                :email, 
-                :telefon, 
-                :druhPodnikuId, 
-                :datumRegistrace, 
-                :heslo, 
-                :sul, 
-                :roleId, 
-                :profilovyObrazekId
-            )";
+    CALL sprava_klienti(
+        :identifikator, 
+        :idKlienta, 
+        :jmeno, 
+        :prijmeni, 
+        :nazev, 
+        :email, 
+        :telefon, 
+        :druhPodnikuId, 
+        :datumRegistrace, 
+        :heslo, 
+        :sul, 
+        :roleId, 
+        :profilovyObrazekId
+    )";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -253,7 +251,7 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32)).Value = (object)profilovyObrazekId ?? DBNull.Value;
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Kleint úspěšně aktualizován!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Klient úspěšně aktualizován!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadKlienti();
                         ClearFields();
                     }
@@ -316,7 +314,7 @@ namespace HospodaUBobra
             this.Close();
         }
 
-        private bool ValidateInputs()
+        private bool ValidateInputs(bool skipEmailCheck = false)
         {
             StringBuilder errorMessage = new StringBuilder();
 
@@ -325,9 +323,19 @@ namespace HospodaUBobra
                 errorMessage.AppendLine("Vyplňte alespoň 'Jméno a Příjmení' nebo 'Název'.");
             }
 
-            if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
+            if (!skipEmailCheck)
             {
-                errorMessage.AppendLine("Zadejte platný email.");
+                if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
+                {
+                    errorMessage.AppendLine("Zadejte platný email.");
+                }
+                else
+                {
+                    if (IsEmailInUse(txtEmail.Text))
+                    {
+                        errorMessage.AppendLine("Tento email je již použitý pro jiného klienta nebo uživatele.");
+                    }
+                }
             }
 
             if (string.IsNullOrWhiteSpace(txtTelefon.Text) || !IsValidPhoneNumber(txtTelefon.Text))
@@ -348,6 +356,43 @@ namespace HospodaUBobra
 
             return true;
         }
+
+        private bool IsEmailInUse(string email)
+        {
+            bool isInUse = false;
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string query = @"
+                SELECT COUNT(*) 
+                FROM (
+                    SELECT EMAIL FROM KLIENTI
+                    UNION
+                    SELECT EMAIL FROM UZIVATELE
+                ) 
+                WHERE UPPER(EMAIL) = :email";
+
+                    using (OracleCommand cmd = new OracleCommand(query, connection))
+                    {
+                        cmd.Parameters.Add("email", OracleDbType.Varchar2).Value = email.ToUpper();
+
+                        object result = cmd.ExecuteScalar();
+                        isInUse = Convert.ToInt32(result) > 0;
+                    }
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Error checking email: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            return isInUse;
+        }
+
 
         private bool IsValidEmail(string email)
         {

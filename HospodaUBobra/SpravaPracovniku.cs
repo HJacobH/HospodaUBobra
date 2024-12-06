@@ -161,13 +161,13 @@ namespace HospodaUBobra
                         cmd.Parameters.Add("pivovarId", OracleDbType.Int32).Value = pivovarId;
 
                         int count = Convert.ToInt32(cmd.ExecuteScalar());
-                        return count > 0; // Return true if the employee already works at the brewery
+                        return count > 0; 
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error checking existing connection: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return true; // Assume they work there if an error occurs
+                    return true; 
                 }
             }
         }

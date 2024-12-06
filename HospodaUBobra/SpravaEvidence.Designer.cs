@@ -46,7 +46,8 @@
             btnClear = new Button();
             label6 = new Label();
             txtSearch = new TextBox();
-            txtOrderId = new TextBox();
+            cbOrderId = new ComboBox();
+            lab = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvEvidence).BeginInit();
             SuspendLayout();
             // 
@@ -138,9 +139,9 @@
             // dgvEvidence
             // 
             dgvEvidence.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvEvidence.Location = new Point(16, 220);
+            dgvEvidence.Location = new Point(16, 242);
             dgvEvidence.Name = "dgvEvidence";
-            dgvEvidence.Size = new Size(458, 275);
+            dgvEvidence.Size = new Size(458, 253);
             dgvEvidence.TabIndex = 12;
             dgvEvidence.SelectionChanged += dgvEvidence_SelectionChanged;
             // 
@@ -206,25 +207,36 @@
             // 
             // txtSearch
             // 
-            txtSearch.Location = new Point(16, 191);
+            txtSearch.Location = new Point(16, 213);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new Size(458, 23);
             txtSearch.TabIndex = 19;
             txtSearch.TextChanged += txtSearch_TextChanged;
             // 
-            // txtOrderId
+            // cbOrderId
             // 
-            txtOrderId.Location = new Point(296, 143);
-            txtOrderId.Name = "txtOrderId";
-            txtOrderId.Size = new Size(100, 23);
-            txtOrderId.TabIndex = 20;
+            cbOrderId.FormattingEnabled = true;
+            cbOrderId.Location = new Point(131, 184);
+            cbOrderId.Name = "cbOrderId";
+            cbOrderId.Size = new Size(119, 23);
+            cbOrderId.TabIndex = 20;
+            // 
+            // lab
+            // 
+            lab.AutoSize = true;
+            lab.Location = new Point(12, 187);
+            lab.Name = "lab";
+            lab.Size = new Size(73, 15);
+            lab.TabIndex = 21;
+            lab.Text = "Objednávka:";
             // 
             // SpravaEvidence
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(486, 531);
-            Controls.Add(txtOrderId);
+            Controls.Add(lab);
+            Controls.Add(cbOrderId);
             Controls.Add(txtSearch);
             Controls.Add(label6);
             Controls.Add(btnClear);
@@ -270,6 +282,7 @@
         private Button btnClear;
         private Label label6;
         private TextBox txtSearch;
-        private TextBox txtOrderId;
+        private ComboBox cbOrderId;
+        private Label lab;
     }
 }

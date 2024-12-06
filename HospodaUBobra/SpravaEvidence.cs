@@ -23,11 +23,45 @@ namespace HospodaUBobra
             LoadBeers();
             LoadUnits();
             LoadEvidenceData();
+            LoadOrderIds();
 
             dgvEvidence.ReadOnly = true;
             cbBeer.DropDownStyle = ComboBoxStyle.DropDownList;
             cbUnit.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbOrderId.DropDownStyle = ComboBoxStyle.DropDownList;
         }
+
+
+        private void LoadOrderIds()
+        {
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT ID_OBJEDNAVKY FROM OBJEDNAVKY ORDER BY ID_OBJEDNAVKY";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    using (OracleDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> orderIds = new List<int>();
+                        while (reader.Read())
+                        {
+                            orderIds.Add(reader.GetInt32(0));
+                        }
+
+                        cbOrderId.DataSource = orderIds;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading order IDs: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+
+
         private void LoadBeers()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -257,9 +291,16 @@ namespace HospodaUBobra
                     ? currentRow.Cells["CENA_OBJEDNAVKY"].Value.ToString()
                     : string.Empty;
 
-                txtOrderId.Text = currentRow.Cells["CLIENT_EMAIL"].Value != DBNull.Value
-                    ? currentRow.Cells["CLIENT_EMAIL"].Value.ToString()
-                    : string.Empty;
+                // Select the appropriate Order ID in the combobox
+                if (currentRow.Cells["ORDER_ID"].Value != DBNull.Value)
+                {
+                    int orderId = Convert.ToInt32(currentRow.Cells["ORDER_ID"].Value);
+                    cbOrderId.SelectedItem = orderId;
+                }
+                else
+                {
+                    cbOrderId.SelectedIndex = -1; // Clear selection if no valid Order ID
+                }
             }
             else
             {
@@ -271,7 +312,13 @@ namespace HospodaUBobra
         {
             if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(errorMessage, "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (cbOrderId.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a valid Order ID.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -280,7 +327,7 @@ namespace HospodaUBobra
             int unitId = ((Tuple<int, string>)cbUnit.SelectedItem).Item1;
             decimal orderPrice = decimal.Parse(txtOrderPrice.Text.Trim());
             DateTime orderDate = dtpOrderDate.Value;
-            int orderId = int.Parse(txtOrderId.Text.Trim());
+            int orderId = (int)cbOrderId.SelectedItem;
 
             ManageEvidence(null, quantity, orderDate, beerId, unitId, orderPrice, orderId);
         }
@@ -289,13 +336,19 @@ namespace HospodaUBobra
         {
             if (selectedEvidenceId == -1)
             {
-                MessageBox.Show("Není vybrán žádný záznam k aktualizaci.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("No record selected for update.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show(errorMessage, "Chyba ověření vstupů", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(errorMessage, "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (cbOrderId.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a valid Order ID.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -304,7 +357,7 @@ namespace HospodaUBobra
             int unitId = ((Tuple<int, string>)cbUnit.SelectedItem).Item1;
             decimal orderPrice = decimal.Parse(txtOrderPrice.Text.Trim());
             DateTime orderDate = dtpOrderDate.Value;
-            int orderId = int.Parse(txtOrderId.Text.Trim());
+            int orderId = (int)cbOrderId.SelectedItem;
 
             ManageEvidence(selectedEvidenceId, quantity, orderDate, beerId, unitId, orderPrice, orderId);
         }
@@ -375,8 +428,8 @@ namespace HospodaUBobra
             dtpOrderDate.Value = DateTime.Now;
             cbBeer.SelectedIndex = -1;
             cbUnit.SelectedIndex = -1;
+            cbOrderId.SelectedIndex = -1; 
             txtOrderPrice.Clear();
-            txtOrderId.Clear();
         }
 
 
@@ -449,36 +502,44 @@ namespace HospodaUBobra
 
             if (!int.TryParse(txtQuantity.Text.Trim(), out int quantity) || quantity <= 0)
             {
-                errorMessage = "Prosím, zadejte platné množství (celé číslo větší než nula).";
+                errorMessage = "Please enter a valid quantity (integer greater than zero).";
                 return false;
             }
 
             if (dtpOrderDate.Value > DateTime.Now)
             {
-                errorMessage = "Datum objednávky nemůže být v budoucnosti.";
+                errorMessage = "Order date cannot be in the future.";
                 return false;
             }
 
             if (cbBeer.SelectedItem == null)
             {
-                errorMessage = "Vyberte prosím pivo.";
+                errorMessage = "Please select a beer.";
                 return false;
             }
 
             if (cbUnit.SelectedItem == null)
             {
-                errorMessage = "Vyberte prosím jednotku.";
+                errorMessage = "Please select a unit.";
+                return false;
+            }
+
+            if (cbOrderId.SelectedItem == null)
+            {
+                errorMessage = "Please select a valid Order ID.";
                 return false;
             }
 
             if (!decimal.TryParse(txtOrderPrice.Text.Trim(), out decimal orderPrice) || orderPrice <= 0)
             {
-                errorMessage = "Prosím, zadejte platnou cenu objednávky.";
+                errorMessage = "Please enter a valid order price.";
                 return false;
             }
 
             return true;
         }
+
+
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
