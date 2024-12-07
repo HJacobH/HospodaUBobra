@@ -80,6 +80,7 @@
             cbEmulace = new ComboBox();
             btnSystemKatalog = new Button();
             lblEmulace = new Label();
+            btnCsv = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -458,9 +459,9 @@
             // 
             // btnSystemKatalog
             // 
-            btnSystemKatalog.Location = new Point(835, 319);
+            btnSystemKatalog.Location = new Point(835, 312);
             btnSystemKatalog.Name = "btnSystemKatalog";
-            btnSystemKatalog.Size = new Size(121, 33);
+            btnSystemKatalog.Size = new Size(121, 40);
             btnSystemKatalog.TabIndex = 15;
             btnSystemKatalog.Text = "Systémový katalog";
             btnSystemKatalog.UseVisualStyleBackColor = true;
@@ -475,11 +476,22 @@
             lblEmulace.TabIndex = 16;
             lblEmulace.Text = "Emulace:";
             // 
+            // btnCsv
+            // 
+            btnCsv.Location = new Point(835, 274);
+            btnCsv.Name = "btnCsv";
+            btnCsv.Size = new Size(121, 32);
+            btnCsv.TabIndex = 17;
+            btnCsv.Text = "Export CSV";
+            btnCsv.UseVisualStyleBackColor = true;
+            btnCsv.Click += btnCsv_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(btnCsv);
             Controls.Add(lblEmulace);
             Controls.Add(btnSystemKatalog);
             Controls.Add(cbEmulace);
@@ -556,5 +568,6 @@
         private Button btnSystemKatalog;
         private ToolStripMenuItem vlastvnictviToolStripMenuItem;
         private Label lblEmulace;
+        private Button btnCsv;
     }
 }

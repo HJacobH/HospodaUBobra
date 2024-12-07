@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Microsoft.VisualBasic.ApplicationServices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Text;
 
 namespace HospodaUBobra
 {
@@ -234,6 +235,7 @@ namespace HospodaUBobra
                 lblEmulace.Visible = false;
                 btnLogs.Visible = false;
                 btnSystemKatalog.Visible = false;
+                btnCsv.Visible = false;
 
                 if (UserSession.Role == "Admin")
                 {
@@ -274,6 +276,7 @@ namespace HospodaUBobra
                 cbEmulace.Visible = false;
 
                 lblEmulace.Visible = false;
+                btnCsv.Visible = false;
 
                 if (UserSession.Role == "Admin")
                 {
@@ -319,6 +322,7 @@ namespace HospodaUBobra
                 }
                 btnLogs.Visible = false;
                 btnSystemKatalog.Visible = false;
+                btnCsv.Visible = false;
             }
             else if (currentRole == "Admin")
             {
@@ -351,6 +355,7 @@ namespace HospodaUBobra
                 cbEmulace.Visible = true;
                 btnSystemKatalog.Visible = true;
                 btnLogs.Visible = true;
+                btnCsv.Visible = true;
             }
 
             PopulateTableList();
@@ -1559,5 +1564,65 @@ namespace HospodaUBobra
             SpravaVlastnictvi spravaVlastnictvi = new SpravaVlastnictvi();
             spravaVlastnictvi.ShowDialog();
         }
+
+        private void ExportToCSV(DataTable table, string filePath)
+            {
+                try
+                {
+                    StringBuilder csvContent = new StringBuilder();
+
+                    for (int i = 0; i < table.Columns.Count; i++)
+                    {
+                        csvContent.Append(table.Columns[i].ColumnName);
+                        if (i < table.Columns.Count - 1)
+                            csvContent.Append(",");
+                    }
+                    csvContent.AppendLine();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        for (int i = 0; i < table.Columns.Count; i++)
+                        {
+                            csvContent.Append(row[i].ToString());
+                            if (i < table.Columns.Count - 1)
+                                csvContent.Append(",");
+                        }
+                        csvContent.AppendLine();
+                    }
+
+                    File.WriteAllText(filePath, csvContent.ToString(), Encoding.UTF8);
+
+                    MessageBox.Show($"Export úspěšně dokončen! Soubor uložen na: {filePath}",
+                                    "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Chyba při exportu: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+
+            private void btnCsv_Click(object sender, EventArgs e)
+                {
+                    if (dataGridView1.DataSource is DataTable dataTable)
+                    {
+                        using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                        {
+                            saveFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                            saveFileDialog.FileName = "exported_table.csv";
+
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string filePath = saveFileDialog.FileName;
+                                ExportToCSV(dataTable, filePath);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Žádná data k exportu. Načtěte tabulku nejdříve.",
+                                        "Upozornění", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+            }
     }
 }
