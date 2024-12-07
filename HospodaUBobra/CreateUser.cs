@@ -322,15 +322,14 @@ namespace HospodaUBobra
                 }
             }
 
-
             string newPassword = txtPassword.Text.Trim();
             string salt = currentSalt;
             string hashedPassword = currentPassword;
 
             if (!string.IsNullOrEmpty(newPassword))
             {
-                salt = PasswordHelper.GenerateSalt(); // Generate new salt
-                hashedPassword = PasswordHelper.HashPassword(newPassword, salt); // Hash new password
+                salt = PasswordHelper.GenerateSalt(); 
+                hashedPassword = PasswordHelper.HashPassword(newPassword, salt);
             }
 
              int roleId = GetRoleId(role);
