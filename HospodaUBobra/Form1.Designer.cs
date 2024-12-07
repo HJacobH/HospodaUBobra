@@ -60,6 +60,7 @@
             vlastniciToolStripMenuItem = new ToolStripMenuItem();
             spravaToolStripMenuItem = new ToolStripMenuItem();
             vlastniciSVicePivovaryToolStripMenuItem = new ToolStripMenuItem();
+            vlastvnictviToolStripMenuItem = new ToolStripMenuItem();
             hierarchiePracovnikuToolStripMenuItem = new ToolStripMenuItem();
             topMestaToolStripMenuItem = new ToolStripMenuItem();
             spravaVyrobyToolStripMenuItem = new ToolStripMenuItem();
@@ -78,6 +79,7 @@
             txtSearch = new TextBox();
             cbEmulace = new ComboBox();
             btnSystemKatalog = new Button();
+            lblEmulace = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profilePictureBox).BeginInit();
@@ -299,7 +301,7 @@
             // 
             // vlastniciToolStripMenuItem
             // 
-            vlastniciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { spravaToolStripMenuItem, vlastniciSVicePivovaryToolStripMenuItem });
+            vlastniciToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { spravaToolStripMenuItem, vlastniciSVicePivovaryToolStripMenuItem, vlastvnictviToolStripMenuItem });
             vlastniciToolStripMenuItem.Name = "vlastniciToolStripMenuItem";
             vlastniciToolStripMenuItem.Size = new Size(190, 22);
             vlastniciToolStripMenuItem.Text = "Vlastníci";
@@ -317,6 +319,13 @@
             vlastniciSVicePivovaryToolStripMenuItem.Size = new Size(198, 22);
             vlastniciSVicePivovaryToolStripMenuItem.Text = "Vlastníci s více pivovary";
             vlastniciSVicePivovaryToolStripMenuItem.Click += vlastniciSVicePivovaryToolStripMenuItem_Click;
+            // 
+            // vlastvnictviToolStripMenuItem
+            // 
+            vlastvnictviToolStripMenuItem.Name = "vlastvnictviToolStripMenuItem";
+            vlastvnictviToolStripMenuItem.Size = new Size(198, 22);
+            vlastvnictviToolStripMenuItem.Text = "Vlastvnictví";
+            vlastvnictviToolStripMenuItem.Click += vlastvnictviToolStripMenuItem_Click;
             // 
             // hierarchiePracovnikuToolStripMenuItem
             // 
@@ -441,7 +450,7 @@
             // cbEmulace
             // 
             cbEmulace.FormattingEnabled = true;
-            cbEmulace.Location = new Point(835, 161);
+            cbEmulace.Location = new Point(835, 192);
             cbEmulace.Name = "cbEmulace";
             cbEmulace.Size = new Size(121, 23);
             cbEmulace.TabIndex = 14;
@@ -457,11 +466,21 @@
             btnSystemKatalog.UseVisualStyleBackColor = true;
             btnSystemKatalog.Click += btnSystemKatalog_Click;
             // 
+            // lblEmulace
+            // 
+            lblEmulace.AutoSize = true;
+            lblEmulace.Location = new Point(835, 174);
+            lblEmulace.Name = "lblEmulace";
+            lblEmulace.Size = new Size(55, 15);
+            lblEmulace.TabIndex = 16;
+            lblEmulace.Text = "Emulace:";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 450);
+            Controls.Add(lblEmulace);
             Controls.Add(btnSystemKatalog);
             Controls.Add(cbEmulace);
             Controls.Add(txtSearch);
@@ -535,5 +554,7 @@
         private TextBox txtSearch;
         private ComboBox cbEmulace;
         private Button btnSystemKatalog;
+        private ToolStripMenuItem vlastvnictviToolStripMenuItem;
+        private Label lblEmulace;
     }
 }

@@ -27,6 +27,7 @@ namespace HospodaUBobra
             PopulateTableList();
             btnLogout.Enabled = false;
             currentUserLabel.Text = "Anonymous";
+            cbEmulace.DropDownStyle = ComboBoxStyle.DropDownList;
 
             UserSession.EmulatedRole = null;
 
@@ -230,12 +231,14 @@ namespace HospodaUBobra
                 SpravaCiselnikuToolStrip.Visible = false;
 
                 cbEmulace.Visible = false;
+                lblEmulace.Visible = false;
                 btnLogs.Visible = false;
                 btnSystemKatalog.Visible = false;
 
                 if (UserSession.Role == "Admin")
                 {
                     cbEmulace.Visible = true;
+                    lblEmulace.Visible = true;
                 }
             }
             else if (currentRole == "User")
@@ -269,9 +272,13 @@ namespace HospodaUBobra
 
                 btnSystemKatalog.Visible = false;
                 cbEmulace.Visible = false;
+
+                lblEmulace.Visible = false;
+
                 if (UserSession.Role == "Admin")
                 {
                     cbEmulace.Visible = true;
+                    lblEmulace.Visible = true;
                 }
                 btnLogs.Visible = false;
             }
@@ -294,11 +301,21 @@ namespace HospodaUBobra
                 spravaObjednavekToolStripMenuItem.Visible = true;
                 splneneObjednavkyToolStripMenuItem.Visible = true;
 
+                zamestnanciToolStripMenuItem.Visible = false;
+                vyrobkyToolStripMenuItem.Visible = false;
+                objednavkyToolStripMenuItem1.Visible = false;
+                spravaPivovaruToolStripMenuItem.Visible = false;
+                vlastniciToolStripMenuItem.Visible = false;
+                hierarchiePracovnikuToolStripMenuItem.Visible = false;
+                spravaVyrobyToolStripMenuItem.Visible = false;
+
                 SpravaCiselnikuToolStrip.Visible = false;
                 cbEmulace.Visible = false;
+                lblEmulace.Visible = false;
                 if (UserSession.Role == "Admin")
                 {
                     cbEmulace.Visible = true;
+                    lblEmulace.Visible = true;
                 }
                 btnLogs.Visible = false;
                 btnSystemKatalog.Visible = false;
@@ -330,6 +347,7 @@ namespace HospodaUBobra
                 objednavkyToolStripMenuItem.Visible = true;
                 SpravaCiselnikuToolStrip.Visible = true;
 
+                lblEmulace.Visible = true;
                 cbEmulace.Visible = true;
                 btnSystemKatalog.Visible = true;
                 btnLogs.Visible = true;
@@ -1476,10 +1494,10 @@ namespace HospodaUBobra
         {
             cbEmulace.Items.Clear();
 
-            cbEmulace.Items.Add("Admin");
-            cbEmulace.Items.Add("Klient");
-            cbEmulace.Items.Add("User");
             cbEmulace.Items.Add("Anonymous");
+            cbEmulace.Items.Add("User");
+            cbEmulace.Items.Add("Klient");
+            cbEmulace.Items.Add("Admin");
 
             cbEmulace.SelectedItem = UserSession.Role;
         }
@@ -1534,6 +1552,12 @@ namespace HospodaUBobra
                     MessageBox.Show($"Error loading system catalog: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void vlastvnictviToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpravaVlastnictvi spravaVlastnictvi = new SpravaVlastnictvi();
+            spravaVlastnictvi.ShowDialog();
         }
     }
 }
