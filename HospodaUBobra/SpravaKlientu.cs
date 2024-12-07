@@ -164,7 +164,7 @@ namespace HospodaUBobra
                 return;
             }
 
-            if (!ValidateInputs(skipEmailCheck: true)) // Skip email check for update
+            if (!ValidateInputs(skipEmailCheck: true))
             {
                 return;
             }
@@ -175,23 +175,18 @@ namespace HospodaUBobra
             string email = txtEmail.Text.Trim();
             string telefon = txtTelefon.Text.Trim();
             int druhPodnikuId = cbDruhPodniku.SelectedValue != null ? Convert.ToInt32(cbDruhPodniku.SelectedValue) : -1;
-            if (druhPodnikuId == null)
-            {
-                MessageBox.Show("Chyba: Druh Podniku není vybrán nebo je neplatný.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
             int? profilovyObrazekId = null;
             DateTime datumRegistrace = DateTime.Now;
             int roleId = 2; // Fixed role ID for clients (Klient role)
 
             string currentPassword = null;
             string currentSalt = null;
+            int? currentProfilePictureId = null;
 
-            // Retrieve current password and salt from the database if the password field is empty
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT HESLO, SUL FROM KLIENTI WHERE ID_KLIENTA = :idKlienta";
+                string query = "SELECT HESLO, SUL, PROFILE_OBRAZKY_ID FROM KLIENTI WHERE ID_KLIENTA = :idKlienta";
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
                     cmd.Parameters.Add(new OracleParameter("idKlienta", OracleDbType.Int32)).Value = selectedKlientId;
@@ -201,13 +196,27 @@ namespace HospodaUBobra
                         {
                             currentPassword = reader["HESLO"] as string;
                             currentSalt = reader["SUL"] as string;
+                            currentProfilePictureId = reader["PROFILE_OBRAZKY_ID"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(reader["PROFILE_OBRAZKY_ID"]);
                         }
                     }
                 }
             }
 
+            //string newPassword = txtPassword.Text.Trim();
+            //string hashedPassword = string.IsNullOrEmpty(newPassword) ? currentPassword : PasswordHelper.HashPassword(newPassword, PasswordHelper.GenerateSalt());
+
             string newPassword = txtPassword.Text.Trim();
-            string hashedPassword = string.IsNullOrEmpty(newPassword) ? currentPassword : PasswordHelper.HashPassword(newPassword, PasswordHelper.GenerateSalt());
+            string salt = currentSalt; // Use existing salt by default
+            string hashedPassword = currentPassword; // Use existing password by default
+
+            // Step 2: Update password and salt if a new password is provided
+            if (!string.IsNullOrEmpty(newPassword))
+            {
+                salt = PasswordHelper.GenerateSalt(); // Generate new salt
+                hashedPassword = PasswordHelper.HashPassword(newPassword, salt); // Hash new password
+            }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -216,21 +225,21 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = @"
-    CALL sprava_klienti(
-        :identifikator, 
-        :idKlienta, 
-        :jmeno, 
-        :prijmeni, 
-        :nazev, 
-        :email, 
-        :telefon, 
-        :druhPodnikuId, 
-        :datumRegistrace, 
-        :heslo, 
-        :sul, 
-        :roleId, 
-        :profilovyObrazekId
-    )";
+CALL sprava_klienti(
+    :identifikator, 
+    :idKlienta, 
+    :jmeno, 
+    :prijmeni, 
+    :nazev, 
+    :email, 
+    :telefon, 
+    :druhPodnikuId, 
+    :datumRegistrace, 
+    :heslo, 
+    :sul, 
+    :roleId, 
+    :profilovyObrazekId
+)";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -245,10 +254,11 @@ namespace HospodaUBobra
                         cmd.Parameters.Add(new OracleParameter("datumRegistrace", OracleDbType.Date)).Value = datumRegistrace;
 
                         cmd.Parameters.Add(new OracleParameter("heslo", OracleDbType.Varchar2)).Value = hashedPassword ?? (object)DBNull.Value;
-                        cmd.Parameters.Add(new OracleParameter("sul", OracleDbType.Varchar2)).Value = string.IsNullOrEmpty(newPassword) ? currentSalt : PasswordHelper.GenerateSalt();
+                        cmd.Parameters.Add(new OracleParameter("sul", OracleDbType.Varchar2)).Value = salt ?? (object)DBNull.Value;
 
                         cmd.Parameters.Add(new OracleParameter("roleId", OracleDbType.Int32)).Value = roleId;
-                        cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32)).Value = (object)profilovyObrazekId ?? DBNull.Value;
+                        cmd.Parameters.Add(new OracleParameter("profilovyObrazekId", OracleDbType.Int32))
+                        .Value = profilovyObrazekId ?? currentProfilePictureId ?? (object)DBNull.Value;
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Klient úspěšně aktualizován!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);

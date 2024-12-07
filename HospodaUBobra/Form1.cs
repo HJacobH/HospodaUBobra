@@ -1171,7 +1171,8 @@ namespace HospodaUBobra
                             using (OracleCommand cmdUpdateProfile = new OracleCommand(updateQuery, connection))
                             {
                                 cmdUpdateProfile.CommandType = CommandType.Text;
-                                cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.Role; //OVER HERE
+                                cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
+                                //OVER HERE
 
                                 cmdUpdateProfile.ExecuteNonQuery();
                                 MessageBox.Show($"{tableName} profile picture ID set to NULL.");

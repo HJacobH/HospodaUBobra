@@ -37,7 +37,7 @@ namespace HospodaUBobra
                 conn.Open();
 
                 string query = @"
-            SELECT * FROM A_DGV_ZAMESTNANCI";
+                    SELECT * FROM A_DGV_ZAMESTNANCI";
 
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
