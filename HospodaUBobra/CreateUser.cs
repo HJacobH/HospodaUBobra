@@ -86,7 +86,7 @@ namespace HospodaUBobra
             string password = txtPassword.Text;
             string role = comboBoxRole.SelectedItem?.ToString();
 
-            if (!ValidateInputs(username, email, telefon, password, role))
+            if (!ValidateInputs(false))
             {
                 return;
             }
@@ -113,7 +113,7 @@ namespace HospodaUBobra
                     cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword;
                     cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt;
                     cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
-                    cmd.Parameters.Add("p_profile_picture", OracleDbType.Blob).Value = DBNull.Value;
+                    cmd.Parameters.Add("p_profile_picture", OracleDbType.Int32).Value = DBNull.Value;
 
                     try
                     {
@@ -129,39 +129,98 @@ namespace HospodaUBobra
             }
         }
 
-        private bool ValidateInputs(string username, string email, string telefon, string password, string role)
+        private bool ValidateInputs(bool skipEmailCheck = false)
         {
-            if (string.IsNullOrWhiteSpace(username) || username.Length > 50 || !Regex.IsMatch(username, @"^[a-zA-Z0-9]+$"))
+            StringBuilder errorMessage = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(txtUsername.Text))
             {
-                MessageBox.Show("Uživatelské jméno musí být alfanumerické a kratší než 50 znaků.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                errorMessage.AppendLine("Vyplňte alespoň 'Jméno a Příjmení' nebo 'Název'.");
             }
 
-            if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            if (!skipEmailCheck)
             {
-                MessageBox.Show("Zadejte platnou e-mailovou adresu.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
+                {
+                    errorMessage.AppendLine("Zadejte platný email.");
+                }
+                else
+                {
+                    if (IsEmailInUse(txtEmail.Text))
+                    {
+                        errorMessage.AppendLine("Tento email je již použitý pro jiného klienta nebo uživatele.");
+                    }
+                }
             }
 
-            if (string.IsNullOrWhiteSpace(telefon) || telefon.Length > 15 || !Regex.IsMatch(telefon, @"^\d+$"))
+            if (string.IsNullOrWhiteSpace(txtTelefon.Text) || !IsValidPhoneNumber(txtTelefon.Text))
             {
-                MessageBox.Show("Telefonní číslo musí obsahovat pouze čísla a být kratší než 15 znaků.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                errorMessage.AppendLine("Zadejte platné telefonní číslo.");
             }
 
-            if (string.IsNullOrWhiteSpace(password) || password.Length < 8 || password.Length > 50)
-            {
-                MessageBox.Show("Heslo musí být mezi 8 a 50 znaky.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
 
-            if (string.IsNullOrEmpty(role))
+            if (errorMessage.Length > 0)
             {
-                MessageBox.Show("Vyberte roli uživatele.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(errorMessage.ToString(), "Chyba validace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
             return true;
+        }
+
+        private bool IsEmailInUse(string email)
+        {
+            bool isInUse = false;
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string query = @"
+                SELECT COUNT(*) 
+                FROM (
+                    SELECT EMAIL FROM KLIENTI
+                    UNION
+                    SELECT EMAIL FROM UZIVATELE
+                ) 
+                WHERE UPPER(EMAIL) = :email";
+
+                    using (OracleCommand cmd = new OracleCommand(query, connection))
+                    {
+                        cmd.Parameters.Add("email", OracleDbType.Varchar2).Value = email.ToUpper();
+
+                        object result = cmd.ExecuteScalar();
+                        isInUse = Convert.ToInt32(result) > 0;
+                    }
+                }
+            }
+            catch (OracleException ex)
+            {
+                MessageBox.Show("Error checking email: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            return isInUse;
+        }
+
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var mailAddress = new System.Net.Mail.MailAddress(email);
+                return mailAddress.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsValidPhoneNumber(string phoneNumber)
+        {
+            return phoneNumber.All(char.IsDigit) && phoneNumber.Length >= 9 && phoneNumber.Length <= 15;
         }
 
         private int GetNextUserId()
@@ -225,104 +284,101 @@ namespace HospodaUBobra
 
             int userId = Convert.ToInt32(dataGridViewUsers.CurrentRow.Cells["ID_UZIVATELE"].Value);
 
+            if (!ValidateInputs(skipEmailCheck: true))
+            {
+                return;
+            }
+
+            string username = txtUsername.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string telefon = txtTelefon.Text.Trim();
+            string password = txtPassword.Text.Trim();
+            string role = comboBoxRole.SelectedItem?.ToString();
+
+            // Variables to store current values
             string currentPassword = null;
             string currentSalt = null;
-            DateTime? currentRegistrationDate = null;
-            int currentProfilePicture = 0;
+            DateTime datumRegistrace = DateTime.Now;
+            int? currentProfilePictureId = null;
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT PASSWORD, SALT, DATUM_REGISTRACE FROM UZIVATELE WHERE ID_UZIVATELE = :userId";
-                string pictureQuery = @"
-                    SELECT 
-                        P.ID_PICTURE
-                    FROM 
-                        PROFILOVE_OBRAZKY P
-                    WHERE 
-                        P.ID_PICTURE = (SELECT U.PROFILE_OBRAZKY_ID FROM UZIVATELE U WHERE U.ID_UZIVATELE = :userId)";
-
-
-
-
+                string query = "SELECT PASSWORD, SALT, PROFILE_OBRAZKY_ID FROM UZIVATELE WHERE ID_UZIVATELE = :userId";
                 using (OracleCommand cmd = new OracleCommand(query, conn))
                 {
                     cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
-
                     using (OracleDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
                             currentPassword = reader["PASSWORD"] as string;
                             currentSalt = reader["SALT"] as string;
-                            currentRegistrationDate = reader["DATUM_REGISTRACE"] as DateTime?;
-                        }
-                    }
-                }
-                using (OracleCommand cmd = new OracleCommand(pictureQuery, conn))
-                {
-                    cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
-
-                    using (OracleDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            currentProfilePicture = Convert.ToInt32(reader["ID_PICTURE"]);
+                            currentProfilePictureId = reader["PROFILE_OBRAZKY_ID"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(reader["PROFILE_OBRAZKY_ID"]);
                         }
                     }
                 }
             }
 
-            string username = txtUsername.Text.Trim();
-            string email = txtEmail.Text.Trim();
-            string telefon = txtTelefon.Text.Trim();
-            string password = txtPassword.Text;
-            string role = comboBoxRole.SelectedItem?.ToString();
 
-            if (!ValidateInputs(username, email, telefon, password, role))
+            string newPassword = txtPassword.Text.Trim();
+            string salt = currentSalt;
+            string hashedPassword = currentPassword;
+
+            if (!string.IsNullOrEmpty(newPassword))
             {
-                return;
+                salt = PasswordHelper.GenerateSalt(); // Generate new salt
+                hashedPassword = PasswordHelper.HashPassword(newPassword, salt); // Hash new password
             }
 
-            string salt = string.IsNullOrEmpty(password) ? currentSalt : PasswordHelper.GenerateSalt();
-            string hashedPassword = string.IsNullOrEmpty(password) ? currentPassword : PasswordHelper.HashPassword(password, salt);
+             int roleId = GetRoleId(role);
 
-            DateTime registrationDate = currentRegistrationDate ?? DateTime.Now;
-
-            int roleId = GetRoleId(role);
-
+            // Step 4: Update user using stored procedure
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
-                conn.Open();
-                OracleTransaction transaction = conn.BeginTransaction();
-
                 try
                 {
-                    using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
+                    conn.Open();
+                    string updateQuery = @"
+            CALL sprava_uzivatele(
+                :identifikator, 
+                :id_uzivatele, 
+                :uzivatelske_jmeno, 
+                :email, 
+                :telefon, 
+                :datum_registrace, 
+                :password, 
+                :salt, 
+                :role_id, 
+                :profile_obrazky_id
+            )";
+
+                    using (OracleCommand cmdUpdate = new OracleCommand(updateQuery, conn))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmdUpdate.Parameters.Add("identifikator", OracleDbType.Int32).Value = userId;
+                        cmdUpdate.Parameters.Add("id_uzivatele", OracleDbType.Int32).Value = userId;
+                        cmdUpdate.Parameters.Add("uzivatelske_jmeno", OracleDbType.Varchar2).Value = string.IsNullOrEmpty(username) ? DBNull.Value : username;
+                        cmdUpdate.Parameters.Add("email", OracleDbType.Varchar2).Value = string.IsNullOrEmpty(email) ? DBNull.Value : email;
+                        cmdUpdate.Parameters.Add("telefon", OracleDbType.Varchar2).Value = string.IsNullOrEmpty(telefon) ? DBNull.Value : telefon;
+                        cmdUpdate.Parameters.Add("datum_registrace", OracleDbType.Date).Value = datumRegistrace;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = 1;
-                        cmd.Parameters.Add("p_id_uzivatele", OracleDbType.Int32).Value = userId;
-                        cmd.Parameters.Add("p_uzivatelske_jmeno", OracleDbType.Varchar2).Value = username ?? (object)DBNull.Value;
-                        cmd.Parameters.Add("p_email", OracleDbType.Varchar2).Value = email ?? (object)DBNull.Value;
-                        cmd.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = telefon ?? (object)DBNull.Value;
-                        cmd.Parameters.Add("p_datum_registrace", OracleDbType.Date).Value = registrationDate;
-                        cmd.Parameters.Add("p_password", OracleDbType.Varchar2).Value = hashedPassword ?? (object)DBNull.Value;
-                        cmd.Parameters.Add("p_salt", OracleDbType.Varchar2).Value = salt ?? (object)DBNull.Value;
-                        cmd.Parameters.Add("p_role_id", OracleDbType.Int32).Value = roleId;
-                        cmd.Parameters.Add("p_profile_obrazky_id", OracleDbType.Int32).Value = currentProfilePicture;
+                        cmdUpdate.Parameters.Add("password", OracleDbType.Varchar2).Value = hashedPassword ?? (object)DBNull.Value;
+                        cmdUpdate.Parameters.Add("salt", OracleDbType.Varchar2).Value = salt ?? (object)DBNull.Value;
+                        cmdUpdate.Parameters.Add("role_id", OracleDbType.Int32).Value = roleId;
 
-                        cmd.ExecuteNonQuery();
+                        cmdUpdate.Parameters.Add("profile_obrazky_id", OracleDbType.Int32)
+                            .Value = currentProfilePictureId ?? (object)DBNull.Value;
+
+                        cmdUpdate.ExecuteNonQuery();
                     }
 
-                    transaction.Commit();
-                    MessageBox.Show("Uživatel úspěšně aktualizován!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Uživatel úspěšně aktualizován!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadUsers();
                 }
                 catch (OracleException ex)
                 {
-                    transaction.Rollback();
                     MessageBox.Show("Chyba při aktualizaci uživatele: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
