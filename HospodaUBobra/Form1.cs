@@ -1533,7 +1533,7 @@ namespace HospodaUBobra
                     {
                         csvContent.Append(table.Columns[i].ColumnName);
                         if (i < table.Columns.Count - 1)
-                            csvContent.Append(",");
+                            csvContent.Append(";");
                     }
                     csvContent.AppendLine();
 
@@ -1543,7 +1543,7 @@ namespace HospodaUBobra
                         {
                             csvContent.Append(row[i].ToString());
                             if (i < table.Columns.Count - 1)
-                                csvContent.Append(",");
+                                csvContent.Append(";");
                         }
                         csvContent.AppendLine();
                     }
