@@ -290,7 +290,6 @@ namespace HospodaUBobra
                 cbPiva.SelectedIndex = cbPiva.FindStringExact(selectedRow.Cells["Pivo"].Value.ToString());
             }
         }
-
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             DataGridViewFilterHelper.FilterData(dataGridView1, txtSearch);
