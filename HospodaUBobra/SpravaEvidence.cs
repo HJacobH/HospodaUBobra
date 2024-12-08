@@ -176,6 +176,7 @@ namespace HospodaUBobra
                             dgvEvidence.Columns["UNIT_NAME"].HeaderText = "Jednotky";
                             dgvEvidence.Columns["CENA_OBJEDNAVKY"].HeaderText = "Cena objednavky";
                             dgvEvidence.Columns["CLIENT_EMAIL"].HeaderText = "Email klienta";
+                            dgvEvidence.Columns["ORDER_ID"].HeaderText = "Číslo objednávky";
 
                             if (dgvEvidence.Columns.Contains("ID_EVIDENCE"))
                             {

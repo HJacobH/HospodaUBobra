@@ -38,10 +38,14 @@ namespace HospodaUBobra
                     {
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+
                         DataGridViewFilterHelper.BindData(dataGridViewPozice, dt);
                         dataGridViewPozice.DataSource = dt;
 
                         dataGridViewPozice.Columns["ID_POZICE"].Visible = false;
+                        dataGridViewPozice.Columns["PARENT_ID"].Visible = false;
+
+                        dataGridViewPozice.Columns["NADRIZENY"].HeaderText = "Nadřízený";
                     }
 
                     string poziceQuery = "SELECT * FROM A_CB_POZICE_PRACOVNIKA_NO_PARENT";
@@ -129,7 +133,7 @@ namespace HospodaUBobra
                 int selectedPoziceId = Convert.ToInt32(selectedRowView["ID_POZICE"]);
 
                 int? parentId = comboBoxParentPozice.SelectedValue != null ? Convert.ToInt32(comboBoxParentPozice.SelectedValue) : -1;
-                MessageBox.Show(parentId.ToString());
+                
 
                 using (OracleConnection conn = new OracleConnection(connectionString))
                 {

@@ -1240,6 +1240,16 @@ namespace HospodaUBobra
 
                             DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
                             dataGridView1.DataSource = dataTable;
+
+                            if (dataGridView1.Columns["OWNER_ID"] != null)
+                                dataGridView1.Columns["OWNER_ID"].Visible = false;
+
+                            if (dataGridView1.Columns["OWNER_NAME"] != null)
+                                dataGridView1.Columns["OWNER_NAME"].HeaderText = "Vlastník";
+                            if (dataGridView1.Columns["TOTAL_BREWERIES"] != null)
+                                dataGridView1.Columns["TOTAL_BREWERIES"].HeaderText = "Počet";
+                            if (dataGridView1.Columns["BREWERIES_LIST"] != null)
+                                dataGridView1.Columns["BREWERIES_LIST"].HeaderText = "Pivovary";
                         }
                     }
                 }
@@ -1278,6 +1288,11 @@ namespace HospodaUBobra
 
                             DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
                             dataGridView1.DataSource = dataTable;
+
+                            if (dataGridView1.Columns["CITY_NAME"] != null)
+                                dataGridView1.Columns["CITY_NAME"].HeaderText = "Název města";
+                            if (dataGridView1.Columns["TOTAL_BREWERIES"] != null)
+                                dataGridView1.Columns["TOTAL_BREWERIES"].HeaderText = "Počet pivovarů";
                         }
                     }
                 }

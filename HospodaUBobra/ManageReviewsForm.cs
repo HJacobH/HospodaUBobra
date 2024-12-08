@@ -246,7 +246,6 @@ namespace HospodaUBobra
             int beerId = comboBoxBeers.SelectedValue != null ? Convert.ToInt32(comboBoxBeers.SelectedValue) : -1;
             int rating = cbHodnoceni.SelectedItem != null ? Convert.ToInt32(cbHodnoceni.SelectedItem) : -1;
 
-            MessageBox.Show($"DEBUG: Title: {title}, Brewery ID: {breweryId}, Beer ID: {beerId}, Rating: {rating}", "Debug Info");
 
             if (!ValidateInputs(title, reviewText, breweryId, beerId, rating))
             {
