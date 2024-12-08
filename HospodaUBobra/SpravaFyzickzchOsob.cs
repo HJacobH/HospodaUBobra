@@ -105,7 +105,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    using (OracleCommand cmd = new OracleCommand("SPRAVA_FYZICKE_OSOBY", conn))
+                    using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.SPRAVA_FYZICKE_OSOBY", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -146,7 +146,7 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    using (OracleCommand cmd = new OracleCommand("SPRAVA_FYZICKE_OSOBY", conn))
+                    using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.SPRAVA_FYZICKE_OSOBY", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 

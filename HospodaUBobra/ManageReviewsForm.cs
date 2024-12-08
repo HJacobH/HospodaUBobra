@@ -176,7 +176,7 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_recenze", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -257,7 +257,7 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_recenze", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 

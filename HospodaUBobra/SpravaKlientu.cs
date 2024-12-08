@@ -122,7 +122,7 @@ namespace HospodaUBobra
                 {
                     connection.Open();
 
-                    using (OracleCommand cmd = new OracleCommand("sprava_klienti", connection))
+                    using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_klienti", connection))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -220,7 +220,7 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = @"
-                        CALL sprava_klienti(
+                        CALL sprava_procedures_pkg.sprava_klienti(
                             :identifikator, 
                             :idKlienta, 
                             :jmeno, 

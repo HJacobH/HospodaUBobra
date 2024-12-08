@@ -99,7 +99,7 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                using (OracleCommand cmd = new OracleCommand("sprava_uzivatele", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_uzivatele", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -338,7 +338,7 @@ namespace HospodaUBobra
                 {
                     conn.Open();
                     string updateQuery = @"
-                    CALL sprava_uzivatele(
+                    CALL sprava_procedures_pkg.sprava_uzivatele(
                         :identifikator, 
                         :id_uzivatele, 
                         :uzivatelske_jmeno, 

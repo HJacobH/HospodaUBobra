@@ -104,7 +104,7 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                using (OracleCommand cmd = new OracleCommand($"SPRAVA_{selectedTable}", conn))
+                using (OracleCommand cmd = new OracleCommand($"sprava_procedures_pkg.SPRAVA_{selectedTable}", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 

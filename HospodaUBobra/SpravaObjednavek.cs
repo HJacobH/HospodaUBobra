@@ -204,7 +204,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                using (OracleCommand cmd = new OracleCommand("sprava_objednavky", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_objednavky", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -252,7 +252,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                using (OracleCommand cmd = new OracleCommand("sprava_objednavky", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_objednavky", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 

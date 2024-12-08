@@ -239,7 +239,7 @@ namespace HospodaUBobra
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
-                using (OracleCommand cmd = new OracleCommand("sprava_mesta_vesnice", conn))
+                using (OracleCommand cmd = new OracleCommand("sprava_procedures_pkg.sprava_mesta_vesnice", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
