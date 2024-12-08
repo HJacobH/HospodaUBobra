@@ -863,7 +863,7 @@ namespace HospodaUBobra
                     }
                 }
 
-                MessageBox.Show($"Profilový obrázek {(profilePictureId != null ? "aktualizován" : "nahrán")} pro {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
+                MessageBox.Show($"Profilový obrázek {(profilePictureId != null ? "aktualizován" : "nahrán")}.");
             }
         }
 

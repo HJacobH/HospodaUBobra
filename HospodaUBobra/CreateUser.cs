@@ -1,5 +1,6 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -75,8 +76,6 @@ namespace HospodaUBobra
                 dataGridViewUsers.Columns["ID_UZIVATELE"].Visible = false;
             }
         }
-
-
 
         private void btnCreate_Click(object sender, EventArgs e)
         {
@@ -392,6 +391,12 @@ namespace HospodaUBobra
 
             int userId = Convert.ToInt32(dataGridViewUsers.CurrentRow.Cells["ID_UZIVATELE"].Value);
 
+            if (UserSession.UserID == userId)
+            {
+                MessageBox.Show("Nemůžete odstranit svůj vlastní účet.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (MessageBox.Show("Opravdu chcete odstranit tohoto uživatele?", "Potvrzení", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
@@ -401,6 +406,19 @@ namespace HospodaUBobra
 
                     try
                     {
+                        int profileImageId = 0;
+
+                        using (OracleCommand cmd = new OracleCommand("SELECT PROFILE_OBRAZKY_ID FROM UZIVATELE WHERE ID_UZIVATELE = :userId", conn))
+                        {
+                            cmd.Parameters.Add(new OracleParameter("userId", OracleDbType.Int32)).Value = userId;
+
+                            object result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                            {
+                                profileImageId = Convert.ToInt32(result);
+                            }
+                        }
+
                         string deleteReviewsQuery = "DELETE FROM RECENZE WHERE ID_UZIVATELE = :userId";
                         using (OracleCommand cmd = new OracleCommand(deleteReviewsQuery, conn))
                         {
@@ -412,10 +430,18 @@ namespace HospodaUBobra
                         {
                             cmd.CommandType = CommandType.Text;
                             cmd.Parameters.Add("userId", OracleDbType.Int32).Value = userId;
-
                             cmd.ExecuteNonQuery();
                         }
 
+                        if (profileImageId > 0)
+                        {
+                            using (OracleCommand cmd = new OracleCommand("DELETE FROM PROFILOVE_OBRAZKY WHERE ID_PICTURE = :pictureId", conn))
+                            {
+                                cmd.CommandType = CommandType.Text;
+                                cmd.Parameters.Add("pictureId", OracleDbType.Int32).Value = profileImageId;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
 
                         transaction.Commit();
                         MessageBox.Show("Uživatel úspěšně odstraněn.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);

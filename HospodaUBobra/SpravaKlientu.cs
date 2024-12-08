@@ -288,27 +288,59 @@ namespace HospodaUBobra
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
+                OracleTransaction transaction = null;
+
                 try
                 {
                     conn.Open();
+                    transaction = conn.BeginTransaction();
 
-                    string query = "DELETE FROM KLIENTI WHERE ID_KLIENTA = :klientId";
-                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    int profileImageId = 0;
+                    string selectProfileImageQuery = "SELECT PROFILE_OBRAZKY_ID FROM KLIENTI WHERE ID_KLIENTA = :klientId";
+                    using (OracleCommand cmdSelect = new OracleCommand(selectProfileImageQuery, conn))
                     {
-                        cmd.Parameters.Add(new OracleParameter("klientId", OracleDbType.Int32)).Value = selectedKlientId;
+                        cmdSelect.Transaction = transaction;
+                        cmdSelect.Parameters.Add(new OracleParameter("klientId", OracleDbType.Int32)).Value = selectedKlientId;
 
-                        cmd.ExecuteNonQuery();
-                        MessageBox.Show("Klient úspěšně smazán!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        object result = cmdSelect.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            profileImageId = Convert.ToInt32(result);
+                        }
                     }
+
+                    string deleteClientQuery = "DELETE FROM KLIENTI WHERE ID_KLIENTA = :klientId";
+                    using (OracleCommand cmdDeleteClient = new OracleCommand(deleteClientQuery, conn))
+                    {
+                        cmdDeleteClient.Transaction = transaction;
+                        cmdDeleteClient.Parameters.Add(new OracleParameter("klientId", OracleDbType.Int32)).Value = selectedKlientId;
+                        cmdDeleteClient.ExecuteNonQuery();
+                    }
+
+                    if (profileImageId > 0)
+                    {
+                        string deleteProfileImageQuery = "DELETE FROM PROFILOVE_OBRAZKY WHERE ID_PICTURE = :profileImageId";
+                        using (OracleCommand cmdDeleteProfileImage = new OracleCommand(deleteProfileImageQuery, conn))
+                        {
+                            cmdDeleteProfileImage.Transaction = transaction;
+                            cmdDeleteProfileImage.Parameters.Add(new OracleParameter("profileImageId", OracleDbType.Int32)).Value = profileImageId;
+                            cmdDeleteProfileImage.ExecuteNonQuery();
+                        }
+                    }
+
+                    transaction.Commit();
+                    MessageBox.Show("Klient a jeho profilový obrázek byli úspěšně smazáni!", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     LoadKlienti();
                 }
                 catch (OracleException ex)
                 {
+                    transaction?.Rollback();
                     MessageBox.Show($"Oracle error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
+                    transaction?.Rollback();
                     MessageBox.Show($"General error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
