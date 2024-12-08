@@ -75,18 +75,15 @@ namespace HospodaUBobra
             }
         }
 
-
         private void dataGridViewPracovnici_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewPracovnici.CurrentRow != null)
             {
                 DataGridViewRow selectedRow = dataGridViewPracovnici.CurrentRow;
 
-                // Get the names from the selected row
                 string selectedPivovar = selectedRow.Cells["Pivovar"].Value.ToString();
                 string selectedZamestnanec = selectedRow.Cells["Zamestnanec"].Value.ToString();
 
-                // Set the ComboBox selected values based on names
                 cbPivovary.SelectedIndex = cbPivovary.FindStringExact(selectedPivovar);
                 cbZamestnanci.SelectedIndex = cbZamestnanci.FindStringExact(selectedZamestnanec);
             }
@@ -103,7 +100,6 @@ namespace HospodaUBobra
             int zamestnanecId = Convert.ToInt32(cbZamestnanci.SelectedValue);
             int pivovarId = Convert.ToInt32(cbPivovary.SelectedValue);
 
-            // Check if the employee already works at the selected brewery
             if (EmployeeAlreadyWorksAtBrewery(zamestnanecId, pivovarId))
             {
                 MessageBox.Show("Tento zaměstnanec již pracuje v tomto pivovaru.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -120,9 +116,8 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        // Call the procedure with NULL for p_identifikator (indicating insert)
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // NULL for insert
-                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = GenerateNewId(conn); // Generate a new ID
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
+                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = GenerateNewId(conn); 
                         cmd.Parameters.Add("p_pivovar_id", OracleDbType.Int32).Value = pivovarId;
                         cmd.Parameters.Add("p_zamestnanec_id", OracleDbType.Int32).Value = zamestnanecId;
 
@@ -130,7 +125,7 @@ namespace HospodaUBobra
 
                         MessageBox.Show("Nové přiřazení zaměstnance k pivovaru bylo úspěšně přidáno.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        LoadData(); // Reload the updated data
+                        LoadData(); 
                     }
                 }
                 catch (Exception ex)
@@ -139,8 +134,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
         private bool EmployeeAlreadyWorksAtBrewery(int zamestnanecId, int pivovarId)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -166,7 +159,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error checking existing connection: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při kontrole zda pracovník již pracuje v pivovaru: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return true; 
                 }
             }
@@ -202,7 +195,7 @@ namespace HospodaUBobra
 
                         int? selectedRowId = GetSelectedRowId();
                         cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedRowId.HasValue ? selectedRowId : (object)DBNull.Value;
-                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = selectedRowId ?? GenerateNewId(conn); // Generate a new ID if not updating
+                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = selectedRowId ?? GenerateNewId(conn);
                         cmd.Parameters.Add("p_pivovar_id", OracleDbType.Int32).Value = cbPivovary.SelectedValue;
                         cmd.Parameters.Add("p_zamestnanec_id", OracleDbType.Int32).Value = cbZamestnanci.SelectedValue;
 
@@ -217,7 +210,7 @@ namespace HospodaUBobra
                             MessageBox.Show("Nový pracovník úspěšně přidán.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
 
-                        LoadData(); // Reload the updated data
+                        LoadData();
                     }
                 }
                 catch (Exception ex)
@@ -257,7 +250,6 @@ namespace HospodaUBobra
                 return;
             }
 
-            // Get the selected row ID
             DataGridViewRow selectedRow = dataGridViewPracovnici.CurrentRow;
             int selectedId = Convert.ToInt32(selectedRow.Cells["ID"].Value);
 
@@ -287,7 +279,7 @@ namespace HospodaUBobra
                             if (rowsAffected > 0)
                             {
                                 MessageBox.Show("Záznam byl úspěšně odstraněn.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                LoadData(); // Reload data to reflect changes
+                                LoadData();
                             }
                             else
                             {
@@ -302,7 +294,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
         private void btnBack_Click(object sender, EventArgs e)
         {
             this.Close();

@@ -185,7 +185,7 @@ namespace HospodaUBobra
         {
             if (!ValidateInputs(out string firstName, out string lastName, out DateTime dob, out decimal salary, out DateTime startDate, out string favBeer, out int positionId))
             {
-                return; // Validation failed
+                return; 
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))

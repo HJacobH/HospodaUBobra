@@ -69,8 +69,6 @@ namespace HospodaUBobra
             }
         }
 
-
-
         private void btnAdd_Click(object sender, EventArgs e)
         {
             string nazevPozice = textBoxNazevPozice.Text.Trim();
@@ -110,7 +108,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             string nazevPozice = textBoxNazevPozice.Text.Trim();
@@ -142,10 +139,10 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedPoziceId; // Updating an existing pozice
-                        cmd.Parameters.Add("p_id_pozice", OracleDbType.Int32).Value = selectedPoziceId; // ID of the position being updated
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedPoziceId; 
+                        cmd.Parameters.Add("p_id_pozice", OracleDbType.Int32).Value = selectedPoziceId; 
                         cmd.Parameters.Add("p_nazev_pozice", OracleDbType.Varchar2).Value = nazevPozice;
-                        cmd.Parameters.Add("p_parent_id", OracleDbType.Int32).Value = parentId; // Handle NULL for no parent
+                        cmd.Parameters.Add("p_parent_id", OracleDbType.Int32).Value = parentId;
 
                         cmd.ExecuteNonQuery();
 
@@ -213,8 +210,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
 
         private void btnBack_Click(object sender, EventArgs e)
         {

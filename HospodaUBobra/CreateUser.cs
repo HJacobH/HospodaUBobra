@@ -198,7 +198,7 @@ namespace HospodaUBobra
             }
             catch (OracleException ex)
             {
-                MessageBox.Show("Error checking email: " + ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Chyba při ověřování emailu: " + ex.Message, "Databáze Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return isInUse;
@@ -295,7 +295,6 @@ namespace HospodaUBobra
             string password = txtPassword.Text.Trim();
             string role = comboBoxRole.SelectedItem?.ToString();
 
-            // Variables to store current values
             string currentPassword = null;
             string currentSalt = null;
             DateTime datumRegistrace = DateTime.Now;
@@ -334,25 +333,24 @@ namespace HospodaUBobra
 
              int roleId = GetRoleId(role);
 
-            // Step 4: Update user using stored procedure
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string updateQuery = @"
-            CALL sprava_uzivatele(
-                :identifikator, 
-                :id_uzivatele, 
-                :uzivatelske_jmeno, 
-                :email, 
-                :telefon, 
-                :datum_registrace, 
-                :password, 
-                :salt, 
-                :role_id, 
-                :profile_obrazky_id
-            )";
+                    CALL sprava_uzivatele(
+                        :identifikator, 
+                        :id_uzivatele, 
+                        :uzivatelske_jmeno, 
+                        :email, 
+                        :telefon, 
+                        :datum_registrace, 
+                        :password, 
+                        :salt, 
+                        :role_id, 
+                        :profile_obrazky_id
+                    )";
 
                     using (OracleCommand cmdUpdate = new OracleCommand(updateQuery, conn))
                     {

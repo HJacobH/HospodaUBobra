@@ -101,7 +101,6 @@ namespace HospodaUBobra
             }
         }
 
-
         private bool ValidateLogin(string username, string password, out string roleName, out int userId, out string tableName)
         {
             roleName = "Anonymous";
@@ -135,7 +134,7 @@ namespace HospodaUBobra
             }
             catch (Exception ex)
             {
-                MessageBox.Show("General error: " + ex.Message);
+                MessageBox.Show("Obecný error: " + ex.Message);
             }
 
             return false;
@@ -189,7 +188,6 @@ namespace HospodaUBobra
             return false;
         }
 
-
         private string HashPassword(string password, string salt)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -205,8 +203,6 @@ namespace HospodaUBobra
                 return result.ToString();
             }
         }
-
-
         private void btnBack_Click(object sender, EventArgs e)
         {
             Close();

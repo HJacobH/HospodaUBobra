@@ -25,8 +25,7 @@ namespace HospodaUBobra
 
         private void LoadHierarchyData(int pivovarId)
         {
-            var positions = new List<Position>();
-            var employees = new List<Employee>();
+            var hierarchyData = new List<string>();
 
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -34,61 +33,81 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    string positionQuery = "SELECT ID_POZICE, NAZEV_POZICE, PARENT_ID FROM POZICE_PRACOVNIKA";
-                    using (OracleCommand positionCmd = new OracleCommand(positionQuery, conn))
+                    string query = @"
+                SELECT HIERARCHY
+                FROM HIERARCHIE_ZAMESTNANCI
+                WHERE PIVOVAR_ID_PIVOVARU = :PivovarId";
+
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
-                        using (OracleDataReader reader = positionCmd.ExecuteReader())
+                        cmd.Parameters.Add(new OracleParameter("PivovarId", pivovarId));
+
+                        using (OracleDataReader reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                positions.Add(new Position
-                                {
-                                    ID = reader.GetInt32(0),
-                                    Name = reader.GetString(1),
-                                    ParentID = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2)
-                                });
+                                hierarchyData.Add(reader.GetString(0));
                             }
                         }
                     }
 
-                    string employeeQuery = @"
-                    SELECT Z.ID_ZAMESTNANCE, Z.JMENO, Z.PRIJMENI, Z.POZICE 
-                    FROM ZAMESTNANCI Z 
-                    JOIN PRACOVNICI P ON Z.ID_ZAMESTNANCE = P.ZAMESTNANEC_ID_ZAMESTNANCE
-                    WHERE P.PIVOVAR_ID_PIVOVARU = :PivovarId";
-
-                    using (OracleCommand employeeCmd = new OracleCommand(employeeQuery, conn))
-                    {
-                        employeeCmd.Parameters.Add(new OracleParameter("PivovarId", pivovarId));
-
-                        using (OracleDataReader reader = employeeCmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                employees.Add(new Employee
-                                {
-                                    ID = reader.GetInt32(0),
-                                    FirstName = reader.GetString(1),
-                                    LastName = reader.GetString(2),
-                                    PositionID = reader.GetInt32(3)
-                                });
-                            }
-                        }
-                    }
-
-                    BuildTreeView(positions, employees);
+                    DisplayHierarchy(hierarchyData);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error loading hierarchy data: {ex.Message}");
-                }
-                finally
-                {
-                    conn.Close();
+                    MessageBox.Show($"Chyba při načítání hierarchie: {ex.Message}");
                 }
             }
         }
-        public class Employee
+
+        private void DisplayHierarchy(List<string> hierarchyData)
+        {
+            treeView.Nodes.Clear();
+
+            foreach (var hierarchyPath in hierarchyData)
+            {
+                string[] nodes = hierarchyPath.Split(new[] { " -> " }, StringSplitOptions.RemoveEmptyEntries);
+                TreeNode currentNode = null;
+
+                foreach (string nodeName in nodes)
+                {
+                    if (currentNode == null)
+                    {
+                        var existingRoot = treeView.Nodes.Cast<TreeNode>()
+                            .FirstOrDefault(n => n.Text == nodeName);
+
+                        if (existingRoot == null)
+                        {
+                            currentNode = treeView.Nodes.Add(nodeName);
+                        }
+                        else
+                        {
+                            currentNode = existingRoot;
+                        }
+                    }
+                    else
+                    {
+                        var existingChild = currentNode.Nodes.Cast<TreeNode>()
+                            .FirstOrDefault(n => n.Text == nodeName);
+
+                        if (existingChild == null)
+                        {
+                            currentNode = currentNode.Nodes.Add(nodeName);
+                        }
+                        else
+                        {
+                            currentNode = existingChild;
+                        }
+                    }
+                }
+            }
+
+            treeView.ExpandAll(); 
+        }
+    
+
+
+    public class Employee
         {
             public int ID { get; set; }
             public string FirstName { get; set; }
@@ -141,33 +160,11 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error loading Pivovary: {ex.Message}");
+                    MessageBox.Show($"Chyba při načítání pivovarů: {ex.Message}");
                 }
                 finally
                 {
                     conn.Close();
-                }
-            }
-        }
-
-        private void BuildTreeView(List<Position> positions, List<Employee> employees)
-        {
-            treeView.Nodes.Clear();
-
-            var positionLookup = new Dictionary<int, Position>();
-            foreach (var position in positions)
-            {
-                positionLookup[position.ID] = position;
-            }
-
-            foreach (var position in positions)
-            {
-                if (position.ParentID == null)
-                {
-                    var rootNode = new TreeNode(position.Name);
-                    rootNode.Tag = position;
-                    treeView.Nodes.Add(rootNode);
-                    AddChildNodes(rootNode, position, positionLookup, employees);
                 }
             }
         }
@@ -207,7 +204,6 @@ namespace HospodaUBobra
         {
             this.Close();
         }
-
         private void comboBoxPivovary_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBoxPivovary.SelectedItem != null)

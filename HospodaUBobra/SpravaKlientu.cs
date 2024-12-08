@@ -116,7 +116,6 @@ namespace HospodaUBobra
             string salt = PasswordHelper.GenerateSalt();
             string hashedPassword = PasswordHelper.HashPassword(defaultPassword, salt);
 
-
             try
             {
                 using (OracleConnection connection = new OracleConnection(connectionString))
@@ -177,7 +176,7 @@ namespace HospodaUBobra
             int druhPodnikuId = cbDruhPodniku.SelectedValue != null ? Convert.ToInt32(cbDruhPodniku.SelectedValue) : -1;
             int? profilovyObrazekId = null;
             DateTime datumRegistrace = DateTime.Now;
-            int roleId = 2; // Fixed role ID for clients (Klient role)
+            int roleId = 2;
 
             string currentPassword = null;
             string currentSalt = null;
@@ -204,18 +203,14 @@ namespace HospodaUBobra
                 }
             }
 
-            //string newPassword = txtPassword.Text.Trim();
-            //string hashedPassword = string.IsNullOrEmpty(newPassword) ? currentPassword : PasswordHelper.HashPassword(newPassword, PasswordHelper.GenerateSalt());
-
             string newPassword = txtPassword.Text.Trim();
-            string salt = currentSalt; // Use existing salt by default
-            string hashedPassword = currentPassword; // Use existing password by default
+            string salt = currentSalt; 
+            string hashedPassword = currentPassword; 
 
-            // Step 2: Update password and salt if a new password is provided
             if (!string.IsNullOrEmpty(newPassword))
             {
-                salt = PasswordHelper.GenerateSalt(); // Generate new salt
-                hashedPassword = PasswordHelper.HashPassword(newPassword, salt); // Hash new password
+                salt = PasswordHelper.GenerateSalt(); 
+                hashedPassword = PasswordHelper.HashPassword(newPassword, salt); 
             }
 
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -225,21 +220,21 @@ namespace HospodaUBobra
                     conn.Open();
 
                     string query = @"
-CALL sprava_klienti(
-    :identifikator, 
-    :idKlienta, 
-    :jmeno, 
-    :prijmeni, 
-    :nazev, 
-    :email, 
-    :telefon, 
-    :druhPodnikuId, 
-    :datumRegistrace, 
-    :heslo, 
-    :sul, 
-    :roleId, 
-    :profilovyObrazekId
-)";
+                        CALL sprava_klienti(
+                            :identifikator, 
+                            :idKlienta, 
+                            :jmeno, 
+                            :prijmeni, 
+                            :nazev, 
+                            :email, 
+                            :telefon, 
+                            :druhPodnikuId, 
+                            :datumRegistrace, 
+                            :heslo, 
+                            :sul, 
+                            :roleId, 
+                            :profilovyObrazekId
+                        )";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
@@ -323,7 +318,6 @@ CALL sprava_klienti(
         {
             this.Close();
         }
-
         private bool ValidateInputs(bool skipEmailCheck = false)
         {
             StringBuilder errorMessage = new StringBuilder();
@@ -366,7 +360,6 @@ CALL sprava_klienti(
 
             return true;
         }
-
         private bool IsEmailInUse(string email)
         {
             bool isInUse = false;
@@ -378,13 +371,13 @@ CALL sprava_klienti(
                     connection.Open();
 
                     string query = @"
-                SELECT COUNT(*) 
-                FROM (
-                    SELECT EMAIL FROM KLIENTI
-                    UNION
-                    SELECT EMAIL FROM UZIVATELE
-                ) 
-                WHERE UPPER(EMAIL) = :email";
+                    SELECT COUNT(*) 
+                    FROM (
+                        SELECT EMAIL FROM KLIENTI
+                        UNION
+                        SELECT EMAIL FROM UZIVATELE
+                    ) 
+                    WHERE UPPER(EMAIL) = :email";
 
                     using (OracleCommand cmd = new OracleCommand(query, connection))
                     {
@@ -426,52 +419,44 @@ CALL sprava_klienti(
         {
             if (dgvKlienti.CurrentRow != null)
             {
-                // Check and handle ID_KLIENTA
                 if (dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value != DBNull.Value)
                 {
                     selectedKlientId = Convert.ToInt32(dgvKlienti.CurrentRow.Cells["ID_KLIENTA"].Value);
                 }
                 else
                 {
-                    selectedKlientId = -1; // Default value
+                    selectedKlientId = -1; 
                 }
 
-                // Handle JMENO
                 txtUsername.Text = dgvKlienti.CurrentRow.Cells["JMENO"].Value != DBNull.Value
                     ? dgvKlienti.CurrentRow.Cells["JMENO"].Value.ToString()
                     : string.Empty;
 
-                // Handle PRIJMENI
                 txtPrijmeni.Text = dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value != DBNull.Value
                     ? dgvKlienti.CurrentRow.Cells["PRIJMENI"].Value.ToString()
                     : string.Empty;
 
-                // Handle NAZEV
                 txtNazev.Text = dgvKlienti.CurrentRow.Cells["NAZEV"].Value != DBNull.Value
                     ? dgvKlienti.CurrentRow.Cells["NAZEV"].Value.ToString()
                     : string.Empty;
 
-                // Handle EMAIL
                 txtEmail.Text = dgvKlienti.CurrentRow.Cells["EMAIL"].Value != DBNull.Value
                     ? dgvKlienti.CurrentRow.Cells["EMAIL"].Value.ToString()
                     : string.Empty;
 
-                // Handle TELEFON
                 txtTelefon.Text = dgvKlienti.CurrentRow.Cells["TELEFON"].Value != DBNull.Value
                     ? dgvKlienti.CurrentRow.Cells["TELEFON"].Value.ToString()
                     : string.Empty;
 
-                // Handle DATUM_REGISTRACE
                 if (dgvKlienti.CurrentRow.Cells["DATUM_REGISTRACE"].Value != DBNull.Value)
                 {
                     dtpDatumRegistrace.Value = Convert.ToDateTime(dgvKlienti.CurrentRow.Cells["DATUM_REGISTRACE"].Value);
                 }
                 else
                 {
-                    dtpDatumRegistrace.Value = DateTime.Now; // Default date
+                    dtpDatumRegistrace.Value = DateTime.Now;
                 }
 
-                // Handle DRUH_PODNIKU
                 string druhPodniku = dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value != DBNull.Value
                     ? dgvKlienti.CurrentRow.Cells["DRUH_PODNIKU"].Value.ToString()
                     : string.Empty;
@@ -480,7 +465,6 @@ CALL sprava_klienti(
             }
             else
             {
-                // Reset all fields if no row is selected
                 selectedKlientId = -1;
                 txtUsername.Clear();
                 txtPrijmeni.Clear();

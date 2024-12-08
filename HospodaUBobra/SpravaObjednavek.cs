@@ -105,7 +105,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading orders: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání objednávek: " + ex.Message);
                 }
             }
 
@@ -150,7 +150,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading clients: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání klientů: " + ex.Message);
                 }
             }
         }
@@ -176,13 +176,13 @@ namespace HospodaUBobra
                         }
 
                         cbOrderStatuses.DataSource = statuses;
-                        cbOrderStatuses.DisplayMember = "Item2"; // Display order status
-                        cbOrderStatuses.ValueMember = "Item1";  // Use status ID as the value
+                        cbOrderStatuses.DisplayMember = "Item2"; 
+                        cbOrderStatuses.ValueMember = "Item1"; 
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading order statuses: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání stavu objednávky: " + ex.Message);
                 }
             }
         }
@@ -191,7 +191,7 @@ namespace HospodaUBobra
         {
             if (cbClients.SelectedItem == null || cbOrderStatuses.SelectedItem == null)
             {
-                MessageBox.Show("Please select valid client and order status.");
+                MessageBox.Show("Vyberte validního klienta a stav objednávky.");
                 return;
             }
 
@@ -208,9 +208,8 @@ namespace HospodaUBobra
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Pass parameters for adding a new order
                     cmd.Parameters.Add(new OracleParameter("p_identifikator", OracleDbType.Int32)).Value = DBNull.Value;
-                    cmd.Parameters.Add(new OracleParameter("p_id_objednavky", OracleDbType.Int32)).Value = DBNull.Value; // Let the procedure handle the ID
+                    cmd.Parameters.Add(new OracleParameter("p_id_objednavky", OracleDbType.Int32)).Value = DBNull.Value;
                     cmd.Parameters.Add(new OracleParameter("p_klient_id", OracleDbType.Int32)).Value = clientId;
                     cmd.Parameters.Add(new OracleParameter("p_stav_objednavky_id", OracleDbType.Int32)).Value = orderStatusId;
                     cmd.Parameters.Add(new OracleParameter("p_datum_obj", OracleDbType.Date)).Value = orderDate;
@@ -219,13 +218,13 @@ namespace HospodaUBobra
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Order added successfully!");
+                        MessageBox.Show("Objednávka úspěšně přidána!");
                         LoadOrders();
                         ClearFormFields();
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error adding order: " + ex.Message);
+                        MessageBox.Show("Chyba při přidávání objednávky: " + ex.Message);
                     }
                 }
             }
@@ -235,13 +234,13 @@ namespace HospodaUBobra
         {
             if (selectedOrderId == -1)
             {
-                MessageBox.Show("Please select an order to update.");
+                MessageBox.Show("Vyberta objednávku k aktualizaci.");
                 return;
             }
 
             if (cbClients.SelectedItem == null || cbOrderStatuses.SelectedItem == null)
             {
-                MessageBox.Show("Please select valid client and order status.");
+                MessageBox.Show("Vyberte validního klienta a stav objednávky.");
                 return;
             }
 
@@ -284,11 +283,11 @@ namespace HospodaUBobra
         {
             if (selectedOrderId == -1)
             {
-                MessageBox.Show("Please select an order to delete.");
+                MessageBox.Show("Vyberte objednávku ke smazání.");
                 return;
             }
 
-            DialogResult result = MessageBox.Show("Are you sure you want to delete this order?", "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show("Opravdu chcete smazat tuto objednávku?", "Potvrdit odstranění", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
                 using (OracleConnection conn = new OracleConnection(connectionString))
@@ -303,7 +302,7 @@ namespace HospodaUBobra
                             cmd.Parameters.Add(new OracleParameter(":id_objednavky", OracleDbType.Int32)).Value = selectedOrderId;
                             cmd.ExecuteNonQuery();
 
-                            MessageBox.Show("Order deleted successfully!");
+                            MessageBox.Show("Objednávka odstraněna úspěšně!");
                             LoadOrders();
                             ClearFormFields();
                             selectedOrderId = -1;
@@ -311,7 +310,7 @@ namespace HospodaUBobra
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error deleting order: " + ex.Message);
+                        MessageBox.Show("Chyba při odstraňování objednávky: " + ex.Message);
                     }
                 }
             }
@@ -351,7 +350,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error selecting order: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Chyba při vybírání objednávky: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -400,7 +399,6 @@ namespace HospodaUBobra
                                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             DataGridViewFilterHelper.FilterData(dgvOrders, txtSearch);

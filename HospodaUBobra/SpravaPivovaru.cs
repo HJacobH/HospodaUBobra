@@ -65,7 +65,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading breweries: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání pivovarů: " + ex.Message);
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading types: " + ex.Message);
+                    MessageBox.Show("Chyby při načítání druhů podniku: " + ex.Message);
                 }
             }
         }
@@ -131,12 +131,10 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading cities/villages: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání měst/vesnic: " + ex.Message);
                 }
             }
         }
-
-
 
         private void LoadYears()
         {

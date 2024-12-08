@@ -57,7 +57,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading comboboxes: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při načítání dat: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -88,12 +88,10 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při načítání dat: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
-
-
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
@@ -123,11 +121,11 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Insert mode
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
                         cmd.Parameters.Add("p_litry_za_den", OracleDbType.Int32).Value = litryZaDen;
                         cmd.Parameters.Add("p_pivovar_id", OracleDbType.Int32).Value = pivovarId;
                         cmd.Parameters.Add("p_pivo_id", OracleDbType.Int32).Value = pivoId;
-                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = DBNull.Value; // No ID needed for insert
+                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = DBNull.Value; 
 
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Nový záznam byl úspěšně přidán.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -176,7 +174,7 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedId; // Update mode
+                        cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = selectedId; 
                         cmd.Parameters.Add("p_litry_za_den", OracleDbType.Int32).Value = litryZaDen;
                         cmd.Parameters.Add("p_pivovar_id", OracleDbType.Int32).Value = pivovarId;
                         cmd.Parameters.Add("p_pivo_id", OracleDbType.Int32).Value = pivoId;
@@ -189,7 +187,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error updating record: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyby pří aktualizaci výroby: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -219,13 +217,13 @@ namespace HospodaUBobra
                         }
 
                         int count = Convert.ToInt32(cmd.ExecuteScalar());
-                        return count > 0; // Returns true if the combination exists
+                        return count > 0; 
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error checking combination: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return true; // Assume it exists in case of an error
+                    MessageBox.Show("Chyba při kontrole kombinace: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return true; 
                 }
             }
         }
@@ -285,13 +283,10 @@ namespace HospodaUBobra
             {
                 DataGridViewRow selectedRow = dataGridView1.CurrentRow;
 
-                // Set Litry za Den in TextBox
                 txtLitryZaDen.Text = selectedRow.Cells["Litry za Den"].Value.ToString();
 
-                // Set selected value for cbPivovary
                 cbPivovary.SelectedIndex = cbPivovary.FindStringExact(selectedRow.Cells["Pivovar"].Value.ToString());
 
-                // Set selected value for cbPiva
                 cbPiva.SelectedIndex = cbPiva.FindStringExact(selectedRow.Cells["Pivo"].Value.ToString());
             }
         }

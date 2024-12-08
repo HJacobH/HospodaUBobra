@@ -40,13 +40,13 @@ namespace HospodaUBobra
         {
             var druhVlastnika = new List<Tuple<string, string>>()
     {
-        new Tuple<string, string>("FO", "Physical Person"),
-        new Tuple<string, string>("PO", "Legal Person")
+        new Tuple<string, string>("FO", "Fyzická osoba"),
+        new Tuple<string, string>("PO", "Právnická osoba")
     };
 
             cbDruhVlastnika.DataSource = druhVlastnika;
-            cbDruhVlastnika.DisplayMember = "Item2"; // Display FO/PO
-            cbDruhVlastnika.ValueMember = "Item1";  // Use FO/PO as the actual value
+            cbDruhVlastnika.DisplayMember = "Item2";
+            cbDruhVlastnika.ValueMember = "Item1"; 
             cbDruhVlastnika.SelectedIndex = -1;
 
         }
@@ -79,7 +79,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading cities/villages: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání měst/vesnic: " + ex.Message);
                 }
             }
         }
@@ -117,12 +117,10 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading owners: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání vlastníků pivovarů: " + ex.Message);
                 }
             }
         }
-
-
 
         private void dgvOwners_SelectionChanged(object sender, EventArgs e)
         {
@@ -397,7 +395,7 @@ namespace HospodaUBobra
         {
             var form = new Form
             {
-                Text = "Audit Brewery Ownership Results",
+                Text = "Audit Výsledky",
                 Width = 800,
                 Height = 600
             };
@@ -427,9 +425,9 @@ namespace HospodaUBobra
         {
             var druhVlastnikaAudit = new List<Tuple<string, string>>()
             {
-                new Tuple<string, string>("", "All (No Filter)"),
-                new Tuple<string, string>("FO", "Physical Person"),
-                new Tuple<string, string>("PO", "Legal Person")
+                new Tuple<string, string>("", "Vše (Bez filtru)"),
+                new Tuple<string, string>("FO", "Fyzická osoba"),
+                new Tuple<string, string>("PO", "Právnická osoba")
             };
 
             cbDruhVlastnikaAudit.DataSource = druhVlastnikaAudit;
@@ -451,7 +449,7 @@ namespace HospodaUBobra
                     {
                         var mestaList = new List<Tuple<int?, string>>();
 
-                        mestaList.Add(new Tuple<int?, string>(null, "All (No Filter)"));
+                        mestaList.Add(new Tuple<int?, string>(null, "Vše (Bez filtru)"));
 
                         while (reader.Read())
                         {
@@ -468,7 +466,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading cities: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání měst/vesnic: " + ex.Message);
                 }
             }
         }
@@ -487,7 +485,7 @@ namespace HospodaUBobra
                     {
                         var pivovarList = new List<Tuple<int?, string>>();
 
-                        pivovarList.Add(new Tuple<int?, string>(null, "All (No Filter)"));
+                        pivovarList.Add(new Tuple<int?, string>(null, "Vše (Bez filtru)"));
 
                         while (reader.Read())
                         {
@@ -504,7 +502,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading breweries: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání pivovarů: " + ex.Message);
                 }
             }
         }

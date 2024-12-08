@@ -57,7 +57,6 @@ namespace HospodaUBobra
                 try
                 {
                     conn.Open();
-                    // Query to concatenate JMENO_NAZEV and PRIJMENI
                     string query = "SELECT * FROM A_CB_VLASTNICI_PIVOVARU_VIEW";
 
                     using (OracleCommand cmd = new OracleCommand(query, conn))
@@ -66,9 +65,8 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
 
-                        // Set ComboBox Display and Value Members
-                        cmbVlastnici.DisplayMember = "FULL_NAME"; // Display concatenated name
-                        cmbVlastnici.ValueMember = "ID_VLASTNIKA"; // Use ID as the value
+                        cmbVlastnici.DisplayMember = "FULL_NAME"; 
+                        cmbVlastnici.ValueMember = "ID_VLASTNIKA";
                         cmbVlastnici.DataSource = dt;
                     }
                 }
@@ -79,8 +77,6 @@ namespace HospodaUBobra
             }
         }
 
-
-        // Load data into DataGridView
         private void LoadVlastnictvi()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -96,14 +92,11 @@ namespace HospodaUBobra
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
 
-                        // Bind data to the DataGridView
                         DataGridViewFilterHelper.BindData(dataGridViewVlastnictvi, dt);
                         dataGridViewVlastnictvi.DataSource = dt;
 
-                        // Hide the ID column
                         dataGridViewVlastnictvi.Columns["ID"].Visible = false;
 
-                        // Set display names for the columns
                         dataGridViewVlastnictvi.Columns["PIVOVAR_NAME"].HeaderText = "Pivovar";
                         dataGridViewVlastnictvi.Columns["VLASTNIK_NAME"].HeaderText = "Vlastník";
                         dataGridViewVlastnictvi.Columns["DATUM_POCATKU_VLASTNICTVI"].HeaderText = "Datum Počátku Vlastnictví";
@@ -127,18 +120,16 @@ namespace HospodaUBobra
             {
                 DataGridViewRow row = dataGridViewVlastnictvi.CurrentRow;
 
-                // Set ComboBox values
                 cmbPivovary.Text = row.Cells["PIVOVAR_NAME"].Value.ToString();
                 cmbVlastnici.Text = row.Cells["VLASTNIK_NAME"].Value.ToString();
 
-                // Set the DateTimePicker value
                 if (row.Cells["DATUM_POCATKU_VLASTNICTVI"].Value != DBNull.Value)
                 {
                     dtpDatumPocatku.Value = Convert.ToDateTime(row.Cells["DATUM_POCATKU_VLASTNICTVI"].Value);
                 }
                 else
                 {
-                    dtpDatumPocatku.Value = DateTime.Now; // Default value if null
+                    dtpDatumPocatku.Value = DateTime.Now;
                 }
             }
         }
@@ -159,17 +150,15 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        // Parameters
-                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = DBNull.Value; // NULL for insert
+                        cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = DBNull.Value; 
                         cmd.Parameters.Add("p_datum_pocatku", OracleDbType.Date).Value = dtpDatumPocatku.Value;
                         cmd.Parameters.Add("p_pivovar_id", OracleDbType.Int32).Value = cmbPivovary.SelectedValue;
                         cmd.Parameters.Add("p_vlastnik_id", OracleDbType.Int32).Value = cmbVlastnici.SelectedValue;
 
-                        // Execute the procedure
                         cmd.ExecuteNonQuery();
 
                         MessageBox.Show("Nové vlastnictví bylo úspěšně přidáno.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadVlastnictvi(); // Refresh the DataGridView
+                        LoadVlastnictvi(); 
                     }
                 }
             }
@@ -194,17 +183,15 @@ namespace HospodaUBobra
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
 
-                            // Parameters
-                            cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = selectedId; // ID of the record to update
+                            cmd.Parameters.Add("p_id", OracleDbType.Int32).Value = selectedId;
                             cmd.Parameters.Add("p_datum_pocatku", OracleDbType.Date).Value = dtpDatumPocatku.Value;
                             cmd.Parameters.Add("p_pivovar_id", OracleDbType.Int32).Value = cmbPivovary.SelectedValue;
                             cmd.Parameters.Add("p_vlastnik_id", OracleDbType.Int32).Value = cmbVlastnici.SelectedValue;
 
-                            // Execute the procedure
                             cmd.ExecuteNonQuery();
 
                             MessageBox.Show("Vlastnictví bylo úspěšně aktualizováno.", "Úspěch", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            LoadVlastnictvi(); // Refresh the DataGridView
+                            LoadVlastnictvi();
                         }
                     }
 
@@ -238,7 +225,6 @@ namespace HospodaUBobra
                         {
                             conn.Open();
 
-                            // Simple DELETE command
                             string query = "DELETE FROM VLASTNICTVI WHERE ID = :id";
 
                             using (OracleCommand cmd = new OracleCommand(query, conn))

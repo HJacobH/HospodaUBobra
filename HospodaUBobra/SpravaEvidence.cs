@@ -31,7 +31,6 @@ namespace HospodaUBobra
             cbOrderId.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
-
         private void LoadOrderIds()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -59,9 +58,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
-
         private void LoadBeers()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -291,7 +287,6 @@ namespace HospodaUBobra
                     ? currentRow.Cells["CENA_OBJEDNAVKY"].Value.ToString()
                     : string.Empty;
 
-                // Select the appropriate Order ID in the combobox
                 if (currentRow.Cells["ORDER_ID"].Value != DBNull.Value)
                 {
                     int orderId = Convert.ToInt32(currentRow.Cells["ORDER_ID"].Value);
@@ -299,7 +294,7 @@ namespace HospodaUBobra
                 }
                 else
                 {
-                    cbOrderId.SelectedIndex = -1; // Clear selection if no valid Order ID
+                    cbOrderId.SelectedIndex = -1;
                 }
             }
             else
@@ -312,13 +307,13 @@ namespace HospodaUBobra
         {
             if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show(errorMessage, "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(errorMessage, "Chyba při validaci", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (cbOrderId.SelectedItem == null)
             {
-                MessageBox.Show("Please select a valid Order ID.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vyberte platnou objednávku.", "Chyba vstupu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -336,19 +331,13 @@ namespace HospodaUBobra
         {
             if (selectedEvidenceId == -1)
             {
-                MessageBox.Show("No record selected for update.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Žádná evidence nebyla vybrána pro aktualizace.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (!ValidateInputs(out string errorMessage))
             {
-                MessageBox.Show(errorMessage, "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (cbOrderId.SelectedItem == null)
-            {
-                MessageBox.Show("Please select a valid Order ID.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(errorMessage, "Chyba při validaci", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -366,13 +355,13 @@ namespace HospodaUBobra
         {
             if (selectedEvidenceId == -1)
             {
-                MessageBox.Show("Please select an evidence record to delete.");
+                MessageBox.Show("Vyberte evidenci ke smazání.");
                 return;
             }
 
             DialogResult result = MessageBox.Show(
-                "Are you sure you want to delete this evidence record?",
-                "Confirm Deletion",
+                "Opravdu chcete odstranit tuto recenzi?",
+                "Potvrdit odstranění",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning
             );
@@ -394,14 +383,14 @@ namespace HospodaUBobra
 
                             if (rowsAffected > 0)
                             {
-                                MessageBox.Show("Evidence record deleted successfully!");
+                                MessageBox.Show("Evidence úspěšně odstraněna!");
                                 LoadEvidenceData();
                                 selectedEvidenceId = -1;
                                 ClearFormFields();
                             }
                             else
                             {
-                                MessageBox.Show("No evidence record found with the selected ID.");
+                                MessageBox.Show("Evidence nenalezena.");
                             }
                         }
                     }
@@ -411,7 +400,7 @@ namespace HospodaUBobra
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("General error: " + ex.Message);
+                        MessageBox.Show("Obecná error: " + ex.Message);
                     }
                 }
             }
@@ -431,7 +420,6 @@ namespace HospodaUBobra
             cbOrderId.SelectedIndex = -1; 
             txtOrderPrice.Clear();
         }
-
 
         private void btnBack_Click(object sender, EventArgs e)
         {
@@ -464,13 +452,13 @@ namespace HospodaUBobra
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        string message = idEvidence.HasValue ? "Evidence updated successfully!" : "Evidence added successfully!";
+                        string message = idEvidence.HasValue ? "Evidence aktualizována úspěšně!" : "Evidence přidána úspěšně!";
                         MessageBox.Show(message);
                         LoadEvidenceData();
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error managing evidence: " + ex.Message);
+                        MessageBox.Show("Chyba: " + ex.Message);
                     }
                 }
             }
@@ -502,44 +490,42 @@ namespace HospodaUBobra
 
             if (!int.TryParse(txtQuantity.Text.Trim(), out int quantity) || quantity <= 0)
             {
-                errorMessage = "Please enter a valid quantity (integer greater than zero).";
+                errorMessage = "Vyberte platné množství (číslo větší než 0).";
                 return false;
             }
 
             if (dtpOrderDate.Value > DateTime.Now)
             {
-                errorMessage = "Order date cannot be in the future.";
+                errorMessage = "Datum nemůže být v budoucnosti.";
                 return false;
             }
 
             if (cbBeer.SelectedItem == null)
             {
-                errorMessage = "Please select a beer.";
+                errorMessage = "Vyberte pivo.";
                 return false;
             }
 
             if (cbUnit.SelectedItem == null)
             {
-                errorMessage = "Please select a unit.";
+                errorMessage = "Vyberte jednotku.";
                 return false;
             }
 
             if (cbOrderId.SelectedItem == null)
             {
-                errorMessage = "Please select a valid Order ID.";
+                errorMessage = "Vyberte platnou objednávku.";
                 return false;
             }
 
             if (!decimal.TryParse(txtOrderPrice.Text.Trim(), out decimal orderPrice) || orderPrice <= 0)
             {
-                errorMessage = "Please enter a valid order price.";
+                errorMessage = "Zadejte platnou cenu.";
                 return false;
             }
 
             return true;
         }
-
-
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {

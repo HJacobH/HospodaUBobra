@@ -136,7 +136,6 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // 1. Generování dynamického seznamu sloupců
                     string columnQuery = $@"
                         SELECT LISTAGG(column_name, ', ') WITHIN GROUP (ORDER BY column_id)
                         FROM user_tab_columns 
@@ -151,14 +150,13 @@ namespace HospodaUBobra
                         {
                             if (reader.Read())
                             {
-                                columns = reader.GetString(0); // Načte dynamicky vytvořený seznam sloupců
+                                columns = reader.GetString(0);
                             }
                         }
                     }
 
                     if (!string.IsNullOrEmpty(columns))
                     {
-                        // 2. Vytvoření a vykonání dotazu s dynamickými sloupci
                         string dataQuery = $"SELECT {columns} FROM {tableName}";
 
                         using (OracleCommand cmd = new OracleCommand(dataQuery, conn))
@@ -174,7 +172,7 @@ namespace HospodaUBobra
                     }
                     else
                     {
-                        MessageBox.Show("No columns found to query.");
+                        MessageBox.Show("Žádné sloupce nenalezeny.");
                     }
 
                     conn.Close();
@@ -360,8 +358,6 @@ namespace HospodaUBobra
 
             PopulateTableList();
         }
-
-
 
         private void btnShowKlientObj_Click(object sender, EventArgs e)
         {
@@ -557,14 +553,11 @@ namespace HospodaUBobra
                     }
                 }
 
-                // Step 2: Check if the entity has an associated profile picture
                 if (profilePictureId == null)
                 {
-                    // Return null if no profile picture is associated
                     return null;
                 }
 
-                // Step 3: Fetch the profile picture from the PROFILOVE_OBRAZKY table
                 string pictureQuery = "SELECT PICTURE FROM PROFILOVE_OBRAZKY WHERE ID_PICTURE = :profilePictureId";
                 using (OracleCommand cmdFetchPicture = new OracleCommand(pictureQuery, conn))
                 {
@@ -585,12 +578,8 @@ namespace HospodaUBobra
                 }
             }
 
-            // Return null if no profile picture is found
             return null;
         }
-
-
-
 
         private void registerStipItem_Click(object sender, EventArgs e)
         {
@@ -649,7 +638,6 @@ namespace HospodaUBobra
                 MessageBox.Show("General error: " + ex.Message);
             }
         }
-
         private void zamestnanciToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -796,7 +784,6 @@ namespace HospodaUBobra
             string fileExtension = Path.GetExtension(fileName);
             byte[] profilePictureData;
 
-            // Convert Image to byte array
             using (var ms = new MemoryStream())
             {
                 profilePicture.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
@@ -811,7 +798,6 @@ namespace HospodaUBobra
                 string tableName = isClient ? "KLIENTI" : "UZIVATELE";
                 string idColumn = isClient ? "ID_KLIENTA" : "ID_UZIVATELE";
 
-                // Step 1: Retrieve the PROFILE_OBRAZKY_ID from the appropriate table
                 string selectQuery = $"SELECT PROFILE_OBRAZKY_ID FROM {tableName} WHERE {idColumn} = :id";
                 using (OracleCommand cmdFetchProfile = new OracleCommand(selectQuery, connection))
                 {
@@ -829,14 +815,13 @@ namespace HospodaUBobra
                     }
                 }
 
-                // Step 2: If PROFILE_OBRAZKY_ID exists, update the existing picture
                 if (profilePictureId != null)
                 {
                     using (OracleCommand cmdUpdatePicture = new OracleCommand("sprava_profilove_obrazky", connection))
                     {
                         cmdUpdatePicture.CommandType = CommandType.StoredProcedure;
 
-                        cmdUpdatePicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = profilePictureId.Value; // Update existing picture
+                        cmdUpdatePicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = profilePictureId.Value; 
                         cmdUpdatePicture.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = profilePictureId.Value;
                         cmdUpdatePicture.Parameters.Add("p_picture", OracleDbType.Blob).Value = profilePictureData;
                         cmdUpdatePicture.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = fileName;
@@ -849,14 +834,13 @@ namespace HospodaUBobra
                 }
                 else
                 {
-                    // Step 3: If no PROFILE_OBRAZKY_ID exists, insert a new picture
                     int newPictureId = GetNextPictureId();
 
                     using (OracleCommand cmdInsertPicture = new OracleCommand("sprava_profilove_obrazky", connection))
                     {
                         cmdInsertPicture.CommandType = CommandType.StoredProcedure;
 
-                        cmdInsertPicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // New picture
+                        cmdInsertPicture.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
                         cmdInsertPicture.Parameters.Add("p_id_picture", OracleDbType.Int32).Value = newPictureId;
                         cmdInsertPicture.Parameters.Add("p_picture", OracleDbType.Blob).Value = profilePictureData;
                         cmdInsertPicture.Parameters.Add("p_file_name", OracleDbType.Varchar2).Value = fileName;
@@ -867,7 +851,6 @@ namespace HospodaUBobra
                         cmdInsertPicture.ExecuteNonQuery();
                     }
 
-                    // Step 4: Update the table with the new PROFILE_OBRAZKY_ID
                     string updateQuery = $"UPDATE {tableName} SET PROFILE_OBRAZKY_ID = :profilePictureId WHERE {idColumn} = :id";
                     using (OracleCommand cmdUpdate = new OracleCommand(updateQuery, connection))
                     {
@@ -880,11 +863,9 @@ namespace HospodaUBobra
                     }
                 }
 
-                MessageBox.Show($"Profile picture successfully {(profilePictureId != null ? "updated" : "uploaded")} for {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
+                MessageBox.Show($"Profilový obrázek {(profilePictureId != null ? "aktualizován" : "nahrán")} pro {(isClient ? "KLIENTI" : "UZIVATELE")} ID {id}.");
             }
         }
-
-
 
         private void vytvoritUzivateleToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1062,7 +1043,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
         private void evidenceToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SpravaEvidence spravaEvidence = new SpravaEvidence();
@@ -1128,7 +1108,7 @@ namespace HospodaUBobra
                             UploadProfilePicture(UserSession.UserID, profileImage, fileName, false);
                         }
 
-                        MessageBox.Show("Profile picture uploaded successfully.");
+                        MessageBox.Show("Profilový obrázek úspěšně nahrán.");
                     }
                 }
             }
@@ -1157,11 +1137,10 @@ namespace HospodaUBobra
                             string tableName = isClient ? "KLIENTI" : "UZIVATELE";
                             string idColumn = isClient ? "ID_KLIENTA" : "ID_UZIVATELE";
 
-                            // Step 1: Retrieve the PROFILE_OBRAZEK_ID
                             string selectQuery = $"SELECT PROFILE_OBRAZKY_ID FROM {tableName} WHERE {idColumn} = :id";
                             using (OracleCommand cmdFetchProfile = new OracleCommand(selectQuery, connection))
                             {
-                                cmdFetchProfile.Transaction = transaction; // Set the transaction explicitly
+                                cmdFetchProfile.Transaction = transaction; 
                                 cmdFetchProfile.CommandType = CommandType.Text;
                                 cmdFetchProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
 
@@ -1175,33 +1154,28 @@ namespace HospodaUBobra
                                     }
                                     else
                                     {
-                                        throw new Exception($"{tableName} entry not found.");
+                                        throw new Exception($"{tableName} nenalezen.");
                                     }
                                 }
                             }
 
-
-                            // Step 2: Check if there is an associated profile picture
                             if (profilePictureId == null)
                             {
-                                MessageBox.Show($"{tableName} entity does not have a profile picture to delete.");
+                                MessageBox.Show($"{tableName} nemá obrázek ke smazaní.");
                                 transaction.Rollback();
                                 return;
                             }
 
-                            // Step 3: Set the PROFILE_OBRAZKY_ID to NULL
                             string updateQuery = $"UPDATE {tableName} SET PROFILE_OBRAZKY_ID = NULL WHERE {idColumn} = :id";
                             using (OracleCommand cmdUpdateProfile = new OracleCommand(updateQuery, connection))
                             {
                                 cmdUpdateProfile.CommandType = CommandType.Text;
                                 cmdUpdateProfile.Parameters.Add(new OracleParameter("id", OracleDbType.Int32)).Value = UserSession.UserID;
-                                //OVER HERE
 
                                 cmdUpdateProfile.ExecuteNonQuery();
-                                MessageBox.Show($"{tableName} profile picture ID set to NULL.");
+                                MessageBox.Show($"{tableName} profilový obrázek nastaven na null.");
                             }
 
-                            // Step 4: Delete the profile picture from the PROFILOVE_OBRAZKY table
                             string deleteQuery = "DELETE FROM PROFILOVE_OBRAZKY WHERE ID_PICTURE = :profilePictureId";
                             using (OracleCommand cmdDeletePicture = new OracleCommand(deleteQuery, connection))
                             {
@@ -1211,26 +1185,22 @@ namespace HospodaUBobra
                                 int rowsAffected = cmdDeletePicture.ExecuteNonQuery();
                                 if (rowsAffected > 0)
                                 {
-                                    MessageBox.Show("Profile picture deleted successfully.");
+                                    MessageBox.Show("Profilový obrázek úspěšně odstraněn.");
                                 }
                                 else
                                 {
-                                    throw new Exception("No profile picture found with the given ID.");
+                                    throw new Exception("Obrázek nebyl nalezen.");
                                 }
                             }
 
-
-
-                            // Commit the transaction
                             transaction.Commit();
-                            UpdateProfilePictureAsync(UserSession.UserID); // This should be outside the transaction
-                            MessageBox.Show($"{tableName} profile picture deleted successfully.");
+                            UpdateProfilePictureAsync(UserSession.UserID);
+                            MessageBox.Show($"{tableName} profilový obrázek byl odstraněn.");
                         }
                         catch (Exception ex)
                         {
-                            // Rollback the transaction on error
                             transaction.Rollback();
-                            MessageBox.Show($"An error occurred: {ex.Message}");
+                            MessageBox.Show($"Objevila se chyba: {ex.Message}");
                         }
                     }
                 }
@@ -1257,22 +1227,18 @@ namespace HospodaUBobra
                 {
                     conn.Open();
 
-                    // Create a command to call the stored procedure
                     using (OracleCommand cmd = new OracleCommand("GetMultipleBreweryOwnersWithBreweries", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        // Define the OUT parameter for the cursor
                         cmd.Parameters.Add("result_cursor", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
 
-                        // Execute the command and load the cursor data into a DataTable
                         using (OracleDataReader reader = cmd.ExecuteReader())
                         {
                             DataTable dataTable = new DataTable();
                             dataTable.Load(reader);
 
                             DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
-                            // Bind the DataTable to the DataGridView
                             dataGridView1.DataSource = dataTable;
                         }
                     }
@@ -1287,7 +1253,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
         private void topMestaToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -1300,22 +1265,18 @@ namespace HospodaUBobra
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        // Add the output parameter for the cursor
                         OracleParameter cursorOutParam = new OracleParameter("cursor_out", OracleDbType.RefCursor)
                         {
                             Direction = ParameterDirection.Output
                         };
                         cmd.Parameters.Add(cursorOutParam);
 
-                        // Execute the procedure and retrieve the cursor
                         using (OracleDataReader reader = cmd.ExecuteReader())
                         {
-                            // Load data into a DataTable
                             DataTable dataTable = new DataTable();
                             dataTable.Load(reader);
 
                             DataGridViewFilterHelper.BindData(dataGridView1, dataTable);
-                            // Bind the DataTable to the DataGridView
                             dataGridView1.DataSource = dataTable;
                         }
                     }
@@ -1371,7 +1332,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading reviews: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při načítání recenzí: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1403,7 +1364,6 @@ namespace HospodaUBobra
                             DataTable dt = new DataTable();
                             adapter.Fill(dt);
 
-                            // Censor the client name when emulating as a client
                             if (UserSession.EmulatedRole == "Klient")
                             {
                                 foreach (DataRow row in dt.Rows)
@@ -1430,10 +1390,9 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading completed orders: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při načítýní splněných recenzí: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
         }
 
         private void spravaVyrobyToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1485,7 +1444,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error loading log data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Chyba při načítání logs: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1506,7 +1465,6 @@ namespace HospodaUBobra
 
             cbEmulace.SelectedItem = UserSession.Role;
         }
-
 
         private void cbEmulace_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1554,7 +1512,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error loading system catalog: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Chyba při načítání systémového katalogu: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -1600,7 +1558,6 @@ namespace HospodaUBobra
                     MessageBox.Show($"Chyba při exportu: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
 
             private void btnCsv_Click(object sender, EventArgs e)
                 {

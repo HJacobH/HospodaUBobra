@@ -62,7 +62,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error při načítání měst a vesnic: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání měst a vesnic: " + ex.Message);
                 }
             }
         }
@@ -94,7 +94,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error při načítání krajů: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání krajů: " + ex.Message);
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace HospodaUBobra
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error při načítání okresů: " + ex.Message);
+                    MessageBox.Show("Chyba při načítání okresů: " + ex.Message);
                 }
             }
         }
@@ -197,7 +197,7 @@ namespace HospodaUBobra
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error: " + ex.Message);
+                        MessageBox.Show("Chyba pří odstranění: " + ex.Message);
                     }
                 }
             }
@@ -254,7 +254,7 @@ namespace HospodaUBobra
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        string message = idMesVes.HasValue ? "Record updated successfully!" : "Record added successfully!";
+                        string message = idMesVes.HasValue ? "Město/Vesnice aktualizována úspěšně!" : "Město/Vesnice úspěšně přidána!";
                         MessageBox.Show(message);
                         LoadMestaVesniceData();
                         ClearFormFields();
@@ -262,7 +262,7 @@ namespace HospodaUBobra
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error managing record: " + ex.Message);
+                        MessageBox.Show("Chyba: " + ex.Message);
                     }
                 }
             }

@@ -80,8 +80,6 @@ namespace HospodaUBobra
                 }
             }
         }
-
-
         private void LoadBeers()
         {
             using (OracleConnection conn = new OracleConnection(connectionString))
@@ -178,14 +176,12 @@ namespace HospodaUBobra
             {
                 conn.Open();
 
-                // Add review via stored procedure
                 using (OracleCommand cmd = new OracleCommand("sprava_recenze", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Parameters for inserting a new review
-                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; // Insert
-                    cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Direction = ParameterDirection.InputOutput; // New ID will be returned
+                    cmd.Parameters.Add("p_identifikator", OracleDbType.Int32).Value = DBNull.Value; 
+                    cmd.Parameters.Add("p_id_recenze", OracleDbType.Int32).Direction = ParameterDirection.InputOutput; 
                     cmd.Parameters["p_id_recenze"].Value = DBNull.Value;
 
                     cmd.Parameters.Add("p_titulek", OracleDbType.Varchar2).Value = title;
@@ -396,7 +392,7 @@ namespace HospodaUBobra
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error processing selection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Chyba při výběru recenze: {ex.Message}", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

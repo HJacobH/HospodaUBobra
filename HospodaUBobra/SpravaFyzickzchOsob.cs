@@ -217,7 +217,6 @@ namespace HospodaUBobra
 
             if (dgvFyzickeOsoby.CurrentRow != null)
             {
-                // Check and handle ID_FYZICKE_OSOBY
                 if (dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value != DBNull.Value)
                 {
                     fyzickaOsobaId = Convert.ToInt32(dgvFyzickeOsoby.CurrentRow.Cells["ID_FYZICKE_OSOBY"].Value);
@@ -225,33 +224,30 @@ namespace HospodaUBobra
                 }
                 else
                 {
-                    fyzickaOsobaId = -1; // Default or reset value
-                    comboBoxVlastnikPivovaru.SelectedIndex = -1; // Clear selection
+                    fyzickaOsobaId = -1; 
+                    comboBoxVlastnikPivovaru.SelectedIndex = -1; 
                 }
 
-                // Check and handle DATUM_NAROZENI
                 if (dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value != DBNull.Value)
                 {
                     dateTimePickerDatumNarozeni.Value = Convert.ToDateTime(dgvFyzickeOsoby.CurrentRow.Cells["DATUM_NAROZENI"].Value);
                 }
                 else
                 {
-                    dateTimePickerDatumNarozeni.Value = DateTime.Now; // Default date
+                    dateTimePickerDatumNarozeni.Value = DateTime.Now; 
                 }
 
-                // Check and handle RODNE_CISLO
                 if (dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value != DBNull.Value)
                 {
                     textBoxRodneCislo.Text = dgvFyzickeOsoby.CurrentRow.Cells["RODNE_CISLO"].Value.ToString();
                 }
                 else
                 {
-                    textBoxRodneCislo.Clear(); // Clear text box
+                    textBoxRodneCislo.Clear();
                 }
             }
             else
             {
-                // Reset all fields if no row is selected
                 fyzickaOsobaId = -1;
                 comboBoxVlastnikPivovaru.SelectedIndex = -1;
                 dateTimePickerDatumNarozeni.Value = DateTime.Now;
